@@ -1,12 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import aureaLogo from "../assets/AUREA - Logo.jpg";
+import aureaLogo from "../assets/AUREA - Logo.png";
 
 const scrollToSection = (sectionId) => {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
+  if (sectionId === 'home') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 };
 
@@ -28,20 +32,33 @@ const Navbar = () => (
             alt="AUREA Logo" 
             className="h-8 w-auto"
           />
+          <span className="text-2xl font-bold tracking-wide uppercase text-black">
+            UREA
+          </span>
           
         </Link>
       </motion.div>
       
       <div className="hidden md:flex items-center space-x-8">
-        <Link to="/" className="text-black hover:text-gray-600 font-medium transition-colors relative group">
+        <button 
+          onClick={() => scrollToSection('home')}
+          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+        >
           Home
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
-        </Link>
+        </button>
         <button 
           onClick={() => scrollToSection('features')}
           className="text-black hover:text-gray-600 font-medium transition-colors relative group"
         >
           Features
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
+        </button>
+         <button 
+          onClick={() => scrollToSection('faq')}
+          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+        >
+          FAQ
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
         </button>
         <button 
@@ -51,13 +68,7 @@ const Navbar = () => (
           Pricing
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
         </button>
-        <button 
-          onClick={() => scrollToSection('faq')}
-          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
-        >
-          FAQ
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
-        </button>
+       
       </div>
       
       <div className="flex items-center space-x-4">

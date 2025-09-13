@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
-import AboutSection from "../components/AboutSection";
+import FeatureSection from "../components/FeatureSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
 import PricingSection from "../components/PricingSection";
@@ -48,7 +48,7 @@ const HomePage = () => {
       </section>
 
       {/* Features Section */}
-      <AboutSection />
+      <FeatureSection />
       
       {/* FAQ */}
       <FAQSection />

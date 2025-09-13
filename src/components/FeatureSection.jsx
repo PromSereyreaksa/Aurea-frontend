@@ -45,8 +45,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
-      delayChildren: 0.2
+      staggerChildren: 0.2,
+      delayChildren: 0.1
     }
   }
 };
@@ -54,37 +54,29 @@ const containerVariants = {
 const itemVariants = {
   hidden: { 
     opacity: 0, 
-    y: 50,
-    scale: 0.95
+    y: 30
   },
   visible: { 
     opacity: 1, 
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.6,
+      duration: 0.5,
       ease: "easeOut"
     }
   }
 };
 
-const AboutSection = () => (
+const FeatureSection = () => (
   <section id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
     <div className="max-w-7xl mx-auto">
-      <motion.div 
-        className="text-center mb-20"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent mb-8 tracking-wide">
+      <div className="text-center mb-20">
+        <h2 className="text-5xl md:text-6xl font-bold text-gray-900 bg-clip-text text-transparent mb-8 tracking-wide">
           Features
         </h2>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Everything you need to elevate your design practice and build a thriving creative business
         </p>
-      </motion.div>
+      </div>
       
       <motion.div 
         className="space-y-12"
@@ -143,4 +135,4 @@ const AboutSection = () => (
   </section>
 );
 
-export default AboutSection;
+export default FeatureSection;
