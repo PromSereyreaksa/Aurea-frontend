@@ -1,19 +1,28 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import useAuthStore from "../stores/authStore";
 import aureaLogo from "../assets/AUREA - Logo.jpg";
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { login, isLoading, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const from = location.state?.from?.pathname || "/dashboard";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
-    alert(`Logged in as ${formData.email}`);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
+
+  const onSubmit = async (data) => {
+    const result = await login(data.email, data.password);
+    if (result.success) {
+      navigate(from, { replace: true });
+    }
   };
 
   const handleBack = () => {
@@ -54,20 +63,28 @@ const LoginPage = () => {
             <p className="text-gray-600">Sign in to your AUREA account</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-black mb-2">
                 Email Address
               </label>
               <input
                 type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("email", { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.email ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Enter your email"
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
             </div>
             
             <div>
@@ -76,13 +93,21 @@ const LoginPage = () => {
               </label>
               <input
                 type="password"
-                name="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.password ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Enter your password"
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+              )}
             </div>
             
             <div className="flex items-center justify-between">
@@ -97,9 +122,10 @@ const LoginPage = () => {
             
             <button
               type="submit"
-              className="w-full bg-black text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-gray-800"
+              disabled={isLoading}
+              className="w-full bg-black text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? "Signing In..." : "Sign In"}
             </button>
           </form>
           

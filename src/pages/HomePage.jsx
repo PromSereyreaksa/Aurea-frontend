@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
-import FeatureSection from "../components/FeatureSection";
-import TestimonialsSection from "../components/TestimonialsSection";
-import FAQSection from "../components/FAQSection";
-import PricingSection from "../components/PricingSection";
-import EmailCaptureSection from "../components/EmailCaptureSection";
-import Footer from "../components/Footer";
+import Navbar from "../components/Shared/Navbar";
+import FeatureSection from "../components/LandingPage/FeatureSection";
+import TestimonialsSection from "../components/LandingPage/TestimonialsSection";
+import FAQSection from "../components/LandingPage/FAQSection";
+import PricingSection from "../components/LandingPage/PricingSection";
+import EmailCaptureSection from "../components/LandingPage/EmailCaptureSection";
+import Footer from "../components/Shared/Footer";
 
 const HomePage = () => {
   return (

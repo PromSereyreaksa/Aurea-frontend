@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/Shared/Navbar";
+import Footer from "../components/Shared/Footer";
 
 const containerVariants = {
   hidden: { opacity: 0 },

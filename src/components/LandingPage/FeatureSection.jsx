@@ -70,7 +70,7 @@ const FeatureSection = () => (
   <section id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-20">
-        <h2 className="text-5xl md:text-6xl font-bold text-gray-900 bg-clip-text text-transparent mb-8 tracking-wide">
+        <h2 className="text-5xl md:text-6xl font-bold text-black mb-8 tracking-wide">
           Features
         </h2>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">

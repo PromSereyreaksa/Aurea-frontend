@@ -1,25 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import useAuthStore from "../stores/authStore";
 import aureaLogo from "../assets/AUREA - Logo.jpg";
 
 const SignupPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const prefilledEmail = location.state?.email || "";
-  const [formData, setFormData] = useState({ name: "", email: prefilledEmail, password: "", confirmPassword: "" });
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    defaultValues: { email: prefilledEmail }
+  });
+  const { signup, isLoading, isAuthenticated } = useAuthStore();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const from = location.state?.from?.pathname || "/dashboard";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
-      return;
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
     }
-    // Handle signup logic here
-    alert(`Account created for ${formData.email}`);
+  }, [isAuthenticated, navigate, from]);
+
+  const onSubmit = async (data) => {
+    const result = await signup(data.name, data.email, data.password);
+    if (result.success) {
+      navigate(from, { replace: true });
+    }
   };
 
   const handleBack = () => {
@@ -60,20 +66,32 @@ const SignupPage = () => {
             <p className="text-gray-600">Create your account and start designing</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-black mb-2">
                 Full Name
               </label>
               <input
                 type="text"
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("name", { 
+                  required: "Name is required",
+                  minLength: {
+                    value: 2,
+                    message: "Name must be at least 2 characters"
+                  },
+                  maxLength: {
+                    value: 50,
+                    message: "Name must be less than 50 characters"
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.name ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Enter your full name"
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+              )}
             </div>
             
             <div>
@@ -82,13 +100,21 @@ const SignupPage = () => {
               </label>
               <input
                 type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("email", { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.email ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Enter your email"
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
             </div>
             
             <div>
@@ -97,13 +123,21 @@ const SignupPage = () => {
               </label>
               <input
                 type="password"
-                name="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.password ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Create a password"
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+              )}
             </div>
             
             <div>
@@ -112,13 +146,22 @@ const SignupPage = () => {
               </label>
               <input
                 type="password"
-                name="confirmPassword"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none focus:border-black transition-colors"
+                {...register("confirmPassword", { 
+                  required: "Please confirm your password",
+                  validate: (value) => {
+                    if (watch('password') !== value) {
+                      return "Passwords do not match";
+                    }
+                  }
+                })}
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
+                  errors.confirmPassword ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                }`}
                 placeholder="Confirm your password"
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+              )}
             </div>
             
             <div className="flex items-center">
@@ -130,9 +173,10 @@ const SignupPage = () => {
             
             <button
               type="submit"
-              className="w-full bg-black text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-gray-800"
+              disabled={isLoading}
+              className="w-full bg-black text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
           
