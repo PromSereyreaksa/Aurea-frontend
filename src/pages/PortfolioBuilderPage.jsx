@@ -12,7 +12,7 @@ const PortfolioBuilderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentPortfolio, isLoading, createPortfolio, updatePortfolio, fetchPortfolioById } = usePortfolioStore();
-  
+
   // Template-based state
   const [step, setStep] = useState('select'); // 'select', 'customize', 'preview'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -22,7 +22,11 @@ const PortfolioBuilderPage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
-  const [justSaved, setJustSaved] = useState(false); // Flag to prevent reload after save
+  const [initializing, setInitializing] = useState(true);
+
+  // Default image URLs for fallback
+  const DEFAULT_HERO_IMAGE = 'https://via.placeholder.com/400x300?text=Default+Image';
+  const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.com/400x300?text=Default+Project';
 
   // Local Storage key for auto-save
   const getLocalStorageKey = () => `portfolio-draft-${id || 'new'}`;
@@ -30,60 +34,46 @@ const PortfolioBuilderPage = () => {
   // Debounced auto-save to local storage
   const autoSaveToLocalStorage = useCallback(
     debounce((data) => {
-      console.log('=== AUTO-SAVE FUNCTION CALLED ===');
-      console.log('Data to save:', data);
-      console.log('Title:', title);
-      console.log('Description:', description);
-      console.log('Selected template:', selectedTemplate?.id);
-      
       setAutoSaveStatus('saving');
       try {
         const key = getLocalStorageKey();
-        console.log('localStorage key:', key);
-        
+
         const saveData = {
           portfolioData: data,
           title,
           description,
           selectedTemplateId: selectedTemplate?.id,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
-        
-        console.log('Full save data:', saveData);
+
         localStorage.setItem(key, JSON.stringify(saveData));
         setAutoSaveStatus('saved');
-        console.log('=== SUCCESSFULLY SAVED TO LOCALSTORAGE ===');
-        console.log('Saved under key:', key);
       } catch (error) {
         console.error('Failed to auto-save to localStorage:', error);
         setAutoSaveStatus('error');
       }
-    }, 1000), // Save 1 second after last change
+    }, 1000),
     [id, title, description, selectedTemplate?.id]
   );
 
   // Helper function to convert portfolio to template format
   const convertToTemplateFormat = (portfolio) => {
-    console.log('Converting portfolio to template format:', portfolio);
-    
+
     if (portfolio.templateId && portfolio.content) {
-      // Already in template format
       return portfolio;
     }
-    
-    // Convert old format to template format
+
     const templateData = {
-      templateId: 'minimal-designer',
+      templateId: portfolio.template || 'minimal-designer',
       content: portfolio.sections?.reduce((acc, section) => {
         acc[section.type] = section.content;
         return acc;
       }, {}) || {},
       styling: portfolio.styling || {},
       structure: portfolio.structure || {},
-      metadata: portfolio.metadata || {}
+      metadata: portfolio.metadata || {},
     };
-    
-    console.log('Converted to template format:', templateData);
+
     return templateData;
   };
 
@@ -92,7 +82,6 @@ const PortfolioBuilderPage = () => {
     try {
       const key = getLocalStorageKey();
       localStorage.removeItem(key);
-      console.log('Cleared localStorage draft:', key);
     } catch (error) {
       console.error('Failed to clear localStorage draft:', error);
     }
@@ -111,136 +100,142 @@ const PortfolioBuilderPage = () => {
     };
   }
 
+  // Function to clean up placeholder data (only for backend saving)
+  const cleanupPlaceholderData = (portfolioData) => {
+    if (!portfolioData || !portfolioData.content) {
+      return portfolioData;
+    }
+
+    const cleanedContent = { ...portfolioData.content };
+
+    const cleanPlaceholderPath = (value) => {
+      if (typeof value === 'string' && value.includes('/placeholder') && !value.startsWith('http')) {
+        return '';
+      }
+      return value;
+    };
+
+    Object.keys(cleanedContent).forEach((sectionKey) => {
+      const section = cleanedContent[sectionKey];
+
+      if (typeof section === 'object' && section !== null) {
+        Object.keys(section).forEach((fieldKey) => {
+          const fieldValue = section[fieldKey];
+
+          if (fieldKey === 'image') {
+            cleanedContent[sectionKey][fieldKey] = cleanPlaceholderPath(fieldValue);
+          } else if (fieldKey === 'projects' && Array.isArray(fieldValue)) {
+            cleanedContent[sectionKey][fieldKey] = fieldValue.map((project) => ({
+              ...project,
+              image: cleanPlaceholderPath(project.image),
+            }));
+          }
+        });
+      }
+    });
+
+    const cleanedData = {
+      ...portfolioData,
+      content: cleanedContent,
+      _version: (portfolioData._version || 0) + 1,
+    };
+
+    return cleanedData;
+  };
+
+  // Function to ensure valid image URLs for rendering
+  const ensureValidImageUrls = (portfolioData) => {
+    if (!portfolioData || !portfolioData.content) {
+      return portfolioData;
+    }
+
+    const updatedContent = { ...portfolioData.content };
+
+    // Ensure hero image
+    updatedContent.hero = {
+      ...updatedContent.hero,
+      image: updatedContent.hero?.image || DEFAULT_HERO_IMAGE,
+    };
+
+    // Ensure project images
+    if (updatedContent.projects && Array.isArray(updatedContent.projects)) {
+      updatedContent.projects = updatedContent.projects.map((project) => ({
+        ...project,
+        image: project.image || DEFAULT_PROJECT_IMAGE,
+      }));
+    } else {
+      updatedContent.projects = [];
+    }
+
+    return {
+      ...portfolioData,
+      content: updatedContent,
+      _version: (portfolioData._version || 0) + 1,
+    };
+  };
+
   // Load portfolio data when component mounts or ID changes
   useEffect(() => {
     const loadPortfolio = async () => {
+      setInitializing(true);
       if (id && id !== 'new') {
-        console.log('=== LOADING PORTFOLIO FROM SERVER ===');
-        console.log('Portfolio ID:', id);
-        
+
         try {
           const result = await fetchPortfolioById(id);
-          if (result.success && result.portfolio) {
-            console.log('Portfolio loaded from server:', result.portfolio);
-            
-            // Set basic info
+
+          if (result && result.success && result.portfolio) {
+
             setTitle(result.portfolio.title || '');
             setDescription(result.portfolio.description || '');
-            
-            // Convert to template format if needed
+
             const templateData = convertToTemplateFormat(result.portfolio);
+
             if (templateData) {
-              setPortfolioData(templateData);
-              setSelectedTemplate(getTemplate(templateData.templateId));
-              setStep('customize');
+              // Ensure valid image URLs for rendering
+              const dataWithValidImages = ensureValidImageUrls(templateData);
+              setPortfolioData(dataWithValidImages);
+              const template = getTemplate(templateData.templateId);
+
+              if (template) {
+                setSelectedTemplate(template);
+                setStep('customize');
+                setInitializing(false);
+              } else {
+                console.error('Template not found:', templateData.templateId);
+                toast.error('Template not found');
+                setInitializing(false);
+              }
+            } else {
+              console.error('Failed to convert portfolio to template format');
+              toast.error('Invalid portfolio format');
+              setInitializing(false);
             }
+          } else {
+            console.error('Failed to load portfolio:', result);
+            toast.error('Portfolio not found');
+            setInitializing(false);
           }
         } catch (error) {
-          console.error('Failed to load portfolio:', error);
+          console.error('Error loading portfolio:', error);
           toast.error('Failed to load portfolio');
+          setInitializing(false);
         }
       } else if (id === 'new') {
-        // Reset for new portfolio
         setPortfolioData(null);
         setSelectedTemplate(null);
         setTitle('');
         setDescription('');
         setStep('select');
+        setInitializing(false);
       }
     };
 
     loadPortfolio();
-  }, [id, fetchPortfolioById]);
-
-  useEffect(() => {
-    // DISABLED: Load portfolio data when currentPortfolio is available 
-    // This was causing reloads that lost user changes
-    console.log('=== PORTFOLIO RELOAD USEEFFECT (DISABLED) ===');
-    console.log('This useEffect is disabled to prevent losing user changes');
-    return; // Exit early - don't load portfolio data from store
-    
-    // Load portfolio data when currentPortfolio is available and we're editing an existing portfolio
-    // But skip if we just saved to prevent overwriting local changes
-    console.log('=== USEEFFECT TRIGGERED ===');
-    console.log('currentPortfolio:', currentPortfolio);
-    console.log('id:', id);
-    console.log('justSaved:', justSaved);
-    console.log('portfolioData exists:', !!portfolioData);
-    console.log('Should load?', currentPortfolio && id && id !== 'new' && !justSaved && !portfolioData);
-    
-    if (currentPortfolio && id && id !== 'new' && !justSaved && !portfolioData) {
-      console.log('=== LOADING EXISTING PORTFOLIO DATA ===');
-      console.log('Loading existing portfolio:', currentPortfolio);
-      console.log('Portfolio structure:', {
-        hasTemplateId: !!currentPortfolio.templateId,
-        hasContent: !!currentPortfolio.content,
-        hasStyling: !!currentPortfolio.styling,
-        hasStructure: !!currentPortfolio.structure,
-        keys: Object.keys(currentPortfolio)
-      });
-      
-      // Load existing portfolio data
-      setTitle(currentPortfolio.title || '');
-      setDescription(currentPortfolio.description || '');
-      
-      // Check if portfolio has template data
-      if (currentPortfolio.templateId) {
-        console.log('Portfolio has templateId:', currentPortfolio.templateId);
-        const template = getTemplate(currentPortfolio.templateId);
-        console.log('Found template:', template);
-        
-        if (template) {
-          setSelectedTemplate(template);
-          setPortfolioData(currentPortfolio);
-          setStep('customize');
-          console.log('Set portfolio data to:', currentPortfolio);
-        } else {
-          console.error('Template not found for ID:', currentPortfolio.templateId);
-          // If template not found, default to minimal-designer
-          const defaultTemplate = getTemplate('minimal-designer');
-          if (defaultTemplate) {
-            setSelectedTemplate(defaultTemplate);
-            // Convert existing portfolio to template format
-            const templateData = createPortfolioFromTemplate('minimal-designer');
-            const newData = {
-              ...templateData,
-              content: currentPortfolio.content || templateData.content,
-              styling: currentPortfolio.styling || templateData.styling,
-              templateId: 'minimal-designer'
-            };
-            setPortfolioData(newData);
-            setStep('customize');
-            console.log('Created new template data:', newData);
-          }
-        }
-      } else {
-        console.log('Portfolio has no templateId, converting to template format');
-        // For portfolios without templateId, convert to template format
-        const defaultTemplate = getTemplate('minimal-designer');
-        if (defaultTemplate) {
-          setSelectedTemplate(defaultTemplate);
-          const templateData = createPortfolioFromTemplate('minimal-designer');
-          const newData = {
-            ...templateData,
-            content: currentPortfolio.content || templateData.content,
-            styling: currentPortfolio.styling || templateData.styling,
-            templateId: 'minimal-designer'
-          };
-          setPortfolioData(newData);
-          setStep('customize');
-          console.log('Converted portfolio to template format:', newData);
-        }
-      }
-    } else {
-      console.log('=== SKIPPING PORTFOLIO LOAD ===');
-      console.log('Reason: currentPortfolio:', !!currentPortfolio, 'id:', id, 'justSaved:', justSaved, 'portfolioData:', !!portfolioData);
-    }
-  }, [currentPortfolio, justSaved, id, portfolioData]);
+  }, [id]);
 
   // Warn user before leaving page with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      // Check if there are local storage drafts
       const key = getLocalStorageKey();
       const saved = localStorage.getItem(key);
       if (saved && autoSaveStatus !== 'saved') {
@@ -255,7 +250,6 @@ const PortfolioBuilderPage = () => {
   }, [autoSaveStatus, id]);
 
   const handleTemplateSelect = (template) => {
-    // If switching to a different template and we have existing data, confirm with user
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
         'Switching templates will reset your current customizations. Are you sure you want to continue?'
@@ -264,92 +258,114 @@ const PortfolioBuilderPage = () => {
         return;
       }
     }
-    
+
     setSelectedTemplate(template);
-    
-    // Only create new portfolio data if we don't already have data for this template
-    // or if we're switching to a different template
+
     if (!portfolioData || portfolioData.templateId !== template.id) {
       const newPortfolioData = createPortfolioFromTemplate(template.id);
-      setPortfolioData(newPortfolioData);
+      setPortfolioData(ensureValidImageUrls(newPortfolioData));
     }
-    
+
     setStep('customize');
     setShowDesignTools(true);
   };
 
   const handleContentChange = (sectionId, fieldId, value) => {
-    console.log('=== CONTENT CHANGE ===');
-    console.log('Content change:', { sectionId, fieldId, value });
+
+    // Handle special section management operations
+    if (sectionId === '_sections') {
+      if (fieldId === 'add') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        toast.success(`Added "${value.sectionData.title}" section successfully!`);
+        return;
+      } else if (fieldId === 'delete') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        toast.success(`Deleted "${value.sectionId}" section successfully!`);
+        return;
+      }
+    }
+
+    // Check if this is an image field or contains image data
+    const isImageField = fieldId === 'image' || fieldId.includes('image') || 
+                        (typeof value === 'string' && value.startsWith('data:image/'));
     
-    setPortfolioData(prev => {
+    // Allow data URLs for images (from cropped images), as well as http/https URLs and relative paths
+    if (isImageField && value && typeof value === 'string' && !value.match(/^(https?:\/\/|\/|data:image\/)/)) {
+      console.warn('Invalid image URL:', value);
+      toast.error('Please use a valid image URL (http://, https://, relative path, or data URL)');
+      return;
+    }
+
+    setPortfolioData((prev) => {
       if (!prev || !prev.content) {
         console.error('Portfolio data or content is null:', prev);
         return prev;
       }
-      
-      const updated = {
-        ...prev,
-        content: {
-          ...prev.content,
-          [sectionId]: {
-            ...prev.content[sectionId],
-            [fieldId]: value
-          }
+
+      const updatedContent = {
+        ...prev.content,
+        [sectionId]: {
+          ...prev.content[sectionId],
+          [fieldId]: value,
         },
-        // Add a version field to force re-renders
-        _version: (prev._version || 0) + 1
       };
-      console.log('Updated portfolio data:', updated);
-      
-      // Auto-save to localStorage with debouncing
-      console.log('=== TRIGGERING AUTO-SAVE ===');
+
+      // Apply fallback images for rendering
+      const updated = ensureValidImageUrls({
+        ...prev,
+        content: updatedContent,
+        _version: (prev._version || 0) + 1,
+      });
       autoSaveToLocalStorage(updated);
-      
       return updated;
     });
   };
 
   const handleTitleChange = (newTitle) => {
     setTitle(newTitle);
-    // Auto-save title changes to localStorage
     if (portfolioData) {
       const updatedData = {
         ...portfolioData,
         title: newTitle,
-        _version: (portfolioData._version || 0) + 1
+        _version: (portfolioData._version || 0) + 1,
       };
+      setPortfolioData(updatedData);
       autoSaveToLocalStorage(updatedData);
     }
   };
 
   const handleDescriptionChange = (newDescription) => {
     setDescription(newDescription);
-    // Auto-save description changes to localStorage
     if (portfolioData) {
       const updatedData = {
         ...portfolioData,
         description: newDescription,
-        _version: (portfolioData._version || 0) + 1
+        _version: (portfolioData._version || 0) + 1,
       };
+      setPortfolioData(updatedData);
       autoSaveToLocalStorage(updatedData);
     }
   };
 
   const handleStyleChange = (styleCategory, newStyles) => {
-    setPortfolioData(prev => ({
+    setPortfolioData((prev) => ({
       ...prev,
       styling: {
         ...prev.styling,
-        [styleCategory]: newStyles
-      }
+        [styleCategory]: newStyles,
+      },
     }));
   };
 
   const handleSave = async () => {
     try {
-      console.log('=== SIMPLE SAVE - KEEPING IT BASIC ===');
-      
+
       if (!selectedTemplate) {
         toast.error('No template selected');
         return;
@@ -360,77 +376,103 @@ const PortfolioBuilderPage = () => {
         return;
       }
 
+      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
+
+      const convertContentToSections = (content) => {
+        if (!content) return [];
+
+        const sections = [];
+        Object.entries(content).forEach(([sectionType, sectionContent]) => {
+          sections.push({
+            type: sectionType,
+            content: sectionContent,
+          });
+        });
+        return sections;
+      };
+
       const saveData = {
         title: title || `${selectedTemplate.name} Portfolio`,
         description: description || `Portfolio created with ${selectedTemplate.name} template`,
-        templateId: selectedTemplate.id,
-        content: portfolioData.content,
-        styling: portfolioData.styling,
-        structure: portfolioData.structure,
-        metadata: portfolioData.metadata,
-        isPublished: false
+        template: selectedTemplate.id,
+        sections: convertContentToSections(cleanedData.content),
+        styling: cleanedData.styling || {},
+        published: false,
       };
 
-      console.log('Saving data:', saveData);
-
+      let result;
       if (id && id !== 'new') {
-        // Update existing - just save, don't touch anything else
-        const result = await updatePortfolio(id, saveData);
-        if (result.success) {
-          toast.success('Portfolio updated successfully!');
-        } else {
-          throw new Error(result.error);
+        result = await updatePortfolio(id, saveData);
+      } else {
+        result = await createPortfolio(saveData);
+      }
+
+      if (result && result.success) {
+        toast.success('Portfolio saved successfully!');
+        clearLocalStorageDraft();
+        if (id === 'new' && result.portfolio?._id) {
+          navigate(`/portfolio-builder/${result.portfolio._id}`);
         }
       } else {
-        // Create new portfolio
-        const result = await createPortfolio(saveData);
-        if (result.success) {
-          toast.success('Portfolio saved successfully!');
-          navigate(`/portfolio-builder/${result.portfolio._id}`);
-        } else {
-          throw new Error(result.error);
-        }
+        throw new Error(result?.error || 'Save failed');
       }
     } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save portfolio');
+      console.error('=== SAVE ERROR ===');
+      console.error('Error:', error);
+      toast.error('Failed to save portfolio: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handlePublish = async () => {
     try {
+      if (!selectedTemplate || !portfolioData) {
+        toast.error('Cannot publish - missing template or data');
+        return;
+      }
+
+      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
+
+      const convertContentToSections = (content) => {
+        if (!content) return [];
+
+        const sections = [];
+        Object.entries(content).forEach(([sectionType, sectionContent]) => {
+          sections.push({
+            type: sectionType,
+            content: sectionContent,
+          });
+        });
+        return sections;
+      };
+
       const publishData = {
         title: title || `${selectedTemplate.name} Portfolio`,
         description: description || `Portfolio created with ${selectedTemplate.name} template`,
-        templateId: selectedTemplate.id,
-        content: portfolioData.content,
-        styling: portfolioData.styling,
-        structure: portfolioData.structure,
-        metadata: portfolioData.metadata,
-        isPublished: true
+        template: selectedTemplate.id,
+        sections: convertContentToSections(cleanedData.content),
+        styling: cleanedData.styling || {},
+        published: true,
       };
 
+      let result;
       if (id && id !== 'new') {
-        await updatePortfolio(id, publishData);
-        clearLocalStorageDraft(); // Clear draft after successful publish
-        setJustSaved(true); // Prevent reload of portfolio data
-        setTimeout(() => setJustSaved(false), 1000); // Reset flag after 1 second
-        toast.success('Portfolio published successfully!');
+        result = await updatePortfolio(id, publishData);
       } else {
-        const result = await createPortfolio(publishData);
-        if (result.success) {
-          clearLocalStorageDraft(); // Clear draft after successful publish
-          setJustSaved(true); // Prevent reload of portfolio data
-          setTimeout(() => setJustSaved(false), 1000); // Reset flag after 1 second
-          toast.success('Portfolio created and published successfully!');
+        result = await createPortfolio(publishData);
+      }
+
+      if (result && result.success) {
+        toast.success('Portfolio published successfully!');
+        clearLocalStorageDraft();
+        if (id === 'new' && result.portfolio?._id) {
           navigate(`/portfolio-builder/${result.portfolio._id}`);
-        } else {
-          throw new Error(result.error);
         }
+      } else {
+        throw new Error(result?.error || 'Publish failed');
       }
     } catch (error) {
       console.error('Publish error:', error);
-      toast.error('Failed to publish portfolio');
+      toast.error('Failed to publish portfolio: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -449,16 +491,14 @@ const PortfolioBuilderPage = () => {
   const handleBackToTemplates = () => {
     setStep('select');
     setShowDesignTools(false);
-    // Don't clear selectedTemplate and portfolioData to preserve changes
   };
 
-  // Create wrapper for content change with save functionality
   const contentChangeHandler = (sectionId, fieldId, value) => {
     handleContentChange(sectionId, fieldId, value);
   };
   contentChangeHandler.onSave = handleSave;
 
-  if (isLoading) {
+  if (initializing || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -481,9 +521,11 @@ const PortfolioBuilderPage = () => {
               </button>
               <div className="flex items-center space-x-2">
                 <h1 className="text-xl font-semibold text-gray-900">
-                  {step === 'select' ? 'Choose Template' : 
-                   step === 'customize' ? 'Customize Portfolio' : 
-                   'Preview Portfolio'}
+                  {step === 'select'
+                    ? 'Choose Template'
+                    : step === 'customize'
+                    ? 'Customize Portfolio'
+                    : 'Preview Portfolio'}
                 </h1>
                 {selectedTemplate && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
@@ -505,8 +547,8 @@ const PortfolioBuilderPage = () => {
                   <button
                     onClick={() => setShowDesignTools(!showDesignTools)}
                     className={`px-4 py-2 rounded-lg transition-colors ${
-                      showDesignTools 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      showDesignTools
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -520,7 +562,7 @@ const PortfolioBuilderPage = () => {
                   </button>
                 </>
               )}
-              
+
               {step === 'preview' && (
                 <button
                   onClick={handleBackToEdit}
@@ -532,7 +574,6 @@ const PortfolioBuilderPage = () => {
 
               {(step === 'customize' || step === 'preview') && (
                 <>
-                  {/* Auto-save status indicator */}
                   <div className="flex items-center text-sm text-gray-600">
                     {autoSaveStatus === 'saving' && (
                       <>
@@ -543,8 +584,18 @@ const PortfolioBuilderPage = () => {
                     {autoSaveStatus === 'saved' && (
                       <>
                         <div className="h-4 w-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-                          <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                          <svg
+                            className="h-3 w-3 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M5 13l4 4L19 7"
+                            ></path>
                           </svg>
                         </div>
                         <span>Auto-saved</span>
@@ -553,15 +604,25 @@ const PortfolioBuilderPage = () => {
                     {autoSaveStatus === 'error' && (
                       <>
                         <div className="h-4 w-4 bg-red-500 rounded-full mr-2 flex items-center justify-center">
-                          <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          <svg
+                            className="h-3 w-3 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            ></path>
                           </svg>
                         </div>
                         <span>Save failed</span>
                       </>
                     )}
                   </div>
-                  
+
                   <button
                     onClick={handleSave}
                     className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -580,7 +641,6 @@ const PortfolioBuilderPage = () => {
           </div>
         </div>
 
-        {/* Progress Steps */}
         {step !== 'select' && (
           <div className="border-t border-gray-200 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -592,17 +652,21 @@ const PortfolioBuilderPage = () => {
                   <span className="text-sm text-gray-600">Template Selected</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                    step === 'customize' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
-                  }`}>
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'customize' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+                    }`}
+                  >
                     {step === 'customize' ? '2' : '✓'}
                   </div>
                   <span className="text-sm text-gray-600">Customize</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                    step === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
-                  }`}>
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
                     3
                   </div>
                   <span className="text-sm text-gray-600">Preview & Publish</span>
@@ -613,7 +677,6 @@ const PortfolioBuilderPage = () => {
         )}
       </div>
 
-      {/* Main Content */}
       <div className="relative">
         <AnimatePresence mode="wait">
           {step === 'select' && (
@@ -624,23 +687,13 @@ const PortfolioBuilderPage = () => {
               exit={{ opacity: 0, x: 20 }}
               className="py-8"
             >
-              <TemplateSelector 
+              <TemplateSelector
                 onSelectTemplate={handleTemplateSelect}
                 selectedTemplateId={selectedTemplate?.id}
               />
             </motion.div>
           )}
 
-      {/* Debug current state */}
-      {console.log('=== RENDER STATE DEBUG ===', {
-        step,
-        selectedTemplate: selectedTemplate?.id,
-        portfolioData: !!portfolioData,
-        showDesignTools,
-        condition: (step === 'customize' || step === 'preview') && selectedTemplate && portfolioData
-      })}
-
-      {/* Customize/Preview Step */}
           {(step === 'customize' || step === 'preview') && selectedTemplate && portfolioData && (
             <motion.div
               key="customize"
@@ -649,7 +702,6 @@ const PortfolioBuilderPage = () => {
               exit={{ opacity: 0, x: 20 }}
               className="relative"
             >
-              {/* Portfolio Settings Panel (only in customize mode) */}
               {step === 'customize' && !showDesignTools && (
                 <div className="absolute top-6 left-6 bg-white rounded-lg shadow-lg p-4 z-30 w-80">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Settings</h3>
@@ -666,7 +718,7 @@ const PortfolioBuilderPage = () => {
                         placeholder={`${selectedTemplate.name} Portfolio`}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Description
@@ -692,17 +744,16 @@ const PortfolioBuilderPage = () => {
                 </div>
               )}
 
-              {/* Template Preview */}
-              <div className={`${showDesignTools ? 'mr-80' : ''} transition-all duration-300`}>
+              <div className={`${showDesignTools ? 'mr-[28rem]' : ''} transition-all duration-300`}>
                 <TemplatePreview
+                  key={`${selectedTemplate?.id}-${portfolioData?._version || 0}`}
                   template={selectedTemplate}
-                  portfolioData={portfolioData}
+                  portfolioData={portfolioData} // Pass portfolioData with ensured valid image URLs
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
                 />
               </div>
 
-              {/* Design Tools Panel */}
               <AnimatePresence>
                 {showDesignTools && step === 'customize' && (
                   <DesignToolsPanel
@@ -714,14 +765,20 @@ const PortfolioBuilderPage = () => {
                 )}
               </AnimatePresence>
 
-              {/* Editing Instructions */}
               {step === 'customize' && isEditing && (
                 <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40">
                   <div className="flex items-center space-x-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
-                    <span className="text-sm">Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.</span>
+                    <span className="text-sm">
+                      Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.
+                    </span>
                   </div>
                 </div>
               )}

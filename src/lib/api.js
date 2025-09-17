@@ -52,4 +52,50 @@ api.interceptors.response.use(
   }
 );
 
+// Cloudinary upload function
+export const uploadImageToCloudinary = async (file) => {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  
+  if (!cloudName || !uploadPreset) {
+    console.warn('Cloudinary not configured, using data URL fallback');
+    return Promise.resolve(file); // Return the original data URL as fallback
+  }
+
+  const formData = new FormData();
+  
+  // Convert data URL to blob if needed
+  if (typeof file === 'string' && file.startsWith('data:')) {
+    const response = await fetch(file);
+    const blob = await response.blob();
+    formData.append('file', blob);
+  } else {
+    formData.append('file', file);
+  }
+  
+  formData.append('upload_preset', uploadPreset);
+  formData.append('folder', 'aurea-portfolios');
+
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error('Cloudinary upload failed:', error);
+    // Fallback to original data URL
+    return file;
+  }
+};
+
 export default api;

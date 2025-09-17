@@ -2,9 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const SectionEditor = ({ section, onUpdate }) => {
+  // Validate section prop
+  if (!section || !section.type || !section.content) {
+    console.error('Invalid section prop:', section);
+    return <div className="p-4 text-red-600">Error: Invalid section data</div>;
+  }
+
   const [content, setContent] = useState(section.content || {});
 
   useEffect(() => {
+    console.log('SectionEditor received section:', section);
     setContent(section.content || {});
   }, [section]);
 
@@ -54,6 +61,7 @@ const SectionEditor = ({ section, onUpdate }) => {
   };
 
   const renderEditor = () => {
+    console.log('Rendering editor for section type:', section.type);
     switch (section.type) {
       case 'about':
         return <AboutEditor />;
@@ -103,6 +111,17 @@ const SectionEditor = ({ section, onUpdate }) => {
           className="w-full border border-gray-300 rounded-md px-3 py-2"
           placeholder="https://example.com/your-photo.jpg"
         />
+        {content.image && (
+          <img
+            src={content.image}
+            alt="Profile preview"
+            className="mt-2 w-32 h-32 object-cover rounded"
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/150?text=Image+Error';
+              console.error('Failed to load image:', content.image);
+            }}
+          />
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Social Links</label>
@@ -132,7 +151,9 @@ const SectionEditor = ({ section, onUpdate }) => {
             title: '',
             description: '',
             technologies: [],
-            featured: false
+            image: 'https://via.placeholder.com/400x300?text=New+Project',
+            featured: false,
+            liveUrl: ''
           })}
           className="px-3 py-1 bg-black text-white rounded text-sm"
         >
@@ -171,6 +192,24 @@ const SectionEditor = ({ section, onUpdate }) => {
                 className="border border-gray-300 rounded px-3 py-2"
                 placeholder="Live URL"
               />
+              <input
+                type="url"
+                value={project.image || ''}
+                onChange={(e) => handleArrayUpdate('projects', index, { ...project, image: e.target.value })}
+                className="border border-gray-300 rounded px-3 py-2"
+                placeholder="Project image URL"
+              />
+              {project.image && (
+                <img
+                  src={project.image}
+                  alt={`Project ${project.title} preview`}
+                  className="mt-2 w-32 h-32 object-cover rounded"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/400x300?text=Image+Error';
+                    console.error('Failed to load project image:', project.image);
+                  }}
+                />
+              )}
               <textarea
                 value={project.description}
                 onChange={(e) => handleArrayUpdate('projects', index, { ...project, description: e.target.value })}
@@ -464,7 +503,7 @@ const SectionEditor = ({ section, onUpdate }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-gray-50"
+      className="bg-gray-50 min-h-[200px] w-full"
     >
       {renderEditor()}
     </motion.div>

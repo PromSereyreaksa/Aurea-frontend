@@ -39,13 +39,13 @@ export const templates = {
         name: 'Your Name',
         title: 'Creative Designer',
         description: 'Passionate about creating beautiful, functional designs that tell stories and solve problems.',
-        image: '/placeholder-avatar.jpg',
+        image: '', // Empty string instead of placeholder path
         background: '#f8fafc'
       },
       about: {
         heading: 'About Me',
         content: 'I\'m a creative designer with over 5 years of experience in visual design, branding, and user experience. I believe in the power of good design to transform ideas into compelling visual narratives.',
-        image: '/placeholder-about.jpg',
+        image: '', // Empty string instead of placeholder path
         skills: ['UI/UX Design', 'Branding', 'Typography', 'Illustration', 'Figma', 'Adobe Creative Suite']
       },
       portfolio: {
@@ -55,7 +55,7 @@ export const templates = {
             id: 1,
             title: 'Project One',
             description: 'Description of your amazing project',
-            image: '/placeholder-project1.jpg',
+            image: '', // Empty string instead of placeholder path
             category: 'branding',
             tags: ['Branding', 'Logo Design']
           },
@@ -63,7 +63,7 @@ export const templates = {
             id: 2,
             title: 'Project Two',
             description: 'Description of your amazing project',
-            image: '/placeholder-project2.jpg',
+            image: '', // Empty string instead of placeholder path
             category: 'web',
             tags: ['Web Design', 'UI/UX']
           },
@@ -71,7 +71,7 @@ export const templates = {
             id: 3,
             title: 'Project Three',
             description: 'Description of your amazing project',
-            image: '/placeholder-project3.jpg',
+            image: '', // Empty string instead of placeholder path
             category: 'print',
             tags: ['Print Design', 'Typography']
           }
