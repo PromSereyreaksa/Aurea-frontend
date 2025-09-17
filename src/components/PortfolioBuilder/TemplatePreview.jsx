@@ -4,7 +4,7 @@ import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { uploadImageToCloudinary } from '../../lib/api';
 
-const TemplatePreview = ({ template, portfolioData, isEditing = false, onContentChange }) => {
+const TemplatePreview = ({ template, portfolioData, isEditing = false, onContentChange, onEditingStateChange }) => {
   const [activeSection, setActiveSection] = useState(null);
   const [isEditingText, setIsEditingText] = useState(null);
   const [isEditingImage, setIsEditingImage] = useState(null);
@@ -26,6 +26,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
   const editingStateRef = useRef(null);
   const inputRefs = useRef({});
   const debounceTimeoutRef = useRef(null);
+  const isActivelyEditingRef = useRef(false); // Track if user is actively typing
 
   // Sync local content with portfolio data when not editing
   useEffect(() => {
@@ -34,21 +35,67 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     }
   }, [portfolioData?.content, isEditingText]);
 
-  // Sync local content with portfolio data when not editing
+  // Notify parent when editing state changes
   useEffect(() => {
-    if (!isEditingText && portfolioData?.content) {
+    if (onEditingStateChange) {
+      const isCurrentlyEditing = Boolean(isEditingText || isEditingSkills || isEditingImage);
+      onEditingStateChange(isCurrentlyEditing);
+    }
+  }, [isEditingText, isEditingSkills, isEditingImage, onEditingStateChange]);
+
+  // Sync local content with portfolio data when not editing - COMPLETELY BLOCK DURING EDITING
+  useEffect(() => {
+    // NEVER sync from external data when actively editing - this prevents the editing from closing
+    if (!isActivelyEditingRef.current && !isEditingText && !isEditingSkills && !isEditingImage && portfolioData?.content) {
       setLocalContent(portfolioData.content);
     }
-  }, [portfolioData?.content, isEditingText]);
+  }, [portfolioData?.content, isEditingText, isEditingSkills, isEditingImage]);
 
-  // Debounced function to sync with parent
+  // Handle clicking outside to stop editing
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isEditingText) {
+        // Check if the click is outside any editing input/textarea
+        const isClickingOnInput = event.target.closest('input, textarea');
+        const isClickingOnEditingArea = event.target.closest('[data-editing-container]');
+        
+        if (!isClickingOnInput && !isClickingOnEditingArea) {
+          // Sync current content before closing
+          const [sectionId, fieldId] = isEditingText.split('-');
+          const currentContent = getContent(sectionId);
+          const currentValue = currentContent[fieldId];
+          
+          // Force sync to parent immediately when closing
+          if (onContentChange && currentValue !== undefined) {
+            if (typeof onContentChange === 'function') {
+              onContentChange(sectionId, fieldId, currentValue);
+            } else if (typeof onContentChange.onChange === 'function') {
+              onContentChange.onChange(sectionId, fieldId, currentValue);
+            }
+          }
+          
+          setIsEditingText(null);
+          editingStateRef.current = null;
+          isActivelyEditingRef.current = false;
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditingText, onContentChange]);
+
+  // Debounced function to sync with parent - ONLY when not editing
   const debouncedSync = useCallback((sectionId, fieldId, value) => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
     
     debounceTimeoutRef.current = setTimeout(() => {
-      if (onContentChange) {
+      // Only sync with parent if not currently editing any text
+      if (!isEditingText && onContentChange) {
         if (typeof onContentChange === 'function') {
           onContentChange(sectionId, fieldId, value);
         } else if (typeof onContentChange.onChange === 'function') {
@@ -56,7 +103,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
         }
       }
     }, 300); // Debounce for 300ms
-  }, [onContentChange]);
+  }, [onContentChange, isEditingText]);
 
   // Handle nested content change for projects
   const handleNestedContentChange = (sectionId, fieldId, index, subFieldId, value) => {
@@ -97,6 +144,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       const editKey = `${sectionId}-${fieldId}`;
       setIsEditingText(editKey);
       editingStateRef.current = editKey;
+      isActivelyEditingRef.current = true; // Mark as actively editing
     }
   };
 
@@ -108,25 +156,31 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       debounceTimeoutRef.current = null;
     }
     
-    setIsEditingText(null);
-    editingStateRef.current = null;
+    // Note: We now handle closing via click-outside instead of blur
+    // This function is kept for manual closing via Escape key
   };
 
-  // Handle key press for exiting edit mode with smart textarea support
+  // Handle key press for exiting edit mode - ONLY Escape key closes editing
   const handleKeyPress = (e, sectionId, fieldId) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      const target = e.target;
-      if (target.tagName.toLowerCase() === 'textarea') {
-        const isDescription = fieldId.includes('description') || fieldId === 'bio' || fieldId === 'content' || fieldId.includes('summary');
-        if (isDescription) return;
+    if (e.key === 'Escape') {
+      // Sync the current content before closing
+      const currentContent = getContent(sectionId);
+      const currentValue = currentContent[fieldId];
+      
+      // Force sync to parent immediately when closing
+      if (onContentChange && currentValue !== undefined) {
+        if (typeof onContentChange === 'function') {
+          onContentChange(sectionId, fieldId, currentValue);
+        } else if (typeof onContentChange.onChange === 'function') {
+          onContentChange.onChange(sectionId, fieldId, currentValue);
+        }
       }
       
-      e.preventDefault();
       setIsEditingText(null);
+      editingStateRef.current = null;
+      isActivelyEditingRef.current = false; // Clear editing flag
     }
-    if (e.key === 'Escape') {
-      setIsEditingText(null);
-    }
+    // Removed Enter key closing - let users type freely
   };
 
   // Render editable text with smart sizing based on content type
@@ -149,7 +203,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       }
 
       return (
-        <div className="relative group">
+        <div className="relative group" data-editing-container>
           <div className="bg-white border border-gray-300 rounded-lg p-1 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all duration-200">
             {shouldUseTextarea ? (
               <textarea
@@ -162,14 +216,6 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
                 }}
                 value={currentValue}
                 onChange={(e) => handleTextEdit(sectionId, fieldId, e.target.value)}
-                onBlur={(e) => {
-                  // Only blur if focus is not moving to another element in the same component
-                  setTimeout(() => {
-                    if (!document.activeElement || !document.activeElement.closest('.group')) {
-                      handleTextBlur();
-                    }
-                  }, 100);
-                }}
                 onKeyDown={(e) => handleKeyPress(e, sectionId, fieldId)}
                 className={`${className} w-full bg-transparent border-none outline-none resize-none px-3 py-2`}
                 rows={rows}
@@ -193,14 +239,6 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
                 }}
                 value={currentValue}
                 onChange={(e) => handleTextEdit(sectionId, fieldId, e.target.value)}
-                onBlur={(e) => {
-                  // Only blur if focus is not moving to another element in the same component
-                  setTimeout(() => {
-                    if (!document.activeElement || !document.activeElement.closest('.group')) {
-                      handleTextBlur();
-                    }
-                  }, 100);
-                }}
                 onKeyDown={(e) => handleKeyPress(e, sectionId, fieldId)}
                 className={`${className} w-full bg-transparent border-none outline-none px-3 py-2`}
                 placeholder="Enter your text here..."
@@ -216,7 +254,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
           
           <div className="absolute -bottom-8 left-0 right-0 text-center">
             <div className="inline-block bg-gray-800 text-white px-3 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {shouldUseTextarea ? 'Shift+Enter for new line • Enter to save • Esc to cancel' : 'Enter to save • Esc to cancel'}
+              Press Esc or click outside to stop editing
             </div>
           </div>
         </div>

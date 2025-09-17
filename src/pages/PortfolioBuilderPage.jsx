@@ -23,6 +23,7 @@ const PortfolioBuilderPage = () => {
   const [description, setDescription] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
   const [initializing, setInitializing] = useState(true);
+  const [isUserCurrentlyEditing, setIsUserCurrentlyEditing] = useState(false); // Track if user is actively editing
 
   // Default image URLs for fallback
   const DEFAULT_HERO_IMAGE = 'https://via.placeholder.com/400x300?text=Default+Image';
@@ -31,29 +32,32 @@ const PortfolioBuilderPage = () => {
   // Local Storage key for auto-save
   const getLocalStorageKey = () => `portfolio-draft-${id || 'new'}`;
 
-  // Debounced auto-save to local storage
+  // Debounced auto-save to local storage - only when not actively editing
   const autoSaveToLocalStorage = useCallback(
     debounce((data) => {
-      setAutoSaveStatus('saving');
-      try {
-        const key = getLocalStorageKey();
+      // Only auto-save if user is not currently editing
+      if (!isUserCurrentlyEditing) {
+        setAutoSaveStatus('saving');
+        try {
+          const key = getLocalStorageKey();
 
-        const saveData = {
-          portfolioData: data,
-          title,
-          description,
-          selectedTemplateId: selectedTemplate?.id,
-          timestamp: Date.now(),
-        };
+          const saveData = {
+            portfolioData: data,
+            title,
+            description,
+            selectedTemplateId: selectedTemplate?.id,
+            timestamp: Date.now(),
+          };
 
-        localStorage.setItem(key, JSON.stringify(saveData));
-        setAutoSaveStatus('saved');
-      } catch (error) {
-        console.error('Failed to auto-save to localStorage:', error);
-        setAutoSaveStatus('error');
+          localStorage.setItem(key, JSON.stringify(saveData));
+          setAutoSaveStatus('saved');
+        } catch (error) {
+          console.error('Failed to auto-save to localStorage:', error);
+          setAutoSaveStatus('error');
+        }
       }
-    }, 1000),
-    [id, title, description, selectedTemplate?.id]
+    }, 2000), // Increased debounce time to 2 seconds
+    [id, title, description, selectedTemplate?.id, isUserCurrentlyEditing]
   );
 
   // Helper function to convert portfolio to template format
@@ -322,7 +326,8 @@ const PortfolioBuilderPage = () => {
         content: updatedContent,
         _version: (prev._version || 0) + 1,
       });
-      autoSaveToLocalStorage(updated);
+      
+      // Don't auto-save during active editing - only trigger auto-save when user stops editing
       return updated;
     });
   };
@@ -751,6 +756,13 @@ const PortfolioBuilderPage = () => {
                   portfolioData={portfolioData} // Pass portfolioData with ensured valid image URLs
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
+                  onEditingStateChange={(isCurrentlyEditing) => {
+                    setIsUserCurrentlyEditing(isCurrentlyEditing);
+                    // Trigger auto-save when user stops editing
+                    if (!isCurrentlyEditing && portfolioData) {
+                      autoSaveToLocalStorage(portfolioData);
+                    }
+                  }}
                 />
               </div>
 
