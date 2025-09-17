@@ -62,10 +62,17 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
         if (!isClickingOnInput && !isClickingOnEditingArea) {
           // Sync current content before closing
           const [sectionId, fieldId] = isEditingText.split('-');
-          const currentContent = getContent(sectionId);
-          const currentValue = currentContent[fieldId];
           
-          // Force sync to parent immediately when closing
+          // Get the current value from local content (where live editing happens)
+          const currentValue = localContent[sectionId]?.[fieldId];
+          
+          // Clear any pending debounced sync since we're doing immediate sync
+          if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+            debounceTimeoutRef.current = null;
+          }
+          
+          // Force immediate sync to parent when closing
           if (onContentChange && currentValue !== undefined) {
             if (typeof onContentChange === 'function') {
               onContentChange(sectionId, fieldId, currentValue);
@@ -160,14 +167,19 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     // This function is kept for manual closing via Escape key
   };
 
-  // Handle key press for exiting edit mode - ONLY Escape key closes editing
+  // Handle key press for exiting edit mode - Escape and Enter keys close editing
   const handleKeyPress = (e, sectionId, fieldId) => {
     if (e.key === 'Escape') {
-      // Sync the current content before closing
-      const currentContent = getContent(sectionId);
-      const currentValue = currentContent[fieldId];
+      // Get the current value from local content (where live editing happens)
+      const currentValue = localContent[sectionId]?.[fieldId];
       
-      // Force sync to parent immediately when closing
+      // Clear any pending debounced sync since we're doing immediate sync
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+      
+      // Force immediate sync to parent when closing
       if (onContentChange && currentValue !== undefined) {
         if (typeof onContentChange === 'function') {
           onContentChange(sectionId, fieldId, currentValue);
@@ -179,8 +191,37 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       setIsEditingText(null);
       editingStateRef.current = null;
       isActivelyEditingRef.current = false; // Clear editing flag
+    } else if (e.key === 'Enter') {
+      // For single-line inputs (not textarea), Enter should save and exit
+      const isTextarea = e.target.tagName.toLowerCase() === 'textarea';
+      
+      if (!isTextarea && !e.shiftKey) {
+        e.preventDefault(); // Prevent form submission or other default behavior
+        
+        // Get the current value from local content
+        const currentValue = localContent[sectionId]?.[fieldId];
+        
+        // Clear any pending debounced sync since we're doing immediate sync
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
+          debounceTimeoutRef.current = null;
+        }
+        
+        // Force immediate sync to parent when closing
+        if (onContentChange && currentValue !== undefined) {
+          if (typeof onContentChange === 'function') {
+            onContentChange(sectionId, fieldId, currentValue);
+          } else if (typeof onContentChange.onChange === 'function') {
+            onContentChange.onChange(sectionId, fieldId, currentValue);
+          }
+        }
+        
+        setIsEditingText(null);
+        editingStateRef.current = null;
+        isActivelyEditingRef.current = false; // Clear editing flag
+      }
+      // For textarea or Shift+Enter, allow normal Enter behavior (new line)
     }
-    // Removed Enter key closing - let users type freely
   };
 
   // Render editable text with smart sizing based on content type
@@ -252,9 +293,10 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
             )}
           </div>
           
-          <div className="absolute -bottom-8 left-0 right-0 text-center">
-            <div className="inline-block bg-gray-800 text-white px-3 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Press Esc or click outside to stop editing
+          <div className="absolute -bottom-14 left-0 right-0 text-center z-[9999]">
+            <div className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm shadow-xl border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Press <kbd className="bg-blue-500 px-1 py-0.5 rounded text-xs">Enter</kbd> or <kbd className="bg-blue-500 px-1 py-0.5 rounded text-xs">Esc</kbd> to save
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-blue-600"></div>
             </div>
           </div>
         </div>
@@ -269,8 +311,9 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       >
         {currentValue || (isEditing ? 'Click to edit...' : '')}
         {isEditing && (
-          <span className="absolute -top-8 left-0 bg-gray-800 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+          <span className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-[9999] shadow-xl border border-blue-500">
             Click to edit
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
           </span>
         )}
       </Component>
