@@ -1,12 +1,241 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentChange }) => {
+// Sortable section item component
+const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sectionId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const getSectionPreview = (data) => {
+    // Handle different section types with more intelligent content preview
+    if (data?.title && data?.title.trim()) {
+      return data.title;
+    }
+    
+    if (data?.name && data?.name.trim()) {
+      return data.name;
+    }
+    
+    // For projects section, show project count and first project title
+    if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
+      const firstProject = data.items[0];
+      if (firstProject?.title) {
+        return data.items.length === 1 
+          ? firstProject.title 
+          : `${firstProject.title} (+${data.items.length - 1} more)`;
+      }
+      return `${data.items.length} item${data.items.length !== 1 ? 's' : ''}`;
+    }
+    
+    // For about section, show bio preview
+    if (data?.bio && data.bio.trim()) {
+      return data.bio.length > 60 
+        ? data.bio.substring(0, 60) + '...' 
+        : data.bio;
+    }
+    
+    // For content field
+    if (data?.content && data.content.trim()) {
+      return data.content.length > 60 
+        ? data.content.substring(0, 60) + '...' 
+        : data.content;
+    }
+    
+    // For description field
+    if (data?.description && data.description.trim()) {
+      return data.description.length > 60 
+        ? data.description.substring(0, 60) + '...' 
+        : data.description;
+    }
+    
+    // For contact section, show email or phone
+    if (data?.email && data.email.trim()) {
+      return data.email;
+    }
+    
+    if (data?.phone && data.phone.trim()) {
+      return data.phone;
+    }
+    
+    // For skills section, show first few skills
+    if (data?.skills && Array.isArray(data.skills) && data.skills.length > 0) {
+      const skillNames = data.skills
+        .map(skill => skill.name || skill)
+        .filter(Boolean)
+        .slice(0, 3);
+      
+      if (skillNames.length > 0) {
+        return skillNames.length < data.skills.length 
+          ? `${skillNames.join(', ')} (+${data.skills.length - skillNames.length} more)`
+          : skillNames.join(', ');
+      }
+    }
+    
+    // Default fallback
+    return 'Click to edit content';
+  };
+
+  const getImagePreview = (data) => {
+    // Check for image in different section types
+    if (data?.image) return data.image;
+    if (data?.profileImage) return data.profileImage;
+    if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
+      const firstItemWithImage = data.items.find(item => item.image);
+      if (firstItemWithImage) return firstItemWithImage.image;
+    }
+    return null;
+  };
+
+  const imagePreview = getImagePreview(sectionData);
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`p-3 md:p-4 rounded-lg border transition-all duration-200 ${
+        isDragging 
+          ? 'bg-blue-50 border-blue-300 shadow-lg scale-105 rotate-2' 
+          : 'bg-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-md'
+      }`}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
+          {/* Drag handle with better touch targets */}
+          <div
+            {...attributes}
+            {...listeners}
+            className={`cursor-grab active:cursor-grabbing p-3 md:p-2 rounded transition-all duration-200 flex-shrink-0 touch-manipulation ${
+              isDragging 
+                ? 'bg-blue-200 shadow-inner' 
+                : 'hover:bg-gray-200 hover:shadow-sm'
+            }`}
+            title="Drag to reorder"
+          >
+            <svg className={`w-5 h-5 md:w-4 md:h-4 transition-colors ${
+              isDragging ? 'text-blue-600' : 'text-gray-400'
+            }`} fill="currentColor" viewBox="0 0 20 20">
+              <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+            </svg>
+          </div>
+          {/* Section icon with responsive sizing */}
+          <div className="text-xl md:text-lg flex-shrink-0 w-7 h-7 md:w-6 md:h-6 flex items-center justify-center">{getSectionIcon(sectionId)}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-gray-900 capitalize truncate">
+                {sectionId.replace(/([A-Z])/g, ' $1').trim()}
+              </h4>
+              {imagePreview && (
+                <div className="w-10 h-10 md:w-8 md:h-8 rounded bg-gray-100 overflow-hidden flex-shrink-0 ml-2">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                </div>
+              )}
+            </div>
+            <p className="text-xs md:text-xs text-gray-600 truncate">
+              {getSectionPreview(sectionData)}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => onDelete(sectionId)}
+          className="ml-2 p-3 md:p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors flex-shrink-0 touch-manipulation"
+          title="Delete section"
+        >
+          <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentChange, onCollapseChange }) => {
   const [activeTab, setActiveTab] = useState('sections');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingField, setEditingField] = useState(null); // Track which field is being edited
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
 
   const currentStyles = portfolioData?.styling || template.styling;
+
+  // Notify parent about initial collapse state
+  React.useEffect(() => {
+    if (onCollapseChange) {
+      onCollapseChange(isCollapsed);
+    }
+  }, [isCollapsed, onCollapseChange]);
+
+  // Set up sensors for drag and drop with touch support
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Minimum drag distance to activate
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for section reordering
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = sectionOrder.indexOf(active.id);
+      const newIndex = sectionOrder.indexOf(over.id);
+      
+      const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+      
+      // Create reordered content object
+      const reorderedContent = {};
+      newOrder.forEach(sectionId => {
+        if (portfolioData.content[sectionId]) {
+          reorderedContent[sectionId] = portfolioData.content[sectionId];
+        }
+      });
+      
+      // Update the portfolio data with new order
+      onContentChange('_sections', 'reorder', { content: reorderedContent });
+    }
+  };
+
+  // Get section order for drag and drop
+  const sectionOrder = portfolioData?.content ? Object.keys(portfolioData.content) : [];
 
   // Color presets for quick selection
   const colorPresets = [
@@ -304,41 +533,82 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
   const tabs = [
     { id: 'sections', label: 'Sections', icon: '📋' },
     { id: 'colors', label: 'Colors', icon: '🎨' },
-    { id: 'fonts', label: 'Typography', icon: '📝' },
-    { id: 'spacing', label: 'Layout', icon: '📐' },
-    { id: 'effects', label: 'Effects', icon: '✨' }
+    { id: 'fonts', label: 'Typography', icon: '📝' }
   ];
 
   return (
-    <motion.div
-      className={`fixed right-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-2xl border-l border-gray-200 z-40 ${
-        isCollapsed ? 'w-16' : 'w-[28rem]'
-      }`}
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-        {!isCollapsed && (
-          <h2 className="text-lg font-semibold text-gray-900">Design Tools</h2>
-        )}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          title={isCollapsed ? 'Expand Panel' : 'Collapse Panel'}
-        >
-          <svg
-            className={`w-5 h-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="fixed bottom-6 left-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 hover:scale-105 z-50 md:hidden"
+        title="Open Design Tools"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+        </svg>
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Design Panel */}
+      <motion.div
+        className={`fixed right-0 top-0 h-full bg-white shadow-2xl border-l border-gray-200 z-50 
+          ${isCollapsed ? 'w-16' : 'w-full md:w-[28rem]'} 
+          ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+          md:top-16 md:h-[calc(100vh-4rem)] md:z-40
+          transition-transform duration-300 ease-in-out`}
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+          {!isCollapsed && (
+            <h2 className="text-lg font-semibold text-gray-900">Design Tools</h2>
+          )}
+          <div className="flex items-center gap-2">
+            {/* Mobile Close Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors md:hidden"
+              title="Close Panel"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            {/* Collapse/Expand Button */}
+            <button
+              onClick={() => {
+                const newCollapsed = !isCollapsed;
+                setIsCollapsed(newCollapsed);
+                // Notify parent about collapse state change
+                if (onCollapseChange) {
+                  onCollapseChange(newCollapsed);
+                }
+              }}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors hidden md:block"
+              title={isCollapsed ? 'Expand Panel' : 'Collapse Panel'}
+            >
+              <svg
+                className={`w-5 h-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
       {!isCollapsed && (
         <>
@@ -348,20 +618,20 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-2 py-4 text-sm font-medium transition-colors ${
+                className={`flex-1 px-2 py-4 md:py-3 text-sm font-medium transition-colors touch-manipulation ${
                   activeTab === tab.id
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <div className="text-xl mb-1">{tab.icon}</div>
+                <div className="text-xl md:text-lg mb-1">{tab.icon}</div>
                 <div className="text-xs font-medium">{tab.label}</div>
               </button>
             ))}
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto max-h-[calc(100vh-12rem)]">
+          <div className="flex-1 overflow-y-auto max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-12rem)] px-1">
             <div className="p-4">
               <AnimatePresence mode="wait">
                 {activeTab === 'sections' && (
@@ -374,147 +644,62 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                   >
                   {/* Current Sections */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Current Sections</h3>
-                    <div className="space-y-3">
-                      {portfolioData?.content && Object.entries(portfolioData.content).map(([sectionId, sectionData]) => {
-                        const getSectionPreview = (data) => {
-                          if (data?.title) return data.title;
-                          if (data?.name) return data.name;
-                          if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
-                            return `${data.items.length} items`;
-                          }
-                          if (data?.content) return data.content.substring(0, 50) + '...';
-                          if (data?.description) return data.description.substring(0, 50) + '...';
-                          return 'Section content';
-                        };
-
-                        const getSectionIcon = (id) => {
-                          const icons = {
-                            hero: '🏠',
-                            about: '👤',
-                            experience: '💼',
-                            education: '🎓',
-                            skills: '⚡',
-                            projects: '🚀',
-                            contact: '📧',
-                            testimonials: '💬',
-                            certifications: '🏆',
-                            portfolio: '📁',
-                            services: '🛠️'
-                          };
-                          return icons[id] || '📄';
-                        };
-
-                        return (
-                          <div
-                            key={sectionId}
-                            className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start space-x-3 flex-1">
-                                <div className="text-2xl">{getSectionIcon(sectionId)}</div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h4 className="text-sm font-medium text-gray-900 capitalize">
-                                      {sectionId.replace(/([A-Z])/g, ' $1').trim()}
-                                    </h4>
-                                    <button
-                                      onClick={() => handleEditSection(sectionId)}
-                                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                                      title="Edit Section"
-                                    >
-                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                      </svg>
-                                    </button>
-                                  </div>
-                                  
-                                  {/* Editable Section Content */}
-                                  <div className="bg-white rounded p-3 border space-y-2">
-                                    {/* Title/Heading Field */}
-                                    {(sectionData?.title !== undefined || sectionData?.heading !== undefined) && (
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-500 block mb-1">
-                                          {sectionId === 'hero' ? 'Name' : 'Title'}
-                                        </label>
-                                        {renderEditableField(sectionId, sectionData?.title !== undefined ? 'title' : 'heading', 
-                                          sectionData?.title || sectionData?.heading, 'Enter title...')}
-                                      </div>
-                                    )}
-
-                                    {/* Subtitle Field */}
-                                    {sectionData?.subtitle !== undefined && (
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-500 block mb-1">Subtitle</label>
-                                        {renderEditableField(sectionId, 'subtitle', sectionData.subtitle, 'Enter subtitle...')}
-                                      </div>
-                                    )}
-
-                                    {/* Description/Bio/Content Field */}
-                                    {(sectionData?.description !== undefined || sectionData?.bio !== undefined || sectionData?.content !== undefined) && (
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-500 block mb-1">
-                                          {sectionData?.bio !== undefined ? 'Bio' : sectionData?.description !== undefined ? 'Description' : 'Content'}
-                                        </label>
-                                        {renderEditableField(sectionId, 
-                                          sectionData?.bio !== undefined ? 'bio' : sectionData?.description !== undefined ? 'description' : 'content',
-                                          sectionData?.bio || sectionData?.description || sectionData?.content, 
-                                          'Enter content...')}
-                                      </div>
-                                    )}
-
-                                    {/* Items Preview (for sections with lists) */}
-                                    {sectionData?.items && Array.isArray(sectionData.items) && (
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-500 block mb-1">
-                                          Items ({sectionData.items.length})
-                                        </label>
-                                        <div className="space-y-1 max-h-20 overflow-y-auto">
-                                          {sectionData.items.slice(0, 3).map((item, idx) => (
-                                            <div key={idx} className="flex items-center space-x-2 text-xs text-gray-600">
-                                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                                              <span>{item.name || item.title || item.company || item.institution || 'Item'}</span>
-                                            </div>
-                                          ))}
-                                          {sectionData.items.length > 3 && (
-                                            <div className="text-xs text-gray-400">+{sectionData.items.length - 3} more...</div>
-                                          )}
-                                        </div>
-                                        <div className="text-xs text-blue-600 mt-1 cursor-pointer hover:underline"
-                                             onClick={() => handleEditSection(sectionId)}>
-                                          Click in template to edit items →
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex flex-col space-y-1 ml-2">
-                                <button
-                                  onClick={() => handleToggleSection(sectionId)}
-                                  className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                                  title="Toggle Visibility"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSection(sectionId)}
-                                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                                  title="Delete Section"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900">Current Sections</h3>
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+                        </svg>
+                        Drag to reorder
+                      </div>
                     </div>
+                    
+                    {portfolioData?.content && (
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={sectionOrder}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-3">
+                            {sectionOrder.map((sectionId) => {
+                              const sectionData = portfolioData.content[sectionId];
+                              if (!sectionData) return null;
+
+                              const getSectionIcon = (id) => {
+                                const icons = {
+                                  hero: '🏠',
+                                  about: '👤',
+                                  experience: '💼',
+                                  education: '🎓',
+                                  skills: '⚡',
+                                  projects: '🚀',
+                                  contact: '📧',
+                                  testimonials: '💬',
+                                  certifications: '🏆',
+                                  portfolio: '📁',
+                                  services: '🛠️'
+                                };
+                                return icons[id] || '📄';
+                              };
+
+                              return (
+                                <SortableSection
+                                  key={sectionId}
+                                  sectionId={sectionId}
+                                  sectionData={sectionData}
+                                  onDelete={handleDeleteSection}
+                                  getSectionIcon={getSectionIcon}
+                                />
+                              );
+                            })}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                    )}
                   </div>
 
                   {/* Add New Section */}
@@ -566,23 +751,23 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                   {/* Color Presets */}
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Themes</h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {colorPresets.map((preset, index) => (
                         <button
                           key={index}
                           onClick={() => handleColorPresetSelect(preset)}
-                          className="p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                          className="p-4 md:p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors touch-manipulation"
                         >
-                          <div className="flex space-x-1 mb-2">
+                          <div className="flex space-x-1 mb-2 justify-center">
                             {Object.values(preset.colors).map((color, colorIndex) => (
                               <div
                                 key={colorIndex}
-                                className="w-4 h-4 rounded-full"
+                                className="w-5 h-5 md:w-4 md:h-4 rounded-full"
                                 style={{ backgroundColor: color }}
                               />
                             ))}
                           </div>
-                          <div className="text-xs text-gray-600">{preset.name}</div>
+                          <div className="text-xs text-gray-600 text-center">{preset.name}</div>
                         </button>
                       ))}
                     </div>
@@ -591,24 +776,24 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                   {/* Individual Color Controls */}
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Custom Colors</h3>
-                    <div className="space-y-3">
+                    <div className="space-y-4 md:space-y-3">
                       {Object.entries(currentStyles.colors).map(([key, value]) => (
-                        <div key={key} className="flex items-center justify-between">
-                          <label className="text-sm text-gray-700 capitalize">
+                        <div key={key} className="flex items-center justify-between gap-3">
+                          <label className="text-sm text-gray-700 capitalize flex-1 min-w-0">
                             {key.replace(/([A-Z])/g, ' $1').trim()}
                           </label>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 flex-shrink-0">
                             <input
                               type="color"
                               value={value}
                               onChange={(e) => handleColorChange(key, e.target.value)}
-                              className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                              className="w-10 h-10 md:w-8 md:h-8 rounded border border-gray-300 cursor-pointer touch-manipulation"
                             />
                             <input
                               type="text"
                               value={value}
                               onChange={(e) => handleColorChange(key, e.target.value)}
-                              className="w-20 px-2 py-1 text-xs border border-gray-300 rounded"
+                              className="w-24 md:w-20 px-2 py-2 md:py-1 text-xs border border-gray-300 rounded touch-manipulation"
                             />
                           </div>
                         </div>
@@ -671,84 +856,13 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                   </div>
                 </motion.div>
               )}
-
-              {activeTab === 'spacing' && (
-                <motion.div
-                  key="spacing"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Section Spacing</h3>
-                    <div className="space-y-3">
-                      {Object.entries(currentStyles.spacing).map(([key, value]) => (
-                        <div key={key}>
-                          <label className="text-sm text-gray-700 capitalize block mb-2">
-                            {key} Spacing
-                          </label>
-                          <input
-                            type="range"
-                            min="1"
-                            max="10"
-                            step="0.5"
-                            value={parseFloat(value)}
-                            onChange={(e) => onStyleChange('spacing', {
-                              ...currentStyles.spacing,
-                              [key]: `${e.target.value}rem`
-                            })}
-                            className="w-full"
-                          />
-                          <div className="text-xs text-gray-500 mt-1">{value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeTab === 'effects' && (
-                <motion.div
-                  key="effects"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Border Radius</h3>
-                    <div className="space-y-3">
-                      {Object.entries(currentStyles.borderRadius).map(([key, value]) => (
-                        <div key={key}>
-                          <label className="text-sm text-gray-700 capitalize block mb-2">
-                            {key} Radius
-                          </label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="2"
-                            step="0.125"
-                            value={parseFloat(value)}
-                            onChange={(e) => onStyleChange('borderRadius', {
-                              ...currentStyles.borderRadius,
-                              [key]: `${e.target.value}rem`
-                            })}
-                            className="w-full"
-                          />
-                          <div className="text-xs text-gray-500 mt-1">{value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
             </AnimatePresence>
             </div>
           </div>
         </>
       )}
     </motion.div>
+    </>
   );
 };
 

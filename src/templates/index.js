@@ -55,7 +55,8 @@ export const templates = {
             id: 1,
             title: 'Project One',
             description: 'Description of your amazing project',
-            image: '', // Empty string instead of placeholder path
+            image: '', // Main image for backward compatibility
+            images: [], // New: Array of additional images for gallery
             category: 'branding',
             tags: ['Branding', 'Logo Design']
           },
@@ -63,7 +64,8 @@ export const templates = {
             id: 2,
             title: 'Project Two',
             description: 'Description of your amazing project',
-            image: '', // Empty string instead of placeholder path
+            image: '', // Main image for backward compatibility
+            images: [], // New: Array of additional images for gallery
             category: 'web',
             tags: ['Web Design', 'UI/UX']
           },
@@ -71,7 +73,8 @@ export const templates = {
             id: 3,
             title: 'Project Three',
             description: 'Description of your amazing project',
-            image: '', // Empty string instead of placeholder path
+            image: '', // Main image for backward compatibility
+            images: [], // New: Array of additional images for gallery
             category: 'print',
             tags: ['Print Design', 'Typography']
           }

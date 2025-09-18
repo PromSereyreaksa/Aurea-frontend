@@ -6,28 +6,59 @@ import aureaLogo from "../assets/AUREA - Logo.jpg";
 
 const LoginPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login, isLoading, isAuthenticated } = useAuthStore();
+  const { login, isLoading, isAuthenticated, checkAuth } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const [authChecked, setAuthChecked] = useState(false);
 
   const from = location.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const verifyAuth = async () => {
+      try {
+        await checkAuth();
+      } catch (error) {
+        // Error handled in store
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+    verifyAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    console.log('Auth effect - authChecked:', authChecked, 'isAuthenticated:', isAuthenticated); // Debug log
+    if (authChecked && isAuthenticated) {
+      console.log('Auto-navigating to:', from); // Debug log
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, from, authChecked]);
 
   const onSubmit = async (data) => {
+    console.log('Submitting login...'); // Debug log
     const result = await login(data.email, data.password);
+    console.log('Login result in component:', result); // Debug log
+    
     if (result.success) {
+      console.log('Login successful, navigating to:', from); // Debug log
       navigate(from, { replace: true });
+    } else {
+      console.log('Login failed:', result.error); // Debug log
     }
   };
 
   const handleBack = () => {
     navigate(-1);
   };
+
+  // Show loading while checking auth
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

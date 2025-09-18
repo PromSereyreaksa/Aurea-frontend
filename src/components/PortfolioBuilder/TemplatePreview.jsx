@@ -1,10 +1,148 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { uploadImageToCloudinary } from '../../lib/api';
+import { cloudinaryApi } from '../../lib/cloudinaryApi';
+import toast from 'react-hot-toast';
+import PDFExport from './PDFExport';
 
-const TemplatePreview = ({ template, portfolioData, isEditing = false, onContentChange, onEditingStateChange }) => {
+// Image Gallery Component for Projects
+const ImageGallery = ({ images = [], mainImage, projectTitle }) => {
+  const [activeImage, setActiveImage] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Combine main image with additional images
+  const allImages = [mainImage, ...images].filter(Boolean);
+  
+  if (allImages.length <= 1) {
+    return mainImage ? (
+      <img 
+        src={mainImage} 
+        alt={projectTitle}
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+      />
+    ) : (
+      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+        <span className="text-gray-500">No image</span>
+      </div>
+    );
+  }
+  
+  return (
+    <>
+      {/* Main Image */}
+      <div className="relative w-full h-full">
+        <img 
+          src={allImages[0]} 
+          alt={projectTitle}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+          onClick={() => {
+            setActiveImage(allImages[0]);
+            setCurrentIndex(0);
+          }}
+        />
+        
+        {/* Image Counter */}
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+          +{allImages.length - 1}
+        </div>
+        
+        {/* Thumbnail Strip */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {allImages.slice(1, 4).map((img, index) => (
+              <div 
+                key={index}
+                className="w-8 h-8 rounded overflow-hidden border-2 border-white/80 cursor-pointer hover:border-white transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImage(img);
+                  setCurrentIndex(index + 1);
+                }}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {activeImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setActiveImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="relative max-w-4xl max-h-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={activeImage} 
+                alt={projectTitle}
+                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              />
+              
+              {/* Navigation */}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => {
+                      const newIndex = currentIndex > 0 ? currentIndex - 1 : allImages.length - 1;
+                      setCurrentIndex(newIndex);
+                      setActiveImage(allImages[newIndex]);
+                    }}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newIndex = currentIndex < allImages.length - 1 ? currentIndex + 1 : 0;
+                      setCurrentIndex(newIndex);
+                      setActiveImage(allImages[newIndex]);
+                    }}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
+              
+              {/* Close Button */}
+              <button
+                onClick={() => setActiveImage(null)}
+                className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              {/* Image Counter */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+                {currentIndex + 1} / {allImages.length}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+const TemplatePreview = ({ template, portfolioData, isEditing = false, onContentChange, onEditingStateChange, showPDFExport, onClosePDFExport }) => {
   const [activeSection, setActiveSection] = useState(null);
   const [isEditingText, setIsEditingText] = useState(null);
   const [isEditingImage, setIsEditingImage] = useState(null);
@@ -27,6 +165,46 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
   const inputRefs = useRef({});
   const debounceTimeoutRef = useRef(null);
   const isActivelyEditingRef = useRef(false); // Track if user is actively typing
+
+  // Comprehensive cleanup function for crop editor
+  const cleanupCropEditor = useCallback(() => {
+    setEditingImage(null);
+    setCrop({ unit: '%', width: 80, height: 80, x: 10, y: 10 });
+    setCompletedCrop(null);
+    setCropLoading(false);
+    setCropImageLoaded(false);
+    // Clear the image reference
+    if (imgRef.current) {
+      imgRef.current.onload = null;
+      imgRef.current.onerror = null;
+    }
+  }, []);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      cleanupCropEditor();
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [cleanupCropEditor]);
+
+  // Handle keyboard events for crop editor
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (editingImage && event.key === 'Escape') {
+        cleanupCropEditor();
+      }
+    };
+
+    if (editingImage) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [editingImage, cleanupCropEditor]);
 
   // Sync local content with portfolio data when not editing
   useEffect(() => {
@@ -124,7 +302,17 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     const originalArray = Array.isArray(currentContent[fieldId]) ? currentContent[fieldId] : [];
     const updatedArray = [...originalArray];
     const existingItem = updatedArray[index] || {};
-    updatedArray[index] = { ...existingItem, [subFieldId]: value };
+    
+    // Handle deeply nested paths like "tags.0"
+    if (subFieldId.includes('.')) {
+      const [parentField, childIndex] = subFieldId.split('.');
+      const parentArray = Array.isArray(existingItem[parentField]) ? existingItem[parentField] : [];
+      const updatedParentArray = [...parentArray];
+      updatedParentArray[parseInt(childIndex)] = value;
+      updatedArray[index] = { ...existingItem, [parentField]: updatedParentArray };
+    } else {
+      updatedArray[index] = { ...existingItem, [subFieldId]: value };
+    }
 
     handleTextEdit(sectionId, fieldId, updatedArray);
   };
@@ -334,6 +522,28 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     return content || {};
   };
 
+  // Get the image source for the currently editing image
+  const getEditingImageSrc = () => {
+    if (!editingImage) return null;
+    
+    const [sectionId, fieldId] = editingImage.split('-');
+    
+    if (fieldId.includes('.')) {
+      // Handle nested field IDs like "projects.0.image"
+      const [mainField, index, subField] = fieldId.split('.');
+      const sectionContent = getContent(sectionId);
+      const items = sectionContent[mainField];
+      if (Array.isArray(items) && items[parseInt(index)]) {
+        return items[parseInt(index)][subField];
+      }
+    } else {
+      // Handle direct field IDs
+      return getContent(sectionId)[fieldId];
+    }
+    
+    return null;
+  };
+
   // Early return if template is missing
   if (!template) {
     console.error('Template is required but missing');
@@ -456,6 +666,11 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     
     const isUploading = uploadingImages.has(imageKey);
     const hasImage = imageSrc && typeof imageSrc === 'string' && imageSrc.trim() !== '';
+    
+    // Debug log for hero section
+    if (sectionId === 'hero') {
+      console.log('Hero renderEditableImage - imageSrc:', imageSrc, 'hasImage:', hasImage);
+    }
 
     const handleFileUpload = async (file) => {
       if (!file) return;
@@ -474,7 +689,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
         
         try {
           // Try uploading to Cloudinary first
-          imageUrl = await uploadImageToCloudinary(file);
+          imageUrl = await cloudinaryApi.uploadImage(file);
         } catch (uploadError) {
           console.warn('Cloudinary upload failed, using data URL fallback:', uploadError);
           
@@ -536,224 +751,30 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     const handleEditImage = () => {
       setEditingImage(imageKey);
       setCropImageLoaded(false); // Reset loading state
-      // Set initial crop to center of image with reasonable size
+      // Set initial crop using percentage for immediate visibility
       setCrop({ 
         unit: '%',
-        width: 80,
-        height: 80,
-        x: 10,
-        y: 10
+        width: 70,
+        height: 70,
+        x: 15,
+        y: 15
       });
+      setShowImageEditor(true);
     };
 
-    const handleCropComplete = async () => {
-      try {
-        setCropLoading(true);
-        
-        if (completedCrop && imgRef.current) {
-          
-          // Try cropping the image
-          let croppedImage;
-          try {
-            croppedImage = await getCroppedImg(imgRef.current, completedCrop);
-            
-            // Upload cropped image to Cloudinary
-            if (croppedImage) {
-              try {
-                const cloudinaryUrl = await uploadImageToCloudinary(croppedImage);
-                croppedImage = cloudinaryUrl;
-              } catch (uploadError) {
-                console.warn('Cloudinary upload failed, using data URL:', uploadError);
-                // Continue with data URL as fallback
-              }
-            }
-            
-          } catch (corsError) {
-            console.warn('CORS cropping failed, trying fallback method:', corsError);
-            
-            // Fallback: If CORS fails, just return the original image
-            // In a real app, you'd want to handle this server-side
-            alert('Image cropping failed due to security restrictions. Using original image.');
-            croppedImage = imageSrc;
-          }
-          
-          if (croppedImage) {
-            
-            // Use the same logic as file upload to handle nested fields
-            if (fieldId.includes('.')) {
-              const [mainField, index, subField] = fieldId.split('.');
-              handleNestedContentChange(sectionId, mainField, parseInt(index), subField, croppedImage);
-            } else {
-              handleTextEdit(sectionId, fieldId, croppedImage);
-            }
-            
-            setEditingImage(null);
-            setCrop({ unit: '%', width: 80, height: 80, x: 10, y: 10 });
-            setCompletedCrop(null);
-          } else {
-            console.error('No cropped image was generated');
-          }
-        } else {
-          console.error('Missing required data for crop:', {
-            completedCrop: !!completedCrop,
-            imgRef: !!imgRef.current
-          });
-        }
-      } catch (error) {
-        console.error('Crop process failed:', error);
-        alert('Failed to process image. Please try again.');
-      } finally {
-        setCropLoading(false);
-      }
-    };
-
-    const handleCancelEdit = () => {
-      setEditingImage(null);
-      setCrop({ unit: '%', width: 80, height: 80, x: 10, y: 10 });
-      setCompletedCrop(null);
-      setCropLoading(false);
-    };
-
-    // Show full-screen crop overlay (like image editor)
-    if (editingImage === imageKey && hasImage) {
-      return (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="relative max-w-4xl max-h-screen p-8 flex flex-col items-center">
-            {/* Loading overlay for image */}
-            {!cropImageLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <div className="bg-black bg-opacity-50 rounded-lg p-4 flex flex-col items-center gap-2">
-                  <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <div className="text-white text-sm">Loading image editor...</div>
-                </div>
-              </div>
-            )}
-            
-            <ReactCrop
-              crop={crop}
-              onChange={setCrop}
-              onComplete={setCompletedCrop}
-              minWidth={50}
-              minHeight={50}
-              keepSelection={true}
-              ruleOfThirds={true}
-              className="react-crop-fullscreen"
-            >
-              <img
-                ref={imgRef}
-                src={imageSrc}
-                alt="Crop"
-                className="max-w-full max-h-[70vh] object-contain"
-                style={{ display: 'block' }}
-                crossOrigin="anonymous"
-                onLoad={() => {
-                  setCropImageLoaded(true);
-                  // Set initial crop when image loads to fit the displayed image better
-                  const imgElement = imgRef.current;
-                  if (imgElement) {
-                    // Wait for the image to be fully rendered
-                    setTimeout(() => {
-                      const displayWidth = imgElement.offsetWidth;
-                      const displayHeight = imgElement.offsetHeight;
-                      const naturalWidth = imgElement.naturalWidth;
-                      const naturalHeight = imgElement.naturalHeight;
-                      
-                      // Calculate the crop area as percentage of natural dimensions
-                      let cropWidth, cropHeight, cropX, cropY;
-                      
-                      if (naturalWidth > naturalHeight) {
-                        // Landscape image - make crop square based on height
-                        cropHeight = naturalHeight * 0.8;
-                        cropWidth = cropHeight; // Square crop
-                        cropX = (naturalWidth - cropWidth) / 2;
-                        cropY = naturalHeight * 0.1; // 10% from top
-                      } else {
-                        // Portrait or square image - make crop square based on width
-                        cropWidth = naturalWidth * 0.8;
-                        cropHeight = cropWidth; // Square crop
-                        cropX = naturalWidth * 0.1; // 10% from left
-                        cropY = (naturalHeight - cropHeight) / 2;
-                      }
-                      
-                      setCrop({
-                        unit: 'px',
-                        width: cropWidth,
-                        height: cropHeight,
-                        x: cropX,
-                        y: cropY
-                      });
-                      
-                    }, 100);
-                  }
-                }}
-              />
-            </ReactCrop>
-            
-            {/* Control buttons at bottom */}
-            <div className="flex justify-center gap-6 mt-8">
-              <button
-                onClick={handleCancelEdit}
-                className="px-10 py-5 bg-white text-black text-lg font-bold rounded-xl hover:bg-gray-100 transition-all shadow-2xl border-4 border-white hover:scale-105 cursor-pointer"
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCropComplete}
-                disabled={cropLoading}
-                className={`px-10 py-5 text-white text-lg font-bold rounded-xl transition-all shadow-2xl cursor-pointer flex items-center gap-3 border-4 hover:scale-105 ${
-                  cropLoading 
-                    ? 'bg-blue-500 border-blue-500 cursor-not-allowed' 
-                    : 'bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600'
-                }`}
-                type="button"
-              >
-                {cropLoading && (
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-                {cropLoading ? 'Processing...' : 'Save Crop'}
-              </button>
-            </div>
-          </div>
-          
-          {/* Enhanced crop styling */}
-          <style jsx global>{`
-            .react-crop-fullscreen .ReactCrop__crop-selection {
-              border: 2px solid #ffffff !important;
-              box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6) !important;
-            }
-            .react-crop-fullscreen .ReactCrop__drag-handle {
-              width: 16px !important;
-              height: 16px !important;
-              background-color: #ffffff !important;
-              border: 2px solid #3b82f6 !important;
-              border-radius: 2px !important;
-              cursor: pointer !important;
-            }
-            .react-crop-fullscreen .ReactCrop__rule-of-thirds-vt,
-            .react-crop-fullscreen .ReactCrop__rule-of-thirds-hz {
-              border-color: rgba(255, 255, 255, 0.4) !important;
-            }
-            .react-crop-fullscreen .ReactCrop__crop-selection {
-              cursor: move !important;
-            }
-          `}</style>
-        </div>
-      );
-    }
-
+    // Show full-screen crop editor is now at component level - removed from here
+    
     return (
       <div
         className={`${className} relative overflow-hidden group ${
           isEditing && !hasImage ? 'cursor-pointer hover:opacity-90' : ''
-        }`}
+        } ${!hasImage ? 'flex items-center justify-center' : ''}`}
         onClick={!hasImage && isEditing ? openFileDialog : undefined}
+        style={{
+          backgroundColor: !hasImage ? '#f3f4f6' : 'transparent',
+          border: !hasImage ? '2px dashed #9ca3af' : 'none',
+          minHeight: !hasImage ? '150px' : 'auto'
+        }}
       >
         {isEditing && (
           <input
@@ -770,11 +791,11 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
             <img 
               src={imageSrc}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-all duration-200 group-hover:brightness-75"
               style={{ display: 'block' }}
             />
             {isEditing && (
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 bg-black bg-opacity-30">
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
                 <button 
                   onClick={handleEditImage}
                   className="bg-blue-600 bg-opacity-95 text-white p-2 rounded-full text-xs hover:bg-opacity-100 transition-all shadow-lg hover:scale-105 min-w-[32px] min-h-[32px] flex items-center justify-center"
@@ -806,10 +827,8 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
             )}
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200 border-2 border-dashed border-gray-400" style={{ minHeight: '150px' }}>
-            <div className="text-center text-gray-600 p-4">
-              <span className="text-sm">{isEditing ? placeholder : 'No image'}</span>
-            </div>
+          <div className="text-center text-gray-600 p-4">
+            <span className="text-sm">{isEditing ? placeholder : 'No image'}</span>
           </div>
         )}
         
@@ -1005,32 +1024,219 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
 
   return (
     <div className="w-full bg-white" style={{ fontFamily: styles.fonts.body }}>
+      {/* Global Image Crop Editor */}
+      {editingImage && getEditingImageSrc() && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
+          <div className="relative bg-white rounded-lg shadow-2xl max-w-5xl max-h-[90vh] flex flex-col">
+            {/* Loading overlay for image */}
+            {!cropImageLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center z-10 bg-white bg-opacity-95 rounded-lg">
+                <div className="flex flex-col items-center gap-2">
+                  <svg className="animate-spin h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <div className="text-gray-600 text-sm">Loading image editor...</div>
+                </div>
+              </div>
+            )}
+            
+            {/* Image cropping area */}
+            <div className="p-6 flex justify-center items-center">
+              <ReactCrop
+                crop={crop}
+                onChange={setCrop}
+                onComplete={setCompletedCrop}
+                minWidth={50}
+                minHeight={50}
+                keepSelection={true}
+                ruleOfThirds={true}
+                aspect={undefined} // Allow free-form cropping
+              >
+                <img
+                  ref={imgRef}
+                  src={getEditingImageSrc()}
+                  alt="Crop"
+                  style={{ 
+                    maxWidth: '80vw',
+                    maxHeight: '60vh',
+                    width: 'auto',
+                    height: 'auto'
+                  }}
+                  crossOrigin="anonymous"
+                  onLoad={() => {
+                    setCropImageLoaded(true);
+                    // Keep the percentage-based crop that was set in handleEditImage
+                    // This ensures immediate visibility without recalculation
+                  }}
+              />
+            </ReactCrop>
+            </div>
+            
+            {/* Control buttons */}
+            <div className="flex justify-center gap-4 p-4 bg-gray-50 rounded-b-lg border-t">
+              <button
+                onClick={() => {
+                  cleanupCropEditor();
+                }}
+                className="px-6 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors"
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    setCropLoading(true);
+                    
+                    if (completedCrop && imgRef.current) {
+                      
+                      // Try cropping the image
+                      let croppedImage;
+                      try {
+                        croppedImage = await getCroppedImg(imgRef.current, completedCrop);
+                        
+                        // Upload cropped image to Cloudinary
+                        if (croppedImage) {
+                          try {
+                            const cloudinaryUrl = await cloudinaryApi.uploadImage(croppedImage);
+                            croppedImage = cloudinaryUrl;
+                          } catch (uploadError) {
+                            console.warn('Cloudinary upload failed, using data URL:', uploadError);
+                            // Continue with data URL as fallback
+                          }
+                        }
+                        
+                      } catch (corsError) {
+                        console.warn('CORS cropping failed, trying fallback method:', corsError);
+                        
+                        // Fallback: If CORS fails, just return the original image
+                        // In a real app, you'd want to handle this server-side
+                        toast.warning('Image cropping not available due to security restrictions. Using original image.');
+                        croppedImage = getEditingImageSrc();
+                      }
+                      
+                      if (croppedImage) {
+                        
+                        // Use the same logic as file upload to handle nested fields
+                        const [sectionId, fieldId] = editingImage.split('-');
+                        
+                        if (fieldId.includes('.')) {
+                          const [mainField, index, subField] = fieldId.split('.');
+                          handleNestedContentChange(sectionId, mainField, parseInt(index), subField, croppedImage);
+                        } else {
+                          handleTextEdit(sectionId, fieldId, croppedImage);
+                        }
+                        
+                        cleanupCropEditor();
+                        
+                        // Show success message
+                        toast.success('Image cropped successfully!');
+                      } else {
+                        console.error('No cropped image was generated');
+                        toast.error('Failed to generate cropped image');
+                      }
+                    } else {
+                      console.error('Missing required data for crop:', {
+                        completedCrop: !!completedCrop,
+                        imgRef: !!imgRef.current
+                      });
+                    }
+                  } catch (error) {
+                    console.error('Crop operation failed:', error);
+                    toast.error('Failed to crop image');
+                  } finally {
+                    setCropLoading(false);
+                  }
+                }}
+                disabled={cropLoading}
+                className={`px-8 py-3 text-white text-base font-bold rounded-lg transition-all shadow-xl cursor-pointer flex items-center gap-2 border-2 hover:scale-105 ${
+                  cropLoading 
+                    ? 'bg-blue-400 border-blue-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700'
+                }`}
+                type="button"
+              >
+                {cropLoading && (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {cropLoading ? 'Processing...' : 'Save Crop'}
+              </button>
+            </div>
+          </div>
+          
+          {/* Updated crop styling */}
+          <style jsx global>{`
+            /* Remove conflicting ReactCrop styles and use default behavior */
+            .ReactCrop {
+              position: relative;
+              display: inline-block;
+            }
+            .ReactCrop__crop-selection {
+              border: 2px solid #ffffff !important;
+              box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+            }
+            .ReactCrop__drag-handle {
+              width: 12px !important;
+              height: 12px !important;
+              background-color: #ffffff !important;
+              border: 2px solid #3b82f6 !important;
+              border-radius: 50% !important;
+            }
+            .ReactCrop__rule-of-thirds-vt,
+            .ReactCrop__rule-of-thirds-hz {
+              border-color: rgba(255, 255, 255, 0.7) !important;
+            }
+            .ReactCrop__crop-selection {
+              cursor: move !important;
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section 
         data-section-id="hero"
-        className="min-h-screen flex items-center justify-center relative"
+        className="min-h-screen flex items-center justify-center relative overflow-hidden"
         style={{ backgroundColor: styles.colors.background }}
         onMouseEnter={() => isEditing && setActiveSection('hero')}
         onMouseLeave={() => isEditing && setActiveSection(null)}
       >
+        {/* Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -top-4 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
         {isEditing && activeSection === 'hero' && (
           <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
             Hero Section
           </div>
         )}
         
-        <div className="text-center max-w-4xl mx-auto px-6">
+        <div className="text-center max-w-5xl mx-auto px-6 relative z-10">
           <div className="mb-8">
             {(() => {
               const heroContent = getContent('hero');
               const imageUrl = heroContent.image;
               
-              return renderEditableImage(
-                imageUrl,
-                'hero',
-                'image',
-                'w-32 h-32 rounded-full mx-auto mb-6',
-                'Upload profile picture'
+              return (
+                <div className="relative inline-block mb-8">
+                  {renderEditableImage(
+                    imageUrl,
+                    'hero',
+                    'image',
+                    'w-40 h-40 rounded-full mx-auto ring-4 ring-white shadow-2xl',
+                    'Upload profile picture'
+                  )}
+                  {/* Decorative rings - with pointer-events-none to allow clicks through */}
+                  <div className="absolute -inset-4 rounded-full border-2 border-blue-200 opacity-30 animate-ping pointer-events-none"></div>
+                  <div className="absolute -inset-8 rounded-full border border-purple-200 opacity-20 animate-pulse pointer-events-none"></div>
+                </div>
               );
             })()}
             
@@ -1038,7 +1244,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
               getContent('hero').name,
               'hero',
               'name',
-              `text-5xl font-bold mb-4`,
+              `text-6xl lg:text-7xl font-bold mb-6 text-black`,
               'h1'
             )}
             
@@ -1046,7 +1252,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
               getContent('hero').title,
               'hero',
               'title',
-              `text-2xl mb-6`,
+              `text-2xl lg:text-3xl mb-8 text-gray-600 font-light`,
               'h2'
             )}
             
@@ -1054,9 +1260,14 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
               getContent('hero').description,
               'hero',
               'description',
-              `text-lg max-w-2xl mx-auto leading-relaxed`,
+              `text-xl max-w-3xl mx-auto leading-relaxed text-gray-700 mb-12`,
               'p'
             )}
+            
+            {/* Simple text instead of buttons */}
+            <div className="text-center">
+              <p className="text-lg text-gray-600 font-medium">Scroll to see my work</p>
+            </div>
           </div>
         </div>
       </section>
@@ -1126,67 +1337,150 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
           </div>
         )}
         
-        <div className="max-w-6xl mx-auto px-6">
-          {renderEditableText(
-            getContent('portfolio').heading,
-            'portfolio',
-            'heading',
-            `text-4xl font-bold text-center mb-12`,
-            'h2'
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {getContent('portfolio').projects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-                whileHover={{ y: -5 }}
-              >
-                {renderEditableImage(
-                  project.image,
-                  'portfolio',
-                  `projects.${index}.image`,
-                  'aspect-video',
-                  'Upload project image'
-                )}
-                <div className="p-6">
-                  {renderEditableProjectField(
-                    project.title,
-                    'portfolio',
-                    'projects',
-                    index,
-                    'title',
-                    'text-xl font-semibold mb-2',
-                    'h3'
-                  )}
-                  {renderEditableProjectField(
-                    project.description,
-                    'portfolio',
-                    'projects',
-                    index,
-                    'description',
-                    'text-gray-600 mb-4',
-                    'p'
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="px-3 py-1 text-xs rounded-full"
-                        style={{ 
-                          backgroundColor: styles.colors.surface,
-                          color: styles.colors.text
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+          <div className="max-w-7xl mx-auto px-6">
+            {renderEditableText(
+              getContent('portfolio').heading,
+              'portfolio',
+              'heading',
+              `text-5xl font-bold text-center mb-16`,
+              'h2'
+            )}
+            
+            {/* Enhanced Visual Portfolio Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+              {getContent('portfolio').projects.map((project, index) => {
+                // Create different sizes for visual variety
+                const isLarge = index === 0 || (index + 1) % 4 === 0;
+                const isMedium = (index + 1) % 3 === 0;
+                
+                return (
+                  <div
+                    key={project.id}
+                    className={`bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden ${
+                      isLarge ? 'md:col-span-2 md:row-span-2' : 
+                      isMedium ? 'md:row-span-2' : ''
+                    }`}
+                  >
+                    {/* Large Image Container */}
+                    <div className={`relative overflow-hidden ${
+                      isLarge ? 'aspect-[4/3]' : 
+                      isMedium ? 'aspect-[3/4]' : 'aspect-[4/3]'
+                    }`}>
+                      {renderEditableImage(
+                        project.image,
+                        'portfolio',
+                        `projects.${index}.image`,
+                        'w-full h-full object-cover',
+                        'Upload project image'
+                      )}
+                    </div>
+                    
+                    {/* Content Section */}
+                    <div className="p-6">
+                      {renderEditableProjectField(
+                        project.title,
+                        'portfolio',
+                        'projects',
+                        index,
+                        'title',
+                        `text-2xl font-bold mb-2 text-gray-900 ${isLarge ? 'lg:text-3xl' : ''}`,
+                        'h3'
+                      )}
+                      {renderEditableProjectField(
+                        project.description,
+                        'portfolio',
+                        'projects',
+                        index,
+                        'description',
+                        'text-gray-600 mb-4',
+                        'p'
+                      )}
+                      
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {project.tags.map((tag, tagIndex) => (
+                          <span
+                            key={tagIndex}
+                            className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700"
+                          >
+                            {renderEditableProjectField(
+                              tag,
+                              'portfolio',
+                              'projects',
+                              index,
+                              `tags.${tagIndex}`,
+                              'inline-block',
+                              'span'
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                );
+              })}
+            </div>
+            
+            {/* Portfolio Statistics */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+                {renderEditableText(
+                  getContent('portfolio').projects.length,
+                  'portfolio',
+                  'projectsCount',
+                  'text-3xl font-bold text-gray-900'
+                )}
+                {renderEditableText(
+                  'Projects',
+                  'portfolio',
+                  'projectsLabel',
+                  'text-sm text-gray-600 mt-1'
+                )}
+              </div>
+              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+                {renderEditableText(
+                  getContent('portfolio').projects.reduce((total, project) => total + (project.tags?.length || 0), 0),
+                  'portfolio',
+                  'technologiesCount',
+                  'text-3xl font-bold text-gray-900'
+                )}
+                {renderEditableText(
+                  'Technologies',
+                  'portfolio',
+                  'technologiesLabel',
+                  'text-sm text-gray-600 mt-1'
+                )}
+              </div>
+              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+                {renderEditableText(
+                  getContent('portfolio').successRate || '100%',
+                  'portfolio',
+                  'successRate',
+                  'text-3xl font-bold text-gray-900'
+                )}
+                {renderEditableText(
+                  'Success Rate',
+                  'portfolio',
+                  'successRateLabel',
+                  'text-sm text-gray-600 mt-1'
+                )}
+              </div>
+              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+                {renderEditableText(
+                  getContent('portfolio').support || '24/7',
+                  'portfolio',
+                  'support',
+                  'text-3xl font-bold text-gray-900'
+                )}
+                {renderEditableText(
+                  'Support',
+                  'portfolio',
+                  'supportLabel',
+                  'text-sm text-gray-600 mt-1'
+                )}
+              </div>
+            </div>
           </div>
-        </div>
       </section>
 
       {/* Contact Section */}
@@ -1361,6 +1655,13 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
           </section>
         ))
       }
+
+      {/* PDF Export Modal */}
+      <PDFExport
+        portfolioData={portfolioData}
+        isVisible={showPDFExport}
+        onClose={onClosePDFExport}
+      />
 
     </div>
   );

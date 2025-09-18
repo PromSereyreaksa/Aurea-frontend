@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import useAuthStore from "./stores/authStore";
 import ProtectedRoute from "./components/PortfolioBuilder/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -13,12 +12,6 @@ import DashboardPage from "./pages/DashboardPage";
 import PortfolioBuilderPage from "./pages/PortfolioBuilderPage";
 
 function App() {
-  const { checkAuth } = useAuthStore();
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
   return (
     <Router>
       <div className="min-h-screen bg-white text-black font-sans">

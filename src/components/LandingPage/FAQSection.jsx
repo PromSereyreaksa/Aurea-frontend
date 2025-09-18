@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
-    question: "What is AUREA and how can it help my design business?",
+    question: "What is AUREA and how can it help my design career?",
     answer: "AUREA is a comprehensive toolkit designed specifically for modern designers. It helps you showcase your work through professional portfolio builders, win more clients with proven pitch templates, and price your projects confidently with our smart calculator. Whether you're a freelancer or part of a design team, AUREA streamlines your workflow and elevates your professional practice."
   },
   {
     question: "How does the portfolio builder work?",
-    answer: "Our portfolio builder features an intuitive drag-and-drop interface with professionally designed templates. You can choose from minimalist, bold, or classic layouts optimized for different design disciplines. Simply upload your projects, add descriptions, organize work into collections, and publish. Built-in SEO optimization ensures your portfolio gets discovered by potential clients."
+    answer: "Our portfolio builder features an intuitive editing interface with professionally designed templates. You can choose from minimalist, bold, or classic layouts optimized for different design disciplines. Simply upload your projects, add descriptions, organize work into collections, and publish. Built-in SEO optimization ensures your portfolio gets discovered by potential clients."
   },
   {
     question: "What makes the pitch templates effective?",
@@ -22,10 +22,6 @@ const faqs = [
     question: "Is there a free plan available?",
     answer: "Yes! Our Starter plan is completely free and includes 3 portfolio projects, basic pitch templates, simple pricing calculator, and community support. It's perfect for getting started and exploring AUREA's features. You can upgrade to Pro ($19/month) or Team ($49/month) plans as your needs grow."
   },
-  {
-    question: "Can I collaborate with my team?",
-    answer: "Absolutely! Our Team plan ($49/month) includes everything in Pro plus team collaboration features, shared asset library, team analytics, admin controls, and white-label options. Multiple team members can work on projects together, share resources, and maintain consistent branding across all client work."
-  }
 ];
 
 const FAQSection = () => {

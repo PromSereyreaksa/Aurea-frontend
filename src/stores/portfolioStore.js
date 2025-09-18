@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import api from '../lib/api';
+import { portfolioApi } from '../lib/portfolioApi';
+import api from '../lib/baseApi';
 import toast from 'react-hot-toast';
 
 const usePortfolioStore = create((set, get) => ({
@@ -15,8 +16,7 @@ const usePortfolioStore = create((set, get) => ({
     try {
       set({ isCreating: true });
       
-      const response = await api.post('/api/portfolios', portfolioData);
-      const newPortfolio = response.data.data.portfolio;
+      const newPortfolio = await portfolioApi.create(portfolioData);
       
       set((state) => ({
         portfolios: [newPortfolio, ...state.portfolios],
@@ -31,7 +31,7 @@ const usePortfolioStore = create((set, get) => ({
       set({ isCreating: false });
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to create portfolio' 
+        error: error.message || 'Failed to create portfolio' 
       };
     }
   },
@@ -113,8 +113,7 @@ const usePortfolioStore = create((set, get) => ({
       
       set({ isUpdating: true });
       
-      const response = await api.put(`/api/portfolios/${id}`, updates);
-      const updatedPortfolio = response.data.data.portfolio;
+      const updatedPortfolio = await portfolioApi.update(id, updates);
       
       console.log('=== PORTFOLIO STORE UPDATE RESPONSE ===');
       console.log('Updated portfolio from server:', updatedPortfolio);

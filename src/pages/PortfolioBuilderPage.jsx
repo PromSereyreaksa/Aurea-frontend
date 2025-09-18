@@ -19,6 +19,9 @@ const PortfolioBuilderPage = () => {
   const [portfolioData, setPortfolioData] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
   const [showDesignTools, setShowDesignTools] = useState(false);
+  const [isDesignToolsCollapsed, setIsDesignToolsCollapsed] = useState(false);
+  const [showPDFExport, setShowPDFExport] = useState(false);
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
@@ -26,8 +29,8 @@ const PortfolioBuilderPage = () => {
   const [isUserCurrentlyEditing, setIsUserCurrentlyEditing] = useState(false); // Track if user is actively editing
 
   // Default image URLs for fallback
-  const DEFAULT_HERO_IMAGE = 'https://via.placeholder.com/400x300?text=Default+Image';
-  const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.com/400x300?text=Default+Project';
+  const DEFAULT_HERO_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Image';
+  const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Project';
 
   // Local Storage key for auto-save
   const getLocalStorageKey = () => `portfolio-draft-${id || 'new'}`;
@@ -155,10 +158,10 @@ const PortfolioBuilderPage = () => {
 
     const updatedContent = { ...portfolioData.content };
 
-    // Ensure hero image
+    // Ensure hero image - don't add default placeholder, let it be empty for proper placeholder rendering
     updatedContent.hero = {
       ...updatedContent.hero,
-      image: updatedContent.hero?.image || DEFAULT_HERO_IMAGE,
+      image: updatedContent.hero?.image || '', // Use empty string instead of default placeholder
     };
 
     // Ensure project images
@@ -253,6 +256,18 @@ const PortfolioBuilderPage = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [autoSaveStatus, id]);
 
+  // Close maintenance menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMaintenancePopup && !event.target.closest('.maintenance-popup')) {
+        setShowMaintenancePopup(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMaintenancePopup]);
+
   const handleTemplateSelect = (template) => {
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
@@ -292,9 +307,15 @@ const PortfolioBuilderPage = () => {
         }));
         toast.success(`Deleted "${value.sectionId}" section successfully!`);
         return;
+      } else if (fieldId === 'reorder') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        return;
       }
     }
-
+    
     // Check if this is an image field or contains image data
     const isImageField = fieldId === 'image' || fieldId.includes('image') || 
                         (typeof value === 'string' && value.startsWith('data:image/'));
@@ -516,42 +537,37 @@ const PortfolioBuilderPage = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b relative z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
+          <div className="flex justify-between items-center h-16 min-w-0">
+            <div className="flex items-center space-x-2 md:space-x-4 min-w-0 flex-shrink">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap text-sm md:text-base"
               >
                 ← Back to Dashboard
               </button>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-semibold text-gray-900">
+              <div className="flex items-center space-x-1 md:space-x-2 min-w-0">
+                <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
                   {step === 'select'
                     ? 'Choose Template'
                     : step === 'customize'
                     ? 'Customize Portfolio'
                     : 'Preview Portfolio'}
                 </h1>
-                {selectedTemplate && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-                    {selectedTemplate.name}
-                  </span>
-                )}
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
               {step === 'customize' && (
                 <>
                   <button
                     onClick={handleBackToTemplates}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 md:px-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
                   >
                     Change Template
                   </button>
                   <button
                     onClick={() => setShowDesignTools(!showDesignTools)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-3 py-2 md:px-4 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap ${
                       showDesignTools
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -561,7 +577,7 @@ const PortfolioBuilderPage = () => {
                   </button>
                   <button
                     onClick={handlePreview}
-                    className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
+                    className="px-3 py-2 md:px-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
                   >
                     Preview
                   </button>
@@ -571,7 +587,7 @@ const PortfolioBuilderPage = () => {
               {step === 'preview' && (
                 <button
                   onClick={handleBackToEdit}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="px-3 py-2 md:px-4 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
                 >
                   Back to Edit
                 </button>
@@ -628,15 +644,26 @@ const PortfolioBuilderPage = () => {
                     )}
                   </div>
 
+                  {/* Export PDF Button */}
+                  <button
+                    onClick={() => setShowMaintenancePopup(true)}
+                    className="flex items-center px-2 py-2 md:px-3 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base whitespace-nowrap"
+                    title="Export PDF"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </button>
+
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 md:px-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
                   >
                     Save Draft
                   </button>
                   <button
                     onClick={handlePublish}
-                    className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                    className="px-3 py-2 md:px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
                   >
                     Publish
                   </button>
@@ -749,7 +776,13 @@ const PortfolioBuilderPage = () => {
                 </div>
               )}
 
-              <div className={`${showDesignTools ? 'mr-[28rem]' : ''} transition-all duration-300`}>
+              <div className={`${
+                showDesignTools 
+                  ? isDesignToolsCollapsed 
+                    ? 'mr-16' 
+                    : 'mr-[28rem]' 
+                  : ''
+              } transition-all duration-300`}>
                 <TemplatePreview
                   key={`${selectedTemplate?.id}-${portfolioData?._version || 0}`}
                   template={selectedTemplate}
@@ -763,6 +796,8 @@ const PortfolioBuilderPage = () => {
                       autoSaveToLocalStorage(portfolioData);
                     }
                   }}
+                  showPDFExport={showPDFExport}
+                  onClosePDFExport={() => setShowPDFExport(false)}
                 />
               </div>
 
@@ -773,6 +808,7 @@ const PortfolioBuilderPage = () => {
                     portfolioData={portfolioData}
                     onStyleChange={handleStyleChange}
                     onContentChange={contentChangeHandler}
+                    onCollapseChange={setIsDesignToolsCollapsed}
                   />
                 )}
               </AnimatePresence>
@@ -797,6 +833,86 @@ const PortfolioBuilderPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Maintenance Popup Modal */}
+        {showMaintenancePopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="maintenance-popup bg-white rounded-lg shadow-xl max-w-md w-full">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Maintenance Notice</h3>
+                      <p className="text-sm text-gray-500">Beta Feature</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowMaintenancePopup(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-lg">📄</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">PDF Export</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        This feature is currently in beta testing. You may experience some limitations or unexpected behavior.
+                      </p>
+                      <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                        <li>• Export may not include all styling</li>
+                        <li>• Image quality may vary</li>
+                        <li>• Some sections might not display correctly</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-gray-500">
+                    We're working to improve this feature
+                  </p>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowMaintenancePopup(false)}
+                      className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMaintenancePopup(false);
+                        setShowPDFExport(true);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Continue Anyway
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
