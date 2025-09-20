@@ -10,15 +10,54 @@ const SectionEditor = ({ section, onUpdate }) => {
 
   const [content, setContent] = useState(section.content || {});
 
+  // Track whether the user is actively editing in this editor to avoid overwriting local state
+  const isActivelyEditingRef = useRef(false);
+  const debounceTimeoutRef = useRef(null);
+
   useEffect(() => {
-    console.log('SectionEditor received section:', section);
-    setContent(section.content || {});
+    console.log('SectionEditor mounted for type:', section.type);
+    return () => {
+      console.log('SectionEditor unmounted for type:', section.type);
+      // cleanup any pending debounce
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('SectionEditor received section prop change:', section.type);
+    // Only overwrite local content when user is not actively editing
+    if (!isActivelyEditingRef.current) {
+      setContent(section.content || {});
+    } else {
+      console.log('SectionEditor: skipping setContent due to active editing');
+    }
   }, [section]);
 
   const handleContentChange = (field, value) => {
+    // Mark that the user is actively editing so incoming prop updates don't clobber local state
+    isActivelyEditingRef.current = true;
+
     const newContent = { ...content, [field]: value };
     setContent(newContent);
-    onUpdate(newContent);
+
+    // Debounce parent updates to avoid fast parent re-renders that can reset this component.
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      debounceTimeoutRef.current = null;
+      // Send update to parent
+      try {
+        onUpdate(newContent);
+      } finally {
+        // allow syncing from parent again after a short pause
+        isActivelyEditingRef.current = false;
+      }
+    }, 350); // 350ms debounce
   };
 
   const handleNestedChange = (parent, field, value) => {
@@ -245,6 +284,26 @@ const SectionEditor = ({ section, onUpdate }) => {
 
   const ContactEditor = () => (
     <div className="p-4 space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
+        <input
+          type="text"
+          value={content.heading || ''}
+          onChange={(e) => handleContentChange('heading', e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-3 py-2"
+          placeholder="Let's Work Together"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea
+          value={content.description || ''}
+          onChange={(e) => handleContentChange('description', e.target.value)}
+          rows={3}
+          className="w-full border border-gray-300 rounded-md px-3 py-2"
+          placeholder="I'm always interested in new projects and opportunities."
+        />
+      </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
         <input

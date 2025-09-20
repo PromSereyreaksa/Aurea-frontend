@@ -147,6 +147,10 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
   const [isEditingText, setIsEditingText] = useState(null);
   const [isEditingImage, setIsEditingImage] = useState(null);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [isEditingSocialLinks, setIsEditingSocialLinks] = useState(false);
+  const socialLinksBlurTimeoutRef = useRef(null); // Use ref instead of state for timeout
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const isEditingSocialLinksRef = useRef(false); // Track if we're actively editing social links
   const [skillsInput, setSkillsInput] = useState('');
   const [uploadingImages, setUploadingImages] = useState(new Set());
   const [imageErrors, setImageErrors] = useState(new Set());
@@ -187,8 +191,12 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
+      // Clear social links blur timeout
+      if (socialLinksBlurTimeoutRef.current) {
+        clearTimeout(socialLinksBlurTimeoutRef.current);
+      }
     };
-  }, [cleanupCropEditor]);
+  }, [cleanupCropEditor]); // Remove socialLinksBlurTimeout from dependencies
 
   // Handle keyboard events for crop editor
   useEffect(() => {
@@ -216,80 +224,32 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
   // Notify parent when editing state changes
   useEffect(() => {
     if (onEditingStateChange) {
-      const isCurrentlyEditing = Boolean(isEditingText || isEditingSkills || isEditingImage);
+      const isCurrentlyEditing = Boolean(isEditingText || isEditingSkills || isEditingImage || isEditingSocialLinks);
       onEditingStateChange(isCurrentlyEditing);
     }
-  }, [isEditingText, isEditingSkills, isEditingImage, onEditingStateChange]);
+  }, [isEditingText, isEditingSkills, isEditingImage, isEditingSocialLinks, onEditingStateChange]);
 
   // Sync local content with portfolio data when not editing - COMPLETELY BLOCK DURING EDITING
   useEffect(() => {
+    console.log('🔍 DEBUG: Sync useEffect running', {
+      isActivelyEditing: isActivelyEditingRef.current,
+      isEditingSocialLinks: isEditingSocialLinksRef.current,
+      isEditingText,
+      isEditingSkills,
+      isEditingImage,
+      hasPortfolioData: !!portfolioData?.content
+    });
+
     // NEVER sync from external data when actively editing - this prevents the editing from closing
-    if (!isActivelyEditingRef.current && !isEditingText && !isEditingSkills && !isEditingImage && portfolioData?.content) {
+    if (!isActivelyEditingRef.current && !isEditingSocialLinksRef.current && !isEditingText && !isEditingSkills && !isEditingImage && portfolioData?.content) {
+      console.log('🔍 DEBUG: Syncing localContent with portfolioData');
       setLocalContent(portfolioData.content);
+    } else {
+      console.log('🔍 DEBUG: Skipping sync - actively editing or no data');
     }
-  }, [portfolioData?.content, isEditingText, isEditingSkills, isEditingImage]);
+  }, [portfolioData?.content]); // Remove editing state dependencies to prevent unnecessary re-runs
 
-  // Handle clicking outside to stop editing
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isEditingText) {
-        // Check if the click is outside any editing input/textarea
-        const isClickingOnInput = event.target.closest('input, textarea');
-        const isClickingOnEditingArea = event.target.closest('[data-editing-container]');
-        
-        if (!isClickingOnInput && !isClickingOnEditingArea) {
-          // Sync current content before closing
-          const [sectionId, fieldId] = isEditingText.split('-');
-          
-          // Get the current value from local content (where live editing happens)
-          const currentValue = localContent[sectionId]?.[fieldId];
-          
-          // Clear any pending debounced sync since we're doing immediate sync
-          if (debounceTimeoutRef.current) {
-            clearTimeout(debounceTimeoutRef.current);
-            debounceTimeoutRef.current = null;
-          }
-          
-          // Force immediate sync to parent when closing
-          if (onContentChange && currentValue !== undefined) {
-            if (typeof onContentChange === 'function') {
-              onContentChange(sectionId, fieldId, currentValue);
-            } else if (typeof onContentChange.onChange === 'function') {
-              onContentChange.onChange(sectionId, fieldId, currentValue);
-            }
-          }
-          
-          setIsEditingText(null);
-          editingStateRef.current = null;
-          isActivelyEditingRef.current = false;
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isEditingText, onContentChange]);
-
-  // Debounced function to sync with parent - ONLY when not editing
-  const debouncedSync = useCallback((sectionId, fieldId, value) => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    
-    debounceTimeoutRef.current = setTimeout(() => {
-      // Only sync with parent if not currently editing any text
-      if (!isEditingText && onContentChange) {
-        if (typeof onContentChange === 'function') {
-          onContentChange(sectionId, fieldId, value);
-        } else if (typeof onContentChange.onChange === 'function') {
-          onContentChange.onChange(sectionId, fieldId, value);
-        }
-      }
-    }, 300); // Debounce for 300ms
-  }, [onContentChange, isEditingText]);
-
+  // Simplified: No complex click-outside detection needed with direct sync pattern
   // Handle nested content change for projects
   const handleNestedContentChange = (sectionId, fieldId, index, subFieldId, value) => {
     const currentContent = getContent(sectionId);
@@ -319,27 +279,55 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
 
   // Handle text editing with local state and debounced sync
   const handleTextEdit = useCallback((sectionId, fieldId, value) => {
-    
+    console.log('🔍 DEBUG: handleTextEdit called', { sectionId, fieldId, value, length: value.length });
+
     // Update local content immediately for responsive UI
-    setLocalContent(prev => ({
-      ...prev,
-      [sectionId]: {
-        ...prev[sectionId],
-        [fieldId]: value,
-      },
-    }));
-    
-    // Debounce the sync to parent component
-    debouncedSync(sectionId, fieldId, value);
-  }, [debouncedSync]);
+    setLocalContent(prev => {
+      const newContent = {
+        ...prev,
+        [sectionId]: {
+          ...prev[sectionId],
+          [fieldId]: value,
+        },
+      };
+      console.log('🔍 DEBUG: Updated localContent', {
+        sectionId,
+        fieldId,
+        oldValue: prev[sectionId]?.[fieldId],
+        newValue: value,
+        localContentKeys: Object.keys(newContent)
+      });
+      return newContent;
+    });
+
+    // Immediately sync to parent (no debouncing)
+    if (onContentChange) {
+      if (typeof onContentChange === 'function') {
+        onContentChange(sectionId, fieldId, value);
+      } else if (typeof onContentChange.onChange === 'function') {
+        onContentChange.onChange(sectionId, fieldId, value);
+      }
+    }
+  }, [onContentChange]);
 
   // Handle entering edit mode for text
   const handleTextClick = (sectionId, fieldId) => {
+    console.log('🔍 DEBUG: handleTextClick called', { sectionId, fieldId, isEditing });
     if (isEditing) {
       const editKey = `${sectionId}-${fieldId}`;
+      console.log('🔍 DEBUG: Starting text edit', { editKey, currentValue: localContent[sectionId]?.[fieldId] });
       setIsEditingText(editKey);
       editingStateRef.current = editKey;
       isActivelyEditingRef.current = true; // Mark as actively editing
+
+      // Prevent any immediate click-outside detection
+      setTimeout(() => {
+        // Double-check we're still in editing mode after the timeout
+        if (isEditingText === editKey) {
+          isActivelyEditingRef.current = true;
+          console.log('🔍 DEBUG: Confirmed editing mode active', { editKey });
+        }
+      }, 50);
     }
   };
 
@@ -357,53 +345,20 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
 
   // Handle key press for exiting edit mode - Escape and Enter keys close editing
   const handleKeyPress = (e, sectionId, fieldId) => {
+    console.log('🔍 DEBUG: handleKeyPress', { key: e.key, sectionId, fieldId, shiftKey: e.shiftKey });
+
     if (e.key === 'Escape') {
-      // Get the current value from local content (where live editing happens)
-      const currentValue = localContent[sectionId]?.[fieldId];
-      
-      // Clear any pending debounced sync since we're doing immediate sync
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-        debounceTimeoutRef.current = null;
-      }
-      
-      // Force immediate sync to parent when closing
-      if (onContentChange && currentValue !== undefined) {
-        if (typeof onContentChange === 'function') {
-          onContentChange(sectionId, fieldId, currentValue);
-        } else if (typeof onContentChange.onChange === 'function') {
-          onContentChange.onChange(sectionId, fieldId, currentValue);
-        }
-      }
-      
+      console.log('🔍 DEBUG: Escape pressed - closing text editing');
       setIsEditingText(null);
       editingStateRef.current = null;
       isActivelyEditingRef.current = false; // Clear editing flag
     } else if (e.key === 'Enter') {
       // For single-line inputs (not textarea), Enter should save and exit
       const isTextarea = e.target.tagName.toLowerCase() === 'textarea';
-      
+
       if (!isTextarea && !e.shiftKey) {
+        console.log('🔍 DEBUG: Enter pressed on input - closing text editing');
         e.preventDefault(); // Prevent form submission or other default behavior
-        
-        // Get the current value from local content
-        const currentValue = localContent[sectionId]?.[fieldId];
-        
-        // Clear any pending debounced sync since we're doing immediate sync
-        if (debounceTimeoutRef.current) {
-          clearTimeout(debounceTimeoutRef.current);
-          debounceTimeoutRef.current = null;
-        }
-        
-        // Force immediate sync to parent when closing
-        if (onContentChange && currentValue !== undefined) {
-          if (typeof onContentChange === 'function') {
-            onContentChange(sectionId, fieldId, currentValue);
-          } else if (typeof onContentChange.onChange === 'function') {
-            onContentChange.onChange(sectionId, fieldId, currentValue);
-          }
-        }
-        
         setIsEditingText(null);
         editingStateRef.current = null;
         isActivelyEditingRef.current = false; // Clear editing flag
@@ -416,8 +371,21 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
   const renderEditableText = (content, sectionId, fieldId, className = '', tag = 'div') => {
     const isCurrentlyEditing = isEditingText === `${sectionId}-${fieldId}`;
     const Component = tag;
-    const currentValue = content || '';
+    // Simple value source - use localContent if available, otherwise use content
+    const currentValue = localContent[sectionId]?.[fieldId] !== undefined
+      ? String(localContent[sectionId][fieldId])
+      : (content !== undefined && content !== null ? String(content) : '');
     const refKey = `${sectionId}-${fieldId}`;
+
+    console.log('🔍 DEBUG: renderEditableText', {
+      sectionId,
+      fieldId,
+      isCurrentlyEditing,
+      content,
+      localContentValue: localContent[sectionId]?.[fieldId],
+      currentValue,
+      isEditing
+    });
 
     if (isEditing && isCurrentlyEditing) {
       const isTitle = fieldId.includes('title') || fieldId.includes('name') || fieldId === 'heading';
@@ -496,6 +464,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
         className={`${className} ${isEditing ? 'cursor-text hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors relative group' : ''}`}
         onClick={() => handleTextClick(sectionId, fieldId)}
         title={isEditing ? 'Click to edit' : ''}
+        data-editable-text={`${sectionId}-${fieldId}`}
       >
         {currentValue || (isEditing ? 'Click to edit...' : '')}
         {isEditing && (
@@ -1517,17 +1486,200 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {(getContent('contact').social_links || []).map((link, index) => (
-              <a
+              <div
                 key={index}
-                href={link.url}
-                className="block p-6 bg-white rounded-lg hover:shadow-lg transition-shadow"
-                target="_blank"
-                rel="noopener noreferrer"
+                className={`block p-6 bg-white rounded-lg transition-shadow cursor-pointer ${
+                  isEditing ? 'hover:shadow-lg border-2 border-dashed border-gray-200 hover:border-blue-300' : 'hover:shadow-lg'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Clear any pending blur timeout
+                  if (socialLinksBlurTimeoutRef.current) {
+                    clearTimeout(socialLinksBlurTimeoutRef.current);
+                    socialLinksBlurTimeoutRef.current = null;
+                  }
+                  if (isEditing && activeSection !== 'contact') {
+                    setActiveSection('contact');
+                  }
+                }}
               >
-                <div className="text-2xl font-semibold capitalize">{link.platform}</div>
-                <div className="text-gray-600 mt-2">Connect with me</div>
-              </a>
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                      <input
+                        type="text"
+                        value={link.platform}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          // Ensure we're in editing mode
+                          if (!isEditingSocialLinks) {
+                            setIsEditingSocialLinks(true);
+                          }
+                          const newLinks = [...(getContent('contact').social_links || [])];
+                          newLinks[index] = { ...newLinks[index], platform: e.target.value };
+                          onContentChange('contact', 'social_links', newLinks);
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditingSocialLinks(true);
+                        }}
+                        onFocus={() => {
+                          // Clear any pending blur timeout
+                          if (socialLinksBlurTimeoutRef.current) {
+                            clearTimeout(socialLinksBlurTimeoutRef.current);
+                            socialLinksBlurTimeoutRef.current = null;
+                          }
+                          isEditingSocialLinksRef.current = true;
+                          setIsEditingSocialLinks(true);
+                        }}
+                        onBlur={() => {
+                          isEditingSocialLinksRef.current = false;
+                          // Delay setting editing to false to allow focus to move to other inputs
+                          const timeout = setTimeout(() => {
+                            // Only set to false if we're still not actively editing
+                            if (!isEditingSocialLinksRef.current) {
+                              setIsEditingSocialLinks(false);
+                            }
+                            socialLinksBlurTimeoutRef.current = null;
+                          }, 100);
+                          socialLinksBlurTimeoutRef.current = timeout;
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="e.g., LinkedIn, Twitter, GitHub"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          // Ensure we're in editing mode
+                          if (!isEditingSocialLinks) {
+                            setIsEditingSocialLinks(true);
+                          }
+                          const newLinks = [...(getContent('contact').social_links || [])];
+                          newLinks[index] = { ...newLinks[index], url: e.target.value };
+                          onContentChange('contact', 'social_links', newLinks);
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditingSocialLinks(true);
+                        }}
+                        onFocus={() => {
+                          // Clear any pending blur timeout
+                          if (socialLinksBlurTimeoutRef.current) {
+                            clearTimeout(socialLinksBlurTimeoutRef.current);
+                            socialLinksBlurTimeoutRef.current = null;
+                          }
+                          isEditingSocialLinksRef.current = true;
+                          setIsEditingSocialLinks(true);
+                        }}
+                        onBlur={() => {
+                          isEditingSocialLinksRef.current = false;
+                          // Delay setting editing to false to allow focus to move to other inputs
+                          const timeout = setTimeout(() => {
+                            // Only set to false if we're still not actively editing
+                            if (!isEditingSocialLinksRef.current) {
+                              setIsEditingSocialLinks(false);
+                            }
+                            socialLinksBlurTimeoutRef.current = null;
+                          }, 100);
+                          socialLinksBlurTimeoutRef.current = timeout;
+                        }}
+                        onPaste={(e) => {
+                          e.stopPropagation();
+                          setIsEditingSocialLinks(true);
+                          setTimeout(() => {
+                            const url = e.target.value.trim();
+                            if (url) {
+                              // Auto-detect platform from URL
+                              let platform = link.platform; // Keep existing if no match
+                              const urlLower = url.toLowerCase();
+                              
+                              if (urlLower.includes('linkedin.com')) platform = 'LinkedIn';
+                              else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) platform = 'Twitter/X';
+                              else if (urlLower.includes('instagram.com')) platform = 'Instagram';
+                              else if (urlLower.includes('facebook.com')) platform = 'Facebook';
+                              else if (urlLower.includes('github.com')) platform = 'GitHub';
+                              else if (urlLower.includes('dribbble.com')) platform = 'Dribbble';
+                              else if (urlLower.includes('behance.net')) platform = 'Behance';
+                              else if (urlLower.includes('youtube.com')) platform = 'YouTube';
+                              else if (urlLower.includes('tiktok.com')) platform = 'TikTok';
+                              else if (urlLower.includes('pinterest.com')) platform = 'Pinterest';
+                              else if (urlLower.includes('discord.com')) platform = 'Discord';
+                              else if (urlLower.includes('telegram.me') || urlLower.includes('t.me')) platform = 'Telegram';
+                              else if (urlLower.includes('snapchat.com')) platform = 'Snapchat';
+                              else if (urlLower.includes('reddit.com')) platform = 'Reddit';
+                              else if (urlLower.includes('medium.com')) platform = 'Medium';
+                              else if (urlLower.includes('twitch.tv')) platform = 'Twitch';
+                              
+                              // Update both platform and URL
+                              const newLinks = [...(getContent('contact').social_links || [])];
+                              newLinks[index] = { platform, url };
+                              onContentChange('contact', 'social_links', newLinks);
+                            }
+                          }, 10);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newLinks = (getContent('contact').social_links || []).filter((_, i) => i !== index);
+                        onContentChange('contact', 'social_links', newLinks);
+                      }}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <a
+                    href={link.url}
+                    className="block"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="text-2xl font-semibold capitalize">{link.platform}</div>
+                    <div className="text-gray-600 mt-2">Connect with me</div>
+                  </a>
+                )}
+              </div>
             ))}
+            
+            {/* Add New Social Link Button */}
+            {isEditing && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Clear any pending blur timeout
+                  if (socialLinksBlurTimeoutRef.current) {
+                    clearTimeout(socialLinksBlurTimeoutRef.current);
+                    socialLinksBlurTimeoutRef.current = null;
+                  }
+                  isEditingSocialLinksRef.current = true;
+                  setIsEditingSocialLinks(true);
+                  const newLinks = [...(getContent('contact').social_links || []), { platform: 'New Platform', url: 'https://' }];
+                  onContentChange('contact', 'social_links', newLinks);
+                  // Reset editing state after a short delay
+                  setTimeout(() => {
+                    isEditingSocialLinksRef.current = false;
+                    setIsEditingSocialLinks(false);
+                  }, 100);
+                }}
+                className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors"
+              >
+                <div className="text-center text-gray-500">
+                  <div className="text-3xl mb-2">+</div>
+                  <div className="text-sm font-medium">Add Social Link</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

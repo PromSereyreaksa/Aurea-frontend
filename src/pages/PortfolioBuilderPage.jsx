@@ -345,7 +345,7 @@ const PortfolioBuilderPage = () => {
       const updated = ensureValidImageUrls({
         ...prev,
         content: updatedContent,
-        _version: (prev._version || 0) + 1,
+        // Do not bump _version for every keystroke - only change _version on explicit save
       });
       
       // Don't auto-save during active editing - only trigger auto-save when user stops editing
@@ -784,7 +784,7 @@ const PortfolioBuilderPage = () => {
                   : ''
               } transition-all duration-300`}>
                 <TemplatePreview
-                  key={`${selectedTemplate?.id}-${portfolioData?._version || 0}`}
+                  key={`${selectedTemplate?.id}`}
                   template={selectedTemplate}
                   portfolioData={portfolioData} // Pass portfolioData with ensured valid image URLs
                   isEditing={isEditing}
