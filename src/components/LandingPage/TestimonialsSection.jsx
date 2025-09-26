@@ -39,7 +39,7 @@ const TestimonialsSection = () => (
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+        <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
           Loved by designers
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -63,7 +63,7 @@ const TestimonialsSection = () => (
               className="mb-6"
               whileHover={{ scale: 1.02 }}
             >
-              <p className="text-lg text-black leading-relaxed italic group-hover:text-gray-700 transition-colors">
+              <p className="text-lg text-[#1a1a1a] leading-relaxed italic group-hover:text-gray-700 transition-colors">
                 "{testimonial.quote}"
               </p>
             </motion.div>
@@ -74,12 +74,12 @@ const TestimonialsSection = () => (
                   rotate: 5,
                   transition: { duration: 0.3 }
                 }}
-                className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold mr-4 group-hover:bg-gray-800 transition-colors"
+                className="w-12 h-12 bg-[#fb8500] text-white flex items-center justify-center font-bold mr-4 group-hover:bg-[#fb8500]/90 transition-colors"
               >
                 {testimonial.avatar}
               </motion.div>
               <div>
-                <h4 className="font-bold text-black group-hover:text-gray-700 transition-colors">{testimonial.name}</h4>
+                <h4 className="font-bold text-[#1a1a1a] group-hover:text-gray-700 transition-colors">{testimonial.name}</h4>
                 <p className="text-gray-600 text-sm">{testimonial.role} at {testimonial.company}</p>
               </div>
             </div>

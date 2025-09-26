@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import usePortfolioStore from '../stores/portfolioStore';
 import { getTemplate, createPortfolioFromTemplate } from '../templates';
 import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
+import TemplateSetupForm from '../components/PortfolioBuilder/TemplateSetupForm';
 import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
 import DesignToolsPanel from '../components/PortfolioBuilder/DesignToolsPanel';
 
@@ -14,7 +15,7 @@ const PortfolioBuilderPage = () => {
   const { currentPortfolio, isLoading, createPortfolio, updatePortfolio, fetchPortfolioById } = usePortfolioStore();
 
   // Template-based state
-  const [step, setStep] = useState('select'); // 'select', 'customize', 'preview'
+  const [step, setStep] = useState('select'); // 'select', 'setup', 'customize', 'preview'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [portfolioData, setPortfolioData] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
@@ -268,6 +269,33 @@ const PortfolioBuilderPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMaintenancePopup]);
 
+  // Add Ctrl+S save functionality
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Check if Ctrl+S (or Cmd+S on Mac) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent browser's default save action
+        
+        // Only save if we're in customize or preview mode and have portfolio data
+        if ((step === 'customize' || step === 'preview') && portfolioData && selectedTemplate) {
+          toast.success('Saving portfolio... (Ctrl+S)', {
+            duration: 1500,
+            icon: '💾',
+          });
+          handleSave();
+        }
+      }
+    };
+
+    // Add the event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [step, portfolioData, selectedTemplate]); // Removed handleSave from dependencies
+
   const handleTemplateSelect = (template) => {
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
@@ -279,14 +307,79 @@ const PortfolioBuilderPage = () => {
     }
 
     setSelectedTemplate(template);
-
-    if (!portfolioData || portfolioData.templateId !== template.id) {
-      const newPortfolioData = createPortfolioFromTemplate(template.id);
-      setPortfolioData(ensureValidImageUrls(newPortfolioData));
+    
+    // For new portfolios, go to setup step
+    if (id === 'new') {
+      setStep('setup');
+    } else {
+      // For existing portfolios, create portfolio data and go directly to customize
+      if (!portfolioData || portfolioData.templateId !== template.id) {
+        const newPortfolioData = createPortfolioFromTemplate(template.id);
+        setPortfolioData(ensureValidImageUrls(newPortfolioData));
+      }
+      setStep('customize');
+      setShowDesignTools(true);
     }
+  };
 
+  const handleSetupComplete = (setupData) => {
+    const { personalInfo, skillsArray, styling } = setupData;
+    
+    // Create portfolio from template with user data
+    const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, {
+      hero: {
+        name: personalInfo.name,
+        title: personalInfo.title,
+        description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
+        image: '', // User will upload this later
+      },
+      about: {
+        heading: 'About Me',
+        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work. I believe in the power of good design and development to solve problems and tell compelling stories.`,
+        image: '', // User will upload this later
+        skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
+      },
+      contact: {
+        heading: "Let's Work Together",
+        description: "I'm always interested in new projects and opportunities.",
+        form_fields: ['name', 'email', 'message'],
+        social_links: [
+          { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
+          ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
+          ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
+        ].filter(link => link.url && !link.url.includes('example.com')),
+      },
+      // Merge custom styling with template defaults
+      styling: {
+        ...styling,
+        colors: {
+          ...selectedTemplate.styling?.colors,
+          ...styling.colors,
+        },
+        fonts: {
+          ...selectedTemplate.styling?.fonts,
+          ...styling.fonts,
+        },
+      },
+    });
+
+    // Set the title and description from form data
+    setTitle(personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`);
+    setDescription(`Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`);
+    
+    // Apply the portfolio data
+    setPortfolioData(ensureValidImageUrls(newPortfolioData));
     setStep('customize');
     setShowDesignTools(true);
+  };
+
+  const handleBackToTemplates = () => {
+    if (step === 'setup') {
+      setStep('select');
+    } else {
+      setStep('select');
+      setShowDesignTools(false);
+    }
   };
 
   const handleContentChange = (sectionId, fieldId, value) => {
@@ -408,11 +501,17 @@ const PortfolioBuilderPage = () => {
         if (!content) return [];
 
         const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
         Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          sections.push({
-            type: sectionType,
-            content: sectionContent,
-          });
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
         });
         return sections;
       };
@@ -425,6 +524,13 @@ const PortfolioBuilderPage = () => {
         styling: cleanedData.styling || {},
         published: false,
       };
+
+      console.log('=== SAVE DATA DEBUG ===');
+      console.log('Portfolio Data:', portfolioData);
+      console.log('Cleaned Data:', cleanedData);
+      console.log('Save Data:', saveData);
+      console.log('Sections:', saveData.sections);
+      console.log('========================');
 
       let result;
       if (id && id !== 'new') {
@@ -462,11 +568,17 @@ const PortfolioBuilderPage = () => {
         if (!content) return [];
 
         const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
         Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          sections.push({
-            type: sectionType,
-            content: sectionContent,
-          });
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
         });
         return sections;
       };
@@ -514,11 +626,6 @@ const PortfolioBuilderPage = () => {
     setShowDesignTools(true);
   };
 
-  const handleBackToTemplates = () => {
-    setStep('select');
-    setShowDesignTools(false);
-  };
-
   const contentChangeHandler = (sectionId, fieldId, value) => {
     handleContentChange(sectionId, fieldId, value);
   };
@@ -549,6 +656,8 @@ const PortfolioBuilderPage = () => {
                 <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
                   {step === 'select'
                     ? 'Choose Template'
+                    : step === 'setup'
+                    ? 'Setup Portfolio'
                     : step === 'customize'
                     ? 'Customize Portfolio'
                     : 'Preview Portfolio'}
@@ -686,10 +795,24 @@ const PortfolioBuilderPage = () => {
                 <div className="flex items-center space-x-2">
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === 'customize' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+                      step === 'setup' 
+                        ? 'bg-blue-500 text-white' 
+                        : ['customize', 'preview'].includes(step)
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-300 text-gray-600'
                     }`}
                   >
-                    {step === 'customize' ? '2' : '✓'}
+                    {['customize', 'preview'].includes(step) ? '✓' : '2'}
+                  </div>
+                  <span className="text-sm text-gray-600">Setup Information</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'customize' ? 'bg-blue-500 text-white' : step === 'preview' ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {step === 'preview' ? '✓' : '3'}
                   </div>
                   <span className="text-sm text-gray-600">Customize</span>
                 </div>
@@ -699,7 +822,7 @@ const PortfolioBuilderPage = () => {
                       step === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
                     }`}
                   >
-                    3
+                    4
                   </div>
                   <span className="text-sm text-gray-600">Preview & Publish</span>
                 </div>
@@ -722,6 +845,21 @@ const PortfolioBuilderPage = () => {
               <TemplateSelector
                 onSelectTemplate={handleTemplateSelect}
                 selectedTemplateId={selectedTemplate?.id}
+              />
+            </motion.div>
+          )}
+
+          {step === 'setup' && selectedTemplate && (
+            <motion.div
+              key="setup"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <TemplateSetupForm
+                template={selectedTemplate}
+                onComplete={handleSetupComplete}
+                onBack={handleBackToTemplates}
               />
             </motion.div>
           )}
@@ -814,9 +952,9 @@ const PortfolioBuilderPage = () => {
               </AnimatePresence>
 
               {step === 'customize' && isEditing && (
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40">
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40 max-w-md">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -824,9 +962,15 @@ const PortfolioBuilderPage = () => {
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span className="text-sm">
-                      Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.
-                    </span>
+                    <div className="text-sm">
+                      <div>Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.</div>
+                      <div className="flex items-center space-x-1 mt-1 text-blue-200">
+                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">Ctrl</kbd>
+                        <span>+</span>
+                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">S</kbd>
+                        <span>to save quickly</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

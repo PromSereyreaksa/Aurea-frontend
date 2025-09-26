@@ -36,7 +36,7 @@ const Navbar = () => {
             alt="AUREA Logo" 
             className="h-8 w-auto"
           />
-          <span className="text-2xl font-bold tracking-wide uppercase text-black">
+          <span className="text-2xl font-bold tracking-wide uppercase text-[#1a1a1a]">
             UREA
           </span>
           
@@ -46,31 +46,31 @@ const Navbar = () => {
       <div className="hidden md:flex items-center space-x-8">
         <button 
           onClick={() => scrollToSection('home')}
-          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+          className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
         >
           Home
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#fb8500] transition-all group-hover:w-full"></span>
         </button>
         <button 
           onClick={() => scrollToSection('features')}
-          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+          className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
         >
           Features
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#fb8500] transition-all group-hover:w-full"></span>
         </button>
          <button 
           onClick={() => scrollToSection('faq')}
-          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+          className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
         >
           FAQ
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#fb8500] transition-all group-hover:w-full"></span>
         </button>
         <button 
           onClick={() => scrollToSection('pricing')}
-          className="text-black hover:text-gray-600 font-medium transition-colors relative group"
+          className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
         >
           Pricing
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#fb8500] transition-all group-hover:w-full"></span>
         </button>
        
       </div>
@@ -81,7 +81,7 @@ const Navbar = () => {
             {/* Authenticated Navigation */}
             <Link 
               to="/dashboard" 
-              className="text-black hover:text-gray-600 font-medium transition-colors"
+              className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors"
             >
               Dashboard
             </Link>
@@ -89,7 +89,7 @@ const Navbar = () => {
               <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
               <button
                 onClick={logout}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors"
+                className="bg-gray-100 text-[#1a1a1a] px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors border border-[#1a1a1a]/20"
               >
                 Logout
               </button>
@@ -101,7 +101,7 @@ const Navbar = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 to="/login" 
-                className="text-black hover:text-gray-600 font-medium transition-colors"
+                className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors"
               >
                 Log In
               </Link>
@@ -112,10 +112,10 @@ const Navbar = () => {
             >
               <Link 
                 to="/signup" 
-                className="bg-black text-white px-6 py-2 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-gray-800 relative overflow-hidden group"
+                className="bg-[#fb8500] text-white px-6 py-2 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90 relative overflow-hidden group shadow-lg"
               >
                 <span className="relative z-10">Sign Up</span>
-                <div className="absolute inset-0 bg-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <div className="absolute inset-0 bg-[#1a1a1a] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Link>
             </motion.div>
           </>

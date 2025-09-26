@@ -41,7 +41,7 @@ const FAQSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -63,7 +63,7 @@ const FAQSection = () => {
                 onClick={() => toggleFAQ(index)}
                 className="w-full px-6 py-5 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
               >
-                <h3 className="text-lg font-semibold text-black pr-4">
+                <h3 className="text-lg font-semibold text-[#1a1a1a] pr-4">
                   {faq.question}
                 </h3>
                 <motion.div
@@ -109,7 +109,7 @@ const FAQSection = () => {
             Still have questions? We're here to help!
           </p>
           <button
-            className="bg-black text-white px-8 py-3 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-gray-800"
+            className="bg-[#fb8500] text-white px-8 py-3 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90"
           >
             Contact Support
           </button>

@@ -61,7 +61,7 @@ const HowItWorksSection = () => (
   <section id="about" className="py-24 px-6 bg-white">
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+        <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
           How It Works
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -87,7 +87,7 @@ const HowItWorksSection = () => (
                   scale: 1.1,
                   transition: { duration: 0.3 }
                 }}
-                className="w-16 h-16 bg-black text-white flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-800 transition-colors duration-300"
+                className="w-16 h-16 bg-[#fb8500] text-white flex items-center justify-center mx-auto mb-4 group-hover:bg-[#fb8500]/90 transition-colors duration-300"
               >
                 {step.icon}
               </motion.div>
@@ -98,10 +98,10 @@ const HowItWorksSection = () => (
                 viewport={{ once: true }}
                 className="absolute -top-2 -right-2 w-8 h-8 bg-gray-100 border-2 border-white flex items-center justify-center"
               >
-                <span className="text-sm font-bold text-black">{step.number}</span>
+                <span className="text-sm font-bold text-[#1a1a1a]">{step.number}</span>
               </motion.div>
             </div>
-            <h3 className="text-2xl font-bold text-black mb-4 tracking-wide group-hover:text-gray-700 transition-colors">
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4 tracking-wide group-hover:text-gray-700 transition-colors">
               {step.title}
             </h3>
             <p className="text-gray-600 leading-relaxed">

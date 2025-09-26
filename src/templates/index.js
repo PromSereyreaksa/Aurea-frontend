@@ -153,10 +153,33 @@ export const createPortfolioFromTemplate = (templateId, customizations = {}) => 
     throw new Error(`Template with ID ${templateId} not found`);
   }
 
+  // Deep merge function to merge nested objects
+  const deepMerge = (target, source) => {
+    const result = { ...target };
+    
+    for (const key in source) {
+      if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = deepMerge(result[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    
+    return result;
+  };
+
+  // Merge content with customizations
+  const mergedContent = deepMerge(template.defaultContent, customizations);
+  
+  // Merge styling if provided
+  const mergedStyling = customizations.styling 
+    ? deepMerge(template.styling, customizations.styling)
+    : template.styling;
+
   return {
     templateId,
-    content: { ...template.defaultContent, ...customizations },
-    styling: { ...template.styling, ...customizations.styling },
+    content: mergedContent,
+    styling: mergedStyling,
     structure: template.structure,
     metadata: {
       createdAt: new Date().toISOString(),

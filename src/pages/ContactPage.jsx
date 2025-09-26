@@ -70,7 +70,7 @@ const ContactPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-6xl md:text-8xl font-bold tracking-wider uppercase text-black leading-none"
+            className="text-6xl md:text-8xl font-bold tracking-wider uppercase text-[#1a1a1a] leading-none"
           >
             Contact Us
           </motion.h1>
@@ -78,7 +78,7 @@ const ContactPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-            className="text-xl md:text-2xl font-medium text-black max-w-lg mx-auto"
+            className="text-xl md:text-2xl font-medium text-[#1a1a1a] max-w-lg mx-auto"
           >
             We'd love to hear from you.
           </motion.p>
@@ -100,7 +100,7 @@ const ContactPage = () => {
       <section className="py-24 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
               Get In Touch
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -124,12 +124,12 @@ const ContactPage = () => {
                       scale: 1.1,
                       transition: { duration: 0.3 },
                     }}
-                    className="w-16 h-16 bg-black text-white flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-800 transition-colors duration-300"
+                    className="w-16 h-16 bg-[#fb8500] text-white flex items-center justify-center mx-auto mb-4 group-hover:bg-[#fb8500]/90 transition-colors duration-300"
                   >
                     {method.icon}
                   </motion.div>
                 </div>
-                <h3 className="text-2xl font-bold text-black mb-4 tracking-wide group-hover:text-gray-700 transition-colors">
+                <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4 tracking-wide group-hover:text-gray-700 transition-colors">
                   {method.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
@@ -138,7 +138,7 @@ const ContactPage = () => {
                 <motion.a
                   href={`mailto:${method.contact}`}
                   whileHover={{ scale: 1.05 }}
-                  className="inline-block text-black font-medium border-b-2 border-black hover:border-gray-600 transition-colors"
+                  className="inline-block text-[#fb8500] font-medium border-b-2 border-[#fb8500] hover:border-[#fb8500]/80 transition-colors"
                 >
                   {method.contact}
                 </motion.a>
@@ -152,7 +152,7 @@ const ContactPage = () => {
       <section className="py-24 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
               Send Us A Message
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -169,56 +169,56 @@ const ContactPage = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-sm font-medium text-black mb-2 tracking-wide uppercase">
+                <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                   First Name
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-black outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                   placeholder="Enter your first name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-black mb-2 tracking-wide uppercase">
+                <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                   Last Name
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-black outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                   placeholder="Enter your last name"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2 tracking-wide uppercase">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Email Address
               </label>
               <input
                 type="email"
-                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-black outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                 placeholder="Enter your email address"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2 tracking-wide uppercase">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Subject
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-black outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                 placeholder="What's this about?"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2 tracking-wide uppercase">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Message
               </label>
               <textarea
                 rows={6}
-                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-black outline-none transition-colors resize-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors resize-none"
                 placeholder="Tell us more about your inquiry..."
               />
             </div>
@@ -227,7 +227,7 @@ const ContactPage = () => {
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-black text-white py-4 px-8 font-medium tracking-wide uppercase transition-all hover:bg-gray-800"
+              className="w-full bg-[#fb8500] text-white py-4 px-8 font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90"
             >
               Send Message
             </motion.button>
@@ -236,7 +236,7 @@ const ContactPage = () => {
       </section>
 
       {/* Office Section */}
-      <section className="py-24 px-6 bg-black text-white">
+      <section className="py-24 px-6 bg-[#1a1a1a] text-white">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
