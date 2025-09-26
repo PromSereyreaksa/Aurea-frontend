@@ -20,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 // Sortable section item component
-const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) => {
+const SortableSection = ({ sectionId, sectionData, onDelete, onEdit, getSectionIcon }) => {
   const {
     attributes,
     listeners,
@@ -34,6 +34,17 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  const handleSectionClick = (e) => {
+    // Don't trigger navigation if clicking on drag handle or delete button
+    if (e.target.closest('[data-drag-handle]') || e.target.closest('[data-delete-button]')) {
+      return;
+    }
+    
+    if (onEdit) {
+      onEdit(sectionId);
+    }
   };
 
   const getSectionPreview = (data) => {
@@ -122,11 +133,12 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-3 md:p-4 rounded-lg border transition-all duration-200 ${
+      className={`p-3 md:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
         isDragging 
           ? 'bg-blue-50 border-blue-300 shadow-lg scale-105 z-50' 
-          : 'bg-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-md'
+          : 'bg-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-100'
       }`}
+      onClick={handleSectionClick}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
@@ -134,6 +146,7 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
           <div
             {...attributes}
             {...listeners}
+            data-drag-handle
             className={`cursor-grab active:cursor-grabbing p-2 rounded-md transition-all duration-200 flex-shrink-0 touch-manipulation hover:scale-110 ${
               isDragging 
                 ? 'bg-blue-200 shadow-md scale-110' 
@@ -180,6 +193,7 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
             e.stopPropagation();
             onDelete(sectionId);
           }}
+          data-delete-button
           className="ml-2 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors flex-shrink-0 touch-manipulation"
           title="Delete section"
         >
@@ -206,6 +220,33 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
       onCollapseChange(isCollapsed);
     }
   }, [isCollapsed, onCollapseChange]);
+
+  // Add Ctrl+S save functionality for the design panel
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Check if Ctrl+S (or Cmd+S on Mac) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent browser's default save action
+        
+        // Check if we have access to the save function through onContentChange
+        if (onContentChange && onContentChange.onSave) {
+          import('react-hot-toast').then(({ toast }) => {
+            toast.success('Saving from Design Tools... (Ctrl+S)', {
+              duration: 1500,
+              icon: '🎨',
+            });
+          });
+          onContentChange.onSave();
+        }
+      }
+    };
+
+    // Only add listener if the panel is open and not collapsed
+    if (!isCollapsed) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isCollapsed, onContentChange]);
 
   // Set up sensors for drag and drop with improved touch and mouse support
   const sensors = useSensors(
@@ -542,15 +583,54 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
     // Find the section element and scroll to it
     const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
     if (sectionElement) {
-      sectionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Add a temporary highlight effect
-      sectionElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
+      sectionElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest' 
+      });
+      
+      // Add a temporary highlight effect with enhanced styling
+      sectionElement.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-75', 'bg-blue-50', 'bg-opacity-20');
+      
+      // Show a brief success toast/notification
+      const notification = document.createElement('div');
+      notification.innerHTML = `
+        <div class="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Navigated to ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} section
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Remove highlight and notification after a delay
       setTimeout(() => {
-        sectionElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
-      }, 3000);
+        sectionElement.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-75', 'bg-blue-50', 'bg-opacity-20');
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 2500);
     } else {
-      // If section not found, just show a message
-      alert(`Click on the "${sectionId}" section in the main view to edit it.`);
+      // If section not found, show an improved message
+      console.warn(`Section "${sectionId}" not found in preview`);
+      
+      const notification = document.createElement('div');
+      notification.innerHTML = `
+        <div class="fixed top-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          Section "${sectionId}" not found in preview
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
     }
   };
 
@@ -596,7 +676,15 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
           {!isCollapsed && (
-            <h2 className="text-lg font-semibold text-gray-900">Design Tools</h2>
+            <div className="flex items-center space-x-3">
+              <h2 className="text-lg font-semibold text-gray-900">Design Tools</h2>
+              <div className="hidden md:flex items-center space-x-1 text-xs text-gray-500">
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd>
+                <span>+</span>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">S</kbd>
+                <span className="text-gray-400">to save</span>
+              </div>
+            </div>
           )}
           <div className="flex items-center gap-2">
             {/* Mobile Close Button */}
@@ -731,6 +819,7 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                                   sectionId={sectionId}
                                   sectionData={sectionData}
                                   onDelete={handleDeleteSection}
+                                  onEdit={handleEditSection}
                                   getSectionIcon={getSectionIcon}
                                 />
                               );

@@ -1,5 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
+// Move InputField component outside to prevent re-creation on every render
+const InputField = ({ 
+  label, 
+  type = 'text', 
+  field, 
+  placeholder, 
+  required = false, 
+  rows = null,
+  value,
+  onChange,
+  hasError
+}) => {
+  const Component = rows ? 'textarea' : 'input';
+  
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <Component
+        type={type}
+        value={value || ''}
+        onChange={onChange}
+        rows={rows}
+        className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:ring-2 ${
+          hasError 
+            ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+            : 'border-gray-300 focus:border-[#fb8500] focus:ring-[#fb8500]/20 focus:ring-2'
+        }`}
+        placeholder={placeholder}
+      />
+      {hasError && (
+        <div className="flex items-center gap-1 mt-2">
+          <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-red-600">{hasError}</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const TemplateSetupForm = ({ template, onComplete, onBack }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -264,49 +307,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
     onComplete(setupData);
   };
 
-  // Reusable input component with error styling
-  const InputField = ({ 
-    label, 
-    type = 'text', 
-    field, 
-    placeholder, 
-    required = false, 
-    rows = null,
-    autoFocus = false 
-  }) => {
-    const hasError = errors[field];
-    const Component = rows ? 'textarea' : 'input';
-    
-    return (
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-        <Component
-          type={type}
-          value={formData[field] || ''}
-          onChange={(e) => handleInputChange(field, e.target.value)}
-          rows={rows}
-          autoFocus={autoFocus}
-          className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:ring-2 ${
-            hasError 
-              ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
-              : 'border-gray-300 focus:border-[#fb8500] focus:ring-[#fb8500]/20 focus:ring-2'
-          }`}
-          placeholder={placeholder}
-        />
-        {hasError && (
-          <div className="flex items-center gap-1 mt-2">
-            <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-red-600">{hasError}</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const renderBasicInfo = () => (
     <motion.div
       key="basic"
@@ -320,7 +320,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         field="name"
         placeholder="e.g., Sarah Johnson"
         required={true}
-        autoFocus={true}
+        value={formData.name}
+        onChange={(e) => handleInputChange('name', e.target.value)}
+        hasError={errors.name}
       />
 
       <InputField
@@ -328,6 +330,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         field="title"
         placeholder="e.g., UI/UX Designer, Web Developer, Creative Director"
         required={true}
+        value={formData.title}
+        onChange={(e) => handleInputChange('title', e.target.value)}
+        hasError={errors.title}
       />
 
       <InputField
@@ -335,6 +340,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         field="description"
         placeholder="Brief description of what you do and your passion..."
         rows={4}
+        value={formData.description}
+        onChange={(e) => handleInputChange('description', e.target.value)}
+        hasError={errors.description}
       />
       
       <div className="bg-[#fb8500]/10 border border-[#fb8500]/20 p-4 rounded-lg">
@@ -359,7 +367,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
           type="email"
           field="email"
           placeholder="your.email@example.com"
-          autoFocus={true}
+          value={formData.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
+          hasError={errors.email}
         />
 
         <InputField
@@ -367,12 +377,18 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
           type="tel"
           field="phone"
           placeholder="+1 (555) 123-4567"
+          value={formData.phone}
+          onChange={(e) => handleInputChange('phone', e.target.value)}
+          hasError={errors.phone}
         />
 
         <InputField
           label="Location"
           field="location"
           placeholder="City, State/Country"
+          value={formData.location}
+          onChange={(e) => handleInputChange('location', e.target.value)}
+          hasError={errors.location}
         />
 
         <InputField
@@ -380,6 +396,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
           type="url"
           field="website"
           placeholder="https://yourwebsite.com"
+          value={formData.website}
+          onChange={(e) => handleInputChange('website', e.target.value)}
+          hasError={errors.website}
         />
       </div>
 
@@ -443,7 +462,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder={formData.skills.length === 0 ? "Type a skill and press Enter (e.g., UX Design, React, Figma)" : "Add another skill..."}
               className="w-full border-none outline-none text-sm placeholder-gray-400"
-              autoFocus={true}
             />
             
             {/* Suggestions Dropdown */}
@@ -507,6 +525,9 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         field="bio"
         placeholder="Tell your story, share your background, experience, and what makes you unique..."
         rows={6}
+        value={formData.bio}
+        onChange={(e) => handleInputChange('bio', e.target.value)}
+        hasError={errors.bio}
       />
       <p className="text-sm text-gray-500 -mt-4">
         This will appear in your "About" section. Share your journey, passions, and what drives you professionally.

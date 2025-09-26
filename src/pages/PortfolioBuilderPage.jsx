@@ -269,6 +269,33 @@ const PortfolioBuilderPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMaintenancePopup]);
 
+  // Add Ctrl+S save functionality
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Check if Ctrl+S (or Cmd+S on Mac) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent browser's default save action
+        
+        // Only save if we're in customize or preview mode and have portfolio data
+        if ((step === 'customize' || step === 'preview') && portfolioData && selectedTemplate) {
+          toast.success('Saving portfolio... (Ctrl+S)', {
+            duration: 1500,
+            icon: '💾',
+          });
+          handleSave();
+        }
+      }
+    };
+
+    // Add the event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [step, portfolioData, selectedTemplate]); // Removed handleSave from dependencies
+
   const handleTemplateSelect = (template) => {
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
@@ -474,11 +501,17 @@ const PortfolioBuilderPage = () => {
         if (!content) return [];
 
         const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
         Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          sections.push({
-            type: sectionType,
-            content: sectionContent,
-          });
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
         });
         return sections;
       };
@@ -491,6 +524,13 @@ const PortfolioBuilderPage = () => {
         styling: cleanedData.styling || {},
         published: false,
       };
+
+      console.log('=== SAVE DATA DEBUG ===');
+      console.log('Portfolio Data:', portfolioData);
+      console.log('Cleaned Data:', cleanedData);
+      console.log('Save Data:', saveData);
+      console.log('Sections:', saveData.sections);
+      console.log('========================');
 
       let result;
       if (id && id !== 'new') {
@@ -528,11 +568,17 @@ const PortfolioBuilderPage = () => {
         if (!content) return [];
 
         const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
         Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          sections.push({
-            type: sectionType,
-            content: sectionContent,
-          });
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
         });
         return sections;
       };
@@ -906,9 +952,9 @@ const PortfolioBuilderPage = () => {
               </AnimatePresence>
 
               {step === 'customize' && isEditing && (
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40">
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40 max-w-md">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -916,9 +962,15 @@ const PortfolioBuilderPage = () => {
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span className="text-sm">
-                      Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.
-                    </span>
+                    <div className="text-sm">
+                      <div>Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.</div>
+                      <div className="flex items-center space-x-1 mt-1 text-blue-200">
+                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">Ctrl</kbd>
+                        <span>+</span>
+                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">S</kbd>
+                        <span>to save quickly</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
