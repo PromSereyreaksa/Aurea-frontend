@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "../stores/authStore";
 import usePortfolioStore from "../stores/portfolioStore";
-import Navbar from "../components/shared/Navbar";
+import Navbar from "../components/Shared/Navbar";
 import DashboardSidebar from "../components/Dashboard/DashboardSidebar";
 import OverviewSection from "../components/Dashboard/OverviewSection";
 import PortfoliosSection from "../components/Dashboard/PortfoliosSection";
