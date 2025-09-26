@@ -64,7 +64,7 @@ const PricingSection = () => (
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
+        <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
           Simple Pricing
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -79,7 +79,7 @@ const PricingSection = () => (
           <div 
             key={index} 
             className={`bg-white border-2 p-8 relative hover:shadow-xl transition-all duration-300 ${
-              plan.popular ? 'border-black scale-105' : 'border-gray-200'
+              plan.popular ? 'border-[#fb8500] scale-105 shadow-lg' : 'border-gray-200'
             }`}
           >
             {plan.popular && (
@@ -88,16 +88,16 @@ const PricingSection = () => (
                 whileInView={{ scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
                 viewport={{ once: true }}
-                className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-1 text-sm font-bold tracking-wide uppercase"
+                className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#fb8500] text-white px-4 py-1 text-sm font-bold tracking-wide uppercase rounded-full"
               >
                 Most Popular
               </motion.div>
             )}
             
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-black mb-2">{plan.name}</h3>
+              <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">{plan.name}</h3>
               <div className="mb-2">
-                <span className="text-4xl font-bold text-black">{plan.price}</span>
+                <span className="text-4xl font-bold text-[#1a1a1a]">{plan.price}</span>
                 {plan.period && <span className="text-gray-600">{plan.period}</span>}
               </div>
               <p className="text-gray-600">{plan.description}</p>
@@ -113,10 +113,10 @@ const PricingSection = () => (
                   viewport={{ once: true }}
                   className="flex items-center"
                 >
-                  <svg className="w-5 h-5 text-black mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#fb8500] mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-black">{feature}</span>
+                  <span className="text-[#1a1a1a]">{feature}</span>
                 </motion.li>
               ))}
             </ul>
@@ -129,8 +129,8 @@ const PricingSection = () => (
                 to="/signup"
                 className={`block w-full text-center py-3 px-6 rounded-md font-bold tracking-wide uppercase transition-all duration-300 ${
                   plan.popular 
-                    ? 'bg-black text-white hover:bg-gray-800' 
-                    : 'border-2 border-black text-black hover:bg-black hover:text-white'
+                    ? 'bg-[#fb8500] text-white hover:bg-[#fb8500]/90 shadow-lg' 
+                    : 'border-2 border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white'
                 }`}
               >
                 {plan.cta}

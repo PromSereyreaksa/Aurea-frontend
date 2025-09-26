@@ -124,29 +124,34 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
       style={style}
       className={`p-3 md:p-4 rounded-lg border transition-all duration-200 ${
         isDragging 
-          ? 'bg-blue-50 border-blue-300 shadow-lg scale-105 rotate-2' 
+          ? 'bg-blue-50 border-blue-300 shadow-lg scale-105 z-50' 
           : 'bg-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-md'
       }`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
-          {/* Drag handle with better touch targets */}
+          {/* Improved drag handle with better visual feedback */}
           <div
             {...attributes}
             {...listeners}
-            className={`cursor-grab active:cursor-grabbing p-3 md:p-2 rounded transition-all duration-200 flex-shrink-0 touch-manipulation ${
+            className={`cursor-grab active:cursor-grabbing p-2 rounded-md transition-all duration-200 flex-shrink-0 touch-manipulation hover:scale-110 ${
               isDragging 
-                ? 'bg-blue-200 shadow-inner' 
+                ? 'bg-blue-200 shadow-md scale-110' 
                 : 'hover:bg-gray-200 hover:shadow-sm'
             }`}
-            title="Drag to reorder"
+            title="Drag to reorder sections"
           >
-            <svg className={`w-5 h-5 md:w-4 md:h-4 transition-colors ${
-              isDragging ? 'text-blue-600' : 'text-gray-400'
-            }`} fill="currentColor" viewBox="0 0 20 20">
+            <svg 
+              className={`w-4 h-4 transition-colors duration-200 ${
+                isDragging ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+              }`} 
+              fill="currentColor" 
+              viewBox="0 0 20 20"
+            >
               <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
             </svg>
           </div>
+          
           {/* Section icon with responsive sizing */}
           <div className="text-xl md:text-lg flex-shrink-0 w-7 h-7 md:w-6 md:h-6 flex items-center justify-center">{getSectionIcon(sectionId)}</div>
           <div className="flex-1 min-w-0">
@@ -171,11 +176,14 @@ const SortableSection = ({ sectionId, sectionData, onDelete, getSectionIcon }) =
           </div>
         </div>
         <button
-          onClick={() => onDelete(sectionId)}
-          className="ml-2 p-3 md:p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors flex-shrink-0 touch-manipulation"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(sectionId);
+          }}
+          className="ml-2 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors flex-shrink-0 touch-manipulation"
           title="Delete section"
         >
-          <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
@@ -199,11 +207,11 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
     }
   }, [isCollapsed, onCollapseChange]);
 
-  // Set up sensors for drag and drop with touch support
+  // Set up sensors for drag and drop with improved touch and mouse support
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Minimum drag distance to activate
+        distance: 5, // Reduced distance for more responsive dragging
       },
     }),
     useSensor(KeyboardSensor, {
@@ -211,27 +219,43 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
     })
   );
 
-  // Handle drag end for section reordering
+  // Handle drag end for section reordering with improved error handling
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      const oldIndex = sectionOrder.indexOf(active.id);
-      const newIndex = sectionOrder.indexOf(over.id);
-      
-      const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
-      
-      // Create reordered content object
-      const reorderedContent = {};
-      newOrder.forEach(sectionId => {
-        if (portfolioData.content[sectionId]) {
-          reorderedContent[sectionId] = portfolioData.content[sectionId];
-        }
-      });
-      
-      // Update the portfolio data with new order
-      onContentChange('_sections', 'reorder', { content: reorderedContent });
+    if (!active || !over || active.id === over.id) {
+      return; // No change needed
     }
+
+    const sectionOrder = portfolioData?.content ? Object.keys(portfolioData.content) : [];
+    
+    if (!sectionOrder.includes(active.id) || !sectionOrder.includes(over.id)) {
+      console.warn('Invalid drag operation: section not found in content');
+      return;
+    }
+
+    const oldIndex = sectionOrder.indexOf(active.id);
+    const newIndex = sectionOrder.indexOf(over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      console.warn('Invalid drag operation: invalid indices');
+      return;
+    }
+
+    const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+    
+    // Create reordered content object
+    const reorderedContent = {};
+    newOrder.forEach(sectionId => {
+      if (portfolioData.content[sectionId]) {
+        reorderedContent[sectionId] = portfolioData.content[sectionId];
+      }
+    });
+    
+    console.log('Reordering sections:', { oldOrder: sectionOrder, newOrder, oldIndex, newIndex });
+    
+    // Update the portfolio data with new order
+    onContentChange('_sections', 'reorder', { content: reorderedContent });
   };
 
   // Get section order for drag and drop
@@ -646,19 +670,34 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-semibold text-gray-900">Current Sections</h3>
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
                         </svg>
-                        Drag to reorder
+                        <span>Drag the ⋮⋮ handle to reorder</span>
                       </div>
                     </div>
+                    
+                    {/* Instructions for first-time users */}
+                    {portfolioData?.content && Object.keys(portfolioData.content).length > 1 && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-700">
+                          💡 <strong>Pro tip:</strong> Drag sections by their handle (⋮⋮) to change the order they appear on your portfolio.
+                        </p>
+                      </div>
+                    )}
                     
                     {portfolioData?.content && (
                       <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
                         onDragEnd={handleDragEnd}
+                        onDragStart={() => {
+                          // Provide haptic feedback on mobile devices
+                          if (navigator.vibrate) {
+                            navigator.vibrate(50);
+                          }
+                        }}
                       >
                         <SortableContext
                           items={sectionOrder}

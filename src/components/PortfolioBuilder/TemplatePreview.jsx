@@ -991,6 +991,532 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
 
   const styles = getStyles();
 
+  // Section Renderers - these functions render individual sections based on type
+  const renderHeroSection = () => (
+    <section 
+      data-section-id="hero"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ backgroundColor: styles.colors.background }}
+      onMouseEnter={() => isEditing && setActiveSection('hero')}
+      onMouseLeave={() => isEditing && setActiveSection(null)}
+    >
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -top-4 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+      
+      {isEditing && activeSection === 'hero' && (
+        <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
+          Hero Section
+        </div>
+      )}
+      
+      <div className="text-center max-w-5xl mx-auto px-6 relative z-10">
+        <div className="mb-8">
+          {(() => {
+            const heroContent = getContent('hero');
+            const imageUrl = heroContent.image;
+            
+            return (
+              <div className="relative inline-block mb-8">
+                {renderEditableImage(
+                  imageUrl,
+                  'hero',
+                  'image',
+                  'w-40 h-40 rounded-full mx-auto ring-4 ring-white shadow-2xl',
+                  'Upload profile picture'
+                )}
+                {/* Decorative rings - with pointer-events-none to allow clicks through */}
+                <div className="absolute -inset-4 rounded-full border-2 border-blue-200 opacity-30 animate-ping pointer-events-none"></div>
+                <div className="absolute -inset-8 rounded-full border border-purple-200 opacity-20 animate-pulse pointer-events-none"></div>
+              </div>
+            );
+          })()}
+          
+          {renderEditableText(
+            getContent('hero').name,
+            'hero',
+            'name',
+            `text-6xl lg:text-7xl font-bold mb-6 text-black`,
+            'h1'
+          )}
+          
+          {renderEditableText(
+            getContent('hero').title,
+            'hero',
+            'title',
+            `text-2xl lg:text-3xl mb-8 text-gray-600 font-light`,
+            'h2'
+          )}
+          
+          {renderEditableText(
+            getContent('hero').description,
+            'hero',
+            'description',
+            `text-xl max-w-3xl mx-auto leading-relaxed text-gray-700 mb-12`,
+            'p'
+          )}
+          
+          {/* Simple text instead of buttons */}
+          <div className="text-center">
+            <p className="text-lg text-gray-600 font-medium">Scroll to see my work</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+  const renderAboutSection = () => (
+    <section 
+      data-section-id="about"
+      className="py-20 relative"
+      style={{ backgroundColor: styles.colors.surface }}
+      onMouseEnter={() => isEditing && setActiveSection('about')}
+      onMouseLeave={() => isEditing && setActiveSection(null)}
+    >
+      {isEditing && activeSection === 'about' && (
+        <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
+          About Section
+        </div>
+      )}
+      
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            {renderEditableText(
+              getContent('about').heading,
+              'about',
+              'heading',
+              `text-4xl font-bold mb-6`,
+              'h2'
+            )}
+            
+            {renderEditableText(
+              getContent('about').content,
+              'about',
+              'content',
+              `text-lg leading-relaxed mb-8`,
+              'p'
+            )}
+            
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Skills</h3>
+              {renderEditableSkills(getContent('about').skills || [], 'about', 'skills')}
+            </div>
+          </div>
+          
+          <div>
+            {renderEditableImage(
+              getContent('about').image,
+              'about',
+              'image',
+              'aspect-square rounded-lg',
+              'Upload about image'
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+  const renderPortfolioSection = () => (
+    <section 
+      data-section-id="portfolio"
+      className="py-20 relative"
+      onMouseEnter={() => isEditing && setActiveSection('portfolio')}
+      onMouseLeave={() => isEditing && setActiveSection(null)}
+    >
+      {isEditing && activeSection === 'portfolio' && (
+        <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
+          Portfolio Section
+        </div>
+      )}
+      
+        <div className="max-w-7xl mx-auto px-6">
+          {renderEditableText(
+            getContent('portfolio').heading,
+            'portfolio',
+            'heading',
+            `text-5xl font-bold text-center mb-16`,
+            'h2'
+          )}
+          
+          {/* Enhanced Visual Portfolio Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            {getContent('portfolio').projects.map((project, index) => {
+              // Create different sizes for visual variety
+              const isLarge = index === 0 || (index + 1) % 4 === 0;
+              const isMedium = (index + 1) % 3 === 0;
+              
+              return (
+                <div
+                  key={project.id}
+                  className={`bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden ${
+                    isLarge ? 'md:col-span-2 md:row-span-2' : 
+                    isMedium ? 'md:row-span-2' : ''
+                  }`}
+                >
+                  {/* Large Image Container */}
+                  <div className={`relative overflow-hidden ${
+                    isLarge ? 'aspect-[4/3]' : 
+                    isMedium ? 'aspect-[3/4]' : 'aspect-[4/3]'
+                  }`}>
+                    {renderEditableImage(
+                      project.image,
+                      'portfolio',
+                      `projects.${index}.image`,
+                      'w-full h-full object-cover',
+                      'Upload project image'
+                    )}
+                  </div>
+                  
+                  {/* Content Section */}
+                  <div className="p-6">
+                    {renderEditableProjectField(
+                      project.title,
+                      'portfolio',
+                      'projects',
+                      index,
+                      'title',
+                      `text-2xl font-bold mb-2 text-gray-900 ${isLarge ? 'lg:text-3xl' : ''}`,
+                      'h3'
+                    )}
+                    {renderEditableProjectField(
+                      project.description,
+                      'portfolio',
+                      'projects',
+                      index,
+                      'description',
+                      'text-gray-600 mb-4',
+                      'p'
+                    )}
+                    
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700"
+                        >
+                          {renderEditableProjectField(
+                            tag,
+                            'portfolio',
+                            'projects',
+                            index,
+                            `tags.${tagIndex}`,
+                            'inline-block',
+                            'span'
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Portfolio Statistics */}
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+              {renderEditableText(
+                getContent('portfolio').projects.length,
+                'portfolio',
+                'projectsCount',
+                'text-3xl font-bold text-gray-900'
+              )}
+              {renderEditableText(
+                'Projects',
+                'portfolio',
+                'projectsLabel',
+                'text-sm text-gray-600 mt-1'
+              )}
+            </div>
+            <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+              {renderEditableText(
+                getContent('portfolio').projects.reduce((total, project) => total + (project.tags?.length || 0), 0),
+                'portfolio',
+                'technologiesCount',
+                'text-3xl font-bold text-gray-900'
+              )}
+              {renderEditableText(
+                'Technologies',
+                'portfolio',
+                'technologiesLabel',
+                'text-sm text-gray-600 mt-1'
+              )}
+            </div>
+            <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+              {renderEditableText(
+                getContent('portfolio').successRate || '100%',
+                'portfolio',
+                'successRate',
+                'text-3xl font-bold text-gray-900'
+              )}
+              {renderEditableText(
+                'Success Rate',
+                'portfolio',
+                'successRateLabel',
+                'text-sm text-gray-600 mt-1'
+              )}
+            </div>
+            <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
+              {renderEditableText(
+                getContent('portfolio').support || '24/7',
+                'portfolio',
+                'support',
+                'text-3xl font-bold text-gray-900'
+              )}
+              {renderEditableText(
+                'Support',
+                'portfolio',
+                'supportLabel',
+                'text-sm text-gray-600 mt-1'
+              )}
+            </div>
+          </div>
+        </div>
+    </section>
+  );
+
+  const renderContactSection = () => {
+    if (!getContent('contact')) return null;
+    
+    return (
+      <section 
+        data-section-id="contact"
+        className="py-20 relative"
+        style={{ backgroundColor: styles.colors.surface }}
+        onMouseEnter={() => isEditing && setActiveSection('contact')}
+        onMouseLeave={() => isEditing && setActiveSection(null)}
+      >
+      {isEditing && activeSection === 'contact' && (
+        <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
+          Contact Section
+        </div>
+      )}
+      
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        {renderEditableText(
+          getContent('contact').heading,
+          'contact',
+          'heading',
+          `text-4xl font-bold mb-6`,
+          'h2'
+        )}
+        
+        {renderEditableText(
+          getContent('contact').description,
+          'contact',
+          'description',
+          `text-lg mb-12`,
+          'p'
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(getContent('contact').social_links || []).map((link, index) => (
+            <div
+              key={index}
+              className={`block p-6 bg-white rounded-lg transition-shadow cursor-pointer ${
+                isEditing ? 'hover:shadow-lg border-2 border-dashed border-gray-200 hover:border-blue-300' : 'hover:shadow-lg'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Clear any pending blur timeout
+                if (socialLinksBlurTimeoutRef.current) {
+                  clearTimeout(socialLinksBlurTimeoutRef.current);
+                  socialLinksBlurTimeoutRef.current = null;
+                }
+                if (isEditing && activeSection !== 'contact') {
+                  setActiveSection('contact');
+                }
+              }}
+            >
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                    <input
+                      type="text"
+                      value={link.platform}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        // Ensure we're in editing mode
+                        if (!isEditingSocialLinks) {
+                          setIsEditingSocialLinks(true);
+                        }
+                        const newLinks = [...(getContent('contact').social_links || [])];
+                        newLinks[index] = { ...newLinks[index], platform: e.target.value };
+                        onContentChange('contact', 'social_links', newLinks);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditingSocialLinks(true);
+                      }}
+                      onFocus={() => {
+                        // Clear any pending blur timeout
+                        if (socialLinksBlurTimeoutRef.current) {
+                          clearTimeout(socialLinksBlurTimeoutRef.current);
+                          socialLinksBlurTimeoutRef.current = null;
+                        }
+                        isEditingSocialLinksRef.current = true;
+                        setIsEditingSocialLinks(true);
+                      }}
+                      onBlur={() => {
+                        isEditingSocialLinksRef.current = false;
+                        // Delay setting editing to false to allow focus to move to other inputs
+                        const timeout = setTimeout(() => {
+                          // Only set to false if we're still not actively editing
+                          if (!isEditingSocialLinksRef.current) {
+                            setIsEditingSocialLinks(false);
+                          }
+                          socialLinksBlurTimeoutRef.current = null;
+                        }, 100);
+                        socialLinksBlurTimeoutRef.current = timeout;
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g., LinkedIn, Twitter, GitHub"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                    <input
+                      type="url"
+                      value={link.url}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        // Ensure we're in editing mode
+                        if (!isEditingSocialLinks) {
+                          setIsEditingSocialLinks(true);
+                        }
+                        const newLinks = [...(getContent('contact').social_links || [])];
+                        newLinks[index] = { ...newLinks[index], url: e.target.value };
+                        onContentChange('contact', 'social_links', newLinks);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditingSocialLinks(true);
+                      }}
+                      onFocus={() => {
+                        // Clear any pending blur timeout
+                        if (socialLinksBlurTimeoutRef.current) {
+                          clearTimeout(socialLinksBlurTimeoutRef.current);
+                          socialLinksBlurTimeoutRef.current = null;
+                        }
+                        isEditingSocialLinksRef.current = true;
+                        setIsEditingSocialLinks(true);
+                      }}
+                      onBlur={() => {
+                        isEditingSocialLinksRef.current = false;
+                        // Delay setting editing to false to allow focus to move to other inputs
+                        const timeout = setTimeout(() => {
+                          // Only set to false if we're still not actively editing
+                          if (!isEditingSocialLinksRef.current) {
+                            setIsEditingSocialLinks(false);
+                          }
+                          socialLinksBlurTimeoutRef.current = null;
+                        }, 100);
+                        socialLinksBlurTimeoutRef.current = timeout;
+                      }}
+                      onPaste={(e) => {
+                        e.stopPropagation();
+                        setIsEditingSocialLinks(true);
+                        setTimeout(() => {
+                          const url = e.target.value.trim();
+                          if (url) {
+                            // Auto-detect platform from URL
+                            let platform = link.platform; // Keep existing if no match
+                            const urlLower = url.toLowerCase();
+                            
+                            if (urlLower.includes('linkedin.com')) platform = 'LinkedIn';
+                            else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) platform = 'Twitter/X';
+                            else if (urlLower.includes('instagram.com')) platform = 'Instagram';
+                            else if (urlLower.includes('facebook.com')) platform = 'Facebook';
+                            else if (urlLower.includes('github.com')) platform = 'GitHub';
+                            else if (urlLower.includes('dribbble.com')) platform = 'Dribbble';
+                            else if (urlLower.includes('behance.net')) platform = 'Behance';
+                            else if (urlLower.includes('youtube.com')) platform = 'YouTube';
+                            else if (urlLower.includes('tiktok.com')) platform = 'TikTok';
+                            else if (urlLower.includes('pinterest.com')) platform = 'Pinterest';
+                            else if (urlLower.includes('discord.com')) platform = 'Discord';
+                            else if (urlLower.includes('telegram.me') || urlLower.includes('t.me')) platform = 'Telegram';
+                            else if (urlLower.includes('snapchat.com')) platform = 'Snapchat';
+                            else if (urlLower.includes('reddit.com')) platform = 'Reddit';
+                            else if (urlLower.includes('medium.com')) platform = 'Medium';
+                            else if (urlLower.includes('twitch.tv')) platform = 'Twitch';
+                            
+                            // Update both platform and URL
+                            const newLinks = [...(getContent('contact').social_links || [])];
+                            newLinks[index] = { platform, url };
+                            onContentChange('contact', 'social_links', newLinks);
+                          }
+                        }, 10);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newLinks = (getContent('contact').social_links || []).filter((_, i) => i !== index);
+                      onContentChange('contact', 'social_links', newLinks);
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <a
+                  href={link.url}
+                  className="block"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="text-2xl font-semibold capitalize">{link.platform}</div>
+                  <div className="text-gray-600 mt-2">Connect with me</div>
+                </a>
+              )}
+            </div>
+          ))}
+          
+          {/* Add New Social Link Button */}
+          {isEditing && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                // Clear any pending blur timeout
+                if (socialLinksBlurTimeoutRef.current) {
+                  clearTimeout(socialLinksBlurTimeoutRef.current);
+                  socialLinksBlurTimeoutRef.current = null;
+                }
+                isEditingSocialLinksRef.current = true;
+                setIsEditingSocialLinks(true);
+                const newLinks = [...(getContent('contact').social_links || []), { platform: 'New Platform', url: 'https://' }];
+                onContentChange('contact', 'social_links', newLinks);
+                // Reset editing state after a short delay
+                setTimeout(() => {
+                  isEditingSocialLinksRef.current = false;
+                  setIsEditingSocialLinks(false);
+                }, 100);
+              }}
+              className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors"
+            >
+              <div className="text-center text-gray-500">
+                <div className="text-3xl mb-2">+</div>
+                <div className="text-sm font-medium">Add Social Link</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+    );
+  };
+
   return (
     <div className="w-full bg-white" style={{ fontFamily: styles.fonts.body }}>
       {/* Global Image Crop Editor */}
@@ -1166,526 +1692,145 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
         </div>
       )}
 
-      {/* Hero Section */}
-      <section 
-        data-section-id="hero"
-        className="min-h-screen flex items-center justify-center relative overflow-hidden"
-        style={{ backgroundColor: styles.colors.background }}
-        onMouseEnter={() => isEditing && setActiveSection('hero')}
-        onMouseLeave={() => isEditing && setActiveSection(null)}
-      >
-        {/* Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -top-4 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+      {/* Dynamic Section Rendering - sections render in the order they appear in portfolioData.content */}
+      {portfolioData?.content && Object.keys(portfolioData.content).map((sectionId) => {
+        const sectionData = portfolioData.content[sectionId];
+        if (!sectionData) return null;
         
-        {isEditing && activeSection === 'hero' && (
-          <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-            Hero Section
-          </div>
-        )}
-        
-        <div className="text-center max-w-5xl mx-auto px-6 relative z-10">
-          <div className="mb-8">
-            {(() => {
-              const heroContent = getContent('hero');
-              const imageUrl = heroContent.image;
-              
-              return (
-                <div className="relative inline-block mb-8">
-                  {renderEditableImage(
-                    imageUrl,
-                    'hero',
-                    'image',
-                    'w-40 h-40 rounded-full mx-auto ring-4 ring-white shadow-2xl',
-                    'Upload profile picture'
-                  )}
-                  {/* Decorative rings - with pointer-events-none to allow clicks through */}
-                  <div className="absolute -inset-4 rounded-full border-2 border-blue-200 opacity-30 animate-ping pointer-events-none"></div>
-                  <div className="absolute -inset-8 rounded-full border border-purple-200 opacity-20 animate-pulse pointer-events-none"></div>
-                </div>
-              );
-            })()}
-            
-            {renderEditableText(
-              getContent('hero').name,
-              'hero',
-              'name',
-              `text-6xl lg:text-7xl font-bold mb-6 text-black`,
-              'h1'
-            )}
-            
-            {renderEditableText(
-              getContent('hero').title,
-              'hero',
-              'title',
-              `text-2xl lg:text-3xl mb-8 text-gray-600 font-light`,
-              'h2'
-            )}
-            
-            {renderEditableText(
-              getContent('hero').description,
-              'hero',
-              'description',
-              `text-xl max-w-3xl mx-auto leading-relaxed text-gray-700 mb-12`,
-              'p'
-            )}
-            
-            {/* Simple text instead of buttons */}
-            <div className="text-center">
-              <p className="text-lg text-gray-600 font-medium">Scroll to see my work</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section 
-        data-section-id="about"
-        className="py-20 relative"
-        style={{ backgroundColor: styles.colors.surface }}
-        onMouseEnter={() => isEditing && setActiveSection('about')}
-        onMouseLeave={() => isEditing && setActiveSection(null)}
-      >
-        {isEditing && activeSection === 'about' && (
-          <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-            About Section
-          </div>
-        )}
-        
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              {renderEditableText(
-                getContent('about').heading,
-                'about',
-                'heading',
-                `text-4xl font-bold mb-6`,
-                'h2'
-              )}
-              
-              {renderEditableText(
-                getContent('about').content,
-                'about',
-                'content',
-                `text-lg leading-relaxed mb-8`,
-                'p'
-              )}
-              
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Skills</h3>
-                {renderEditableSkills(getContent('about').skills || [], 'about', 'skills')}
-              </div>
-            </div>
-            
-            <div>
-              {renderEditableImage(
-                getContent('about').image,
-                'about',
-                'image',
-                'aspect-square rounded-lg',
-                'Upload about image'
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Portfolio Section */}
-      <section 
-        data-section-id="portfolio"
-        className="py-20 relative"
-        onMouseEnter={() => isEditing && setActiveSection('portfolio')}
-        onMouseLeave={() => isEditing && setActiveSection(null)}
-      >
-        {isEditing && activeSection === 'portfolio' && (
-          <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-            Portfolio Section
-          </div>
-        )}
-        
-          <div className="max-w-7xl mx-auto px-6">
-            {renderEditableText(
-              getContent('portfolio').heading,
-              'portfolio',
-              'heading',
-              `text-5xl font-bold text-center mb-16`,
-              'h2'
-            )}
-            
-            {/* Enhanced Visual Portfolio Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-              {getContent('portfolio').projects.map((project, index) => {
-                // Create different sizes for visual variety
-                const isLarge = index === 0 || (index + 1) % 4 === 0;
-                const isMedium = (index + 1) % 3 === 0;
+        // Render sections based on their type/id
+        switch (sectionId) {
+          case 'hero':
+            return <React.Fragment key={sectionId}>{renderHeroSection()}</React.Fragment>;
+          case 'about':
+            return <React.Fragment key={sectionId}>{renderAboutSection()}</React.Fragment>;
+          case 'portfolio':
+            return <React.Fragment key={sectionId}>{renderPortfolioSection()}</React.Fragment>;
+          case 'contact':
+            return <React.Fragment key={sectionId}>{renderContactSection()}</React.Fragment>;
+          default:
+            // Render custom sections that were added dynamically
+            return (
+              <section
+                key={sectionId}
+                data-section-id={sectionId}
+                className="py-20 relative"
+                style={{ backgroundColor: styles.colors.surface }}
+                onMouseEnter={() => isEditing && setActiveSection(sectionId)}
+                onMouseLeave={() => isEditing && setActiveSection(null)}
+              >
+                {isEditing && activeSection === sectionId && (
+                  <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
+                    {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} Section
+                  </div>
+                )}
                 
-                return (
-                  <div
-                    key={project.id}
-                    className={`bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden ${
-                      isLarge ? 'md:col-span-2 md:row-span-2' : 
-                      isMedium ? 'md:row-span-2' : ''
-                    }`}
-                  >
-                    {/* Large Image Container */}
-                    <div className={`relative overflow-hidden ${
-                      isLarge ? 'aspect-[4/3]' : 
-                      isMedium ? 'aspect-[3/4]' : 'aspect-[4/3]'
-                    }`}>
-                      {renderEditableImage(
-                        project.image,
-                        'portfolio',
-                        `projects.${index}.image`,
-                        'w-full h-full object-cover',
-                        'Upload project image'
-                      )}
+                <div className="max-w-6xl mx-auto px-6">
+                  {/* Section Title */}
+                  {renderEditableText(
+                    sectionData.title,
+                    sectionId,
+                    'title',
+                    'text-4xl font-bold text-center mb-12',
+                    'h2'
+                  )}
+                  
+                  {/* Section Content */}
+                  {sectionData.content && renderEditableText(
+                    sectionData.content,
+                    sectionId,
+                    'content',
+                    'text-lg leading-relaxed text-center max-w-3xl mx-auto mb-8',
+                    'p'
+                  )}
+                  
+                  {/* Section Items (for lists like experience, education, etc.) */}
+                  {sectionData.items && Array.isArray(sectionData.items) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {sectionData.items.map((item, index) => (
+                        <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+                          {item.name && renderEditableText(
+                            item.name,
+                            sectionId,
+                            `items.${index}.name`,
+                            'text-xl font-semibold mb-2',
+                            'h3'
+                          )}
+                          {item.title && renderEditableText(
+                            item.title,
+                            sectionId,
+                            `items.${index}.title`,
+                            'text-xl font-semibold mb-2',
+                            'h3'
+                          )}
+                          {item.company && renderEditableText(
+                            item.company,
+                            sectionId,
+                            `items.${index}.company`,
+                            'text-lg font-medium text-blue-600 mb-1',
+                            'div'
+                          )}
+                          {item.institution && renderEditableText(
+                            item.institution,
+                            sectionId,
+                            `items.${index}.institution`,
+                            'text-lg font-medium text-blue-600 mb-1',
+                            'div'
+                          )}
+                          {item.position && renderEditableText(
+                            item.position,
+                            sectionId,
+                            `items.${index}.position`,
+                            'text-gray-600 mb-1',
+                            'div'
+                          )}
+                          {item.degree && renderEditableText(
+                            item.degree,
+                            sectionId,
+                            `items.${index}.degree`,
+                            'text-gray-600 mb-1',
+                            'div'
+                          )}
+                          {item.duration && renderEditableText(
+                            item.duration,
+                            sectionId,
+                            `items.${index}.duration`,
+                            'text-sm text-gray-500 mb-2',
+                            'div'
+                          )}
+                          {item.description && renderEditableText(
+                            item.description,
+                            sectionId,
+                            `items.${index}.description`,
+                            'text-gray-700 text-sm',
+                            'p'
+                          )}
+                          {item.image && renderEditableImage(
+                            item.image,
+                            sectionId,
+                            `items.${index}.image`,
+                            'w-full h-48 object-cover rounded mb-4',
+                            'Upload image'
+                          )}
+                        </div>
+                      ))}
                     </div>
-                    
-                    {/* Content Section */}
-                    <div className="p-6">
-                      {renderEditableProjectField(
-                        project.title,
-                        'portfolio',
-                        'projects',
-                        index,
-                        'title',
-                        `text-2xl font-bold mb-2 text-gray-900 ${isLarge ? 'lg:text-3xl' : ''}`,
-                        'h3'
-                      )}
-                      {renderEditableProjectField(
-                        project.description,
-                        'portfolio',
-                        'projects',
-                        index,
-                        'description',
-                        'text-gray-600 mb-4',
-                        'p'
-                      )}
-                      
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2">
-                        {project.tags.map((tag, tagIndex) => (
-                          <span
-                            key={tagIndex}
-                            className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700"
-                          >
-                            {renderEditableProjectField(
-                              tag,
-                              'portfolio',
-                              'projects',
-                              index,
-                              `tags.${tagIndex}`,
-                              'inline-block',
-                              'span'
-                            )}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            {/* Portfolio Statistics */}
-            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
-                {renderEditableText(
-                  getContent('portfolio').projects.length,
-                  'portfolio',
-                  'projectsCount',
-                  'text-3xl font-bold text-gray-900'
-                )}
-                {renderEditableText(
-                  'Projects',
-                  'portfolio',
-                  'projectsLabel',
-                  'text-sm text-gray-600 mt-1'
-                )}
-              </div>
-              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
-                {renderEditableText(
-                  getContent('portfolio').projects.reduce((total, project) => total + (project.tags?.length || 0), 0),
-                  'portfolio',
-                  'technologiesCount',
-                  'text-3xl font-bold text-gray-900'
-                )}
-                {renderEditableText(
-                  'Technologies',
-                  'portfolio',
-                  'technologiesLabel',
-                  'text-sm text-gray-600 mt-1'
-                )}
-              </div>
-              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
-                {renderEditableText(
-                  getContent('portfolio').successRate || '100%',
-                  'portfolio',
-                  'successRate',
-                  'text-3xl font-bold text-gray-900'
-                )}
-                {renderEditableText(
-                  'Success Rate',
-                  'portfolio',
-                  'successRateLabel',
-                  'text-sm text-gray-600 mt-1'
-                )}
-              </div>
-              <div className="text-center p-6 rounded-xl bg-white/50 backdrop-blur-sm">
-                {renderEditableText(
-                  getContent('portfolio').support || '24/7',
-                  'portfolio',
-                  'support',
-                  'text-3xl font-bold text-gray-900'
-                )}
-                {renderEditableText(
-                  'Support',
-                  'portfolio',
-                  'supportLabel',
-                  'text-sm text-gray-600 mt-1'
-                )}
-              </div>
-            </div>
-          </div>
-      </section>
-
-      {/* Contact Section */}
-      {getContent('contact') && (
-        <section 
-          data-section-id="contact"
-          className="py-20 relative"
-          style={{ backgroundColor: styles.colors.surface }}
-          onMouseEnter={() => isEditing && setActiveSection('contact')}
-          onMouseLeave={() => isEditing && setActiveSection(null)}
-        >
-        {isEditing && activeSection === 'contact' && (
-          <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-            Contact Section
-          </div>
-        )}
-        
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          {renderEditableText(
-            getContent('contact').heading,
-            'contact',
-            'heading',
-            `text-4xl font-bold mb-6`,
-            'h2'
-          )}
-          
-          {renderEditableText(
-            getContent('contact').description,
-            'contact',
-            'description',
-            `text-lg mb-12`,
-            'p'
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(getContent('contact').social_links || []).map((link, index) => (
-              <div
-                key={index}
-                className={`block p-6 bg-white rounded-lg transition-shadow cursor-pointer ${
-                  isEditing ? 'hover:shadow-lg border-2 border-dashed border-gray-200 hover:border-blue-300' : 'hover:shadow-lg'
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Clear any pending blur timeout
-                  if (socialLinksBlurTimeoutRef.current) {
-                    clearTimeout(socialLinksBlurTimeoutRef.current);
-                    socialLinksBlurTimeoutRef.current = null;
-                  }
-                  if (isEditing && activeSection !== 'contact') {
-                    setActiveSection('contact');
-                  }
-                }}
-              >
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
-                      <input
-                        type="text"
-                        value={link.platform}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          // Ensure we're in editing mode
-                          if (!isEditingSocialLinks) {
-                            setIsEditingSocialLinks(true);
-                          }
-                          const newLinks = [...(getContent('contact').social_links || [])];
-                          newLinks[index] = { ...newLinks[index], platform: e.target.value };
-                          onContentChange('contact', 'social_links', newLinks);
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsEditingSocialLinks(true);
-                        }}
-                        onFocus={() => {
-                          // Clear any pending blur timeout
-                          if (socialLinksBlurTimeoutRef.current) {
-                            clearTimeout(socialLinksBlurTimeoutRef.current);
-                            socialLinksBlurTimeoutRef.current = null;
-                          }
-                          isEditingSocialLinksRef.current = true;
-                          setIsEditingSocialLinks(true);
-                        }}
-                        onBlur={() => {
-                          isEditingSocialLinksRef.current = false;
-                          // Delay setting editing to false to allow focus to move to other inputs
-                          const timeout = setTimeout(() => {
-                            // Only set to false if we're still not actively editing
-                            if (!isEditingSocialLinksRef.current) {
-                              setIsEditingSocialLinks(false);
-                            }
-                            socialLinksBlurTimeoutRef.current = null;
-                          }, 100);
-                          socialLinksBlurTimeoutRef.current = timeout;
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., LinkedIn, Twitter, GitHub"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                      <input
-                        type="url"
-                        value={link.url}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          // Ensure we're in editing mode
-                          if (!isEditingSocialLinks) {
-                            setIsEditingSocialLinks(true);
-                          }
-                          const newLinks = [...(getContent('contact').social_links || [])];
-                          newLinks[index] = { ...newLinks[index], url: e.target.value };
-                          onContentChange('contact', 'social_links', newLinks);
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsEditingSocialLinks(true);
-                        }}
-                        onFocus={() => {
-                          // Clear any pending blur timeout
-                          if (socialLinksBlurTimeoutRef.current) {
-                            clearTimeout(socialLinksBlurTimeoutRef.current);
-                            socialLinksBlurTimeoutRef.current = null;
-                          }
-                          isEditingSocialLinksRef.current = true;
-                          setIsEditingSocialLinks(true);
-                        }}
-                        onBlur={() => {
-                          isEditingSocialLinksRef.current = false;
-                          // Delay setting editing to false to allow focus to move to other inputs
-                          const timeout = setTimeout(() => {
-                            // Only set to false if we're still not actively editing
-                            if (!isEditingSocialLinksRef.current) {
-                              setIsEditingSocialLinks(false);
-                            }
-                            socialLinksBlurTimeoutRef.current = null;
-                          }, 100);
-                          socialLinksBlurTimeoutRef.current = timeout;
-                        }}
-                        onPaste={(e) => {
-                          e.stopPropagation();
-                          setIsEditingSocialLinks(true);
-                          setTimeout(() => {
-                            const url = e.target.value.trim();
-                            if (url) {
-                              // Auto-detect platform from URL
-                              let platform = link.platform; // Keep existing if no match
-                              const urlLower = url.toLowerCase();
-                              
-                              if (urlLower.includes('linkedin.com')) platform = 'LinkedIn';
-                              else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) platform = 'Twitter/X';
-                              else if (urlLower.includes('instagram.com')) platform = 'Instagram';
-                              else if (urlLower.includes('facebook.com')) platform = 'Facebook';
-                              else if (urlLower.includes('github.com')) platform = 'GitHub';
-                              else if (urlLower.includes('dribbble.com')) platform = 'Dribbble';
-                              else if (urlLower.includes('behance.net')) platform = 'Behance';
-                              else if (urlLower.includes('youtube.com')) platform = 'YouTube';
-                              else if (urlLower.includes('tiktok.com')) platform = 'TikTok';
-                              else if (urlLower.includes('pinterest.com')) platform = 'Pinterest';
-                              else if (urlLower.includes('discord.com')) platform = 'Discord';
-                              else if (urlLower.includes('telegram.me') || urlLower.includes('t.me')) platform = 'Telegram';
-                              else if (urlLower.includes('snapchat.com')) platform = 'Snapchat';
-                              else if (urlLower.includes('reddit.com')) platform = 'Reddit';
-                              else if (urlLower.includes('medium.com')) platform = 'Medium';
-                              else if (urlLower.includes('twitch.tv')) platform = 'Twitch';
-                              
-                              // Update both platform and URL
-                              const newLinks = [...(getContent('contact').social_links || [])];
-                              newLinks[index] = { platform, url };
-                              onContentChange('contact', 'social_links', newLinks);
-                            }
-                          }, 10);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="https://..."
-                      />
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newLinks = (getContent('contact').social_links || []).filter((_, i) => i !== index);
-                        onContentChange('contact', 'social_links', newLinks);
-                      }}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <a
-                    href={link.url}
-                    className="block"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <div className="text-2xl font-semibold capitalize">{link.platform}</div>
-                    <div className="text-gray-600 mt-2">Connect with me</div>
-                  </a>
-                )}
-              </div>
-            ))}
-            
-            {/* Add New Social Link Button */}
-            {isEditing && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Clear any pending blur timeout
-                  if (socialLinksBlurTimeoutRef.current) {
-                    clearTimeout(socialLinksBlurTimeoutRef.current);
-                    socialLinksBlurTimeoutRef.current = null;
-                  }
-                  isEditingSocialLinksRef.current = true;
-                  setIsEditingSocialLinks(true);
-                  const newLinks = [...(getContent('contact').social_links || []), { platform: 'New Platform', url: 'https://' }];
-                  onContentChange('contact', 'social_links', newLinks);
-                  // Reset editing state after a short delay
-                  setTimeout(() => {
-                    isEditingSocialLinksRef.current = false;
-                    setIsEditingSocialLinks(false);
-                  }, 100);
-                }}
-                className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors"
-              >
-                <div className="text-center text-gray-500">
-                  <div className="text-3xl mb-2">+</div>
-                  <div className="text-sm font-medium">Add Social Link</div>
+                  )}
+                  
+                  {/* Section Image */}
+                  {sectionData.image && renderEditableImage(
+                    sectionData.image,
+                    sectionId,
+                    'image',
+                    'w-full max-w-md mx-auto rounded-lg mb-8',
+                    'Upload section image'
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-      )}
+              </section>
+            );
+        }
+      })}
 
-      {/* Dynamic Sections - render any additional sections that were added */}
+      {/* Legacy Dynamic Sections (kept for backwards compatibility) */}
       {portfolioData?.content && Object.entries(portfolioData.content)
         .filter(([sectionId]) => !['hero', 'about', 'portfolio', 'contact'].includes(sectionId))
         .map(([sectionId, sectionData]) => (

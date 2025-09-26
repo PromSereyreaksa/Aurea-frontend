@@ -70,7 +70,7 @@ const LoginPage = () => {
               alt="AUREA Logo" 
               className="h-8 w-auto"
             />
-            <span className="text-2xl font-bold tracking-wide uppercase text-black">
+            <span className="text-2xl font-bold tracking-wide uppercase text-[#1a1a1a]">
               AUREA
             </span>
           </Link>
@@ -81,7 +81,7 @@ const LoginPage = () => {
         <div className="w-full max-w-md">
           <button 
             onClick={handleBack}
-            className="text-black hover:text-gray-600 font-medium flex items-center mb-6"
+            className="text-[#1a1a1a] hover:text-[#fb8500] font-medium flex items-center mb-6 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -90,13 +90,13 @@ const LoginPage = () => {
           </button>
           
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-black mb-2">Welcome back</h1>
+            <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Welcome back</h1>
             <p className="text-gray-600">Sign in to your AUREA account</p>
           </div>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
                 Email Address
               </label>
               <input
@@ -108,8 +108,8 @@ const LoginPage = () => {
                     message: "Invalid email address"
                   }
                 })}
-                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
-                  errors.email ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-[#1a1a1a] bg-white focus:outline-none transition-colors ${
+                  errors.email ? 'border-red-500' : 'border-gray-200 focus:border-[#fb8500] focus:ring-2 focus:ring-[#fb8500]/20'
                 }`}
                 placeholder="Enter your email"
               />
@@ -119,7 +119,7 @@ const LoginPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
                 Password
               </label>
               <input
@@ -131,8 +131,8 @@ const LoginPage = () => {
                     message: "Password must be at least 6 characters"
                   }
                 })}
-                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-black bg-white focus:outline-none transition-colors ${
-                  errors.password ? 'border-red-500' : 'border-gray-200 focus:border-black'
+                className={`w-full border-2 rounded-md px-4 py-3 text-lg text-[#1a1a1a] bg-white focus:outline-none transition-colors ${
+                  errors.password ? 'border-red-500' : 'border-gray-200 focus:border-[#fb8500] focus:ring-2 focus:ring-[#fb8500]/20'
                 }`}
                 placeholder="Enter your password"
               />
@@ -143,10 +143,10 @@ const LoginPage = () => {
             
             <div className="flex items-center justify-between">
               <label className="flex items-center">
-                <input type="checkbox" className="mr-2" />
+                <input type="checkbox" className="mr-2 accent-[#fb8500]" />
                 <span className="text-sm text-gray-600">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-black hover:underline">
+              <Link to="/forgot-password" className="text-sm text-[#fb8500] hover:text-[#fb8500]/80">
                 Forgot password?
               </Link>
             </div>
@@ -154,7 +154,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#fb8500] text-white font-bold text-lg py-4 rounded-md tracking-wide uppercase transition-all hover:bg-[#fb8500]/90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </button>
@@ -163,7 +163,7 @@ const LoginPage = () => {
           <div className="text-center mt-8">
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-black font-medium hover:underline">
+              <Link to="/signup" className="text-[#fb8500] font-medium hover:text-[#fb8500]/80">
                 Sign up here
               </Link>
             </p>

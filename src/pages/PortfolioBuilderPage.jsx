@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import usePortfolioStore from '../stores/portfolioStore';
 import { getTemplate, createPortfolioFromTemplate } from '../templates';
 import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
+import TemplateSetupForm from '../components/PortfolioBuilder/TemplateSetupForm';
 import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
 import DesignToolsPanel from '../components/PortfolioBuilder/DesignToolsPanel';
 
@@ -14,7 +15,7 @@ const PortfolioBuilderPage = () => {
   const { currentPortfolio, isLoading, createPortfolio, updatePortfolio, fetchPortfolioById } = usePortfolioStore();
 
   // Template-based state
-  const [step, setStep] = useState('select'); // 'select', 'customize', 'preview'
+  const [step, setStep] = useState('select'); // 'select', 'setup', 'customize', 'preview'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [portfolioData, setPortfolioData] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
@@ -279,14 +280,79 @@ const PortfolioBuilderPage = () => {
     }
 
     setSelectedTemplate(template);
-
-    if (!portfolioData || portfolioData.templateId !== template.id) {
-      const newPortfolioData = createPortfolioFromTemplate(template.id);
-      setPortfolioData(ensureValidImageUrls(newPortfolioData));
+    
+    // For new portfolios, go to setup step
+    if (id === 'new') {
+      setStep('setup');
+    } else {
+      // For existing portfolios, create portfolio data and go directly to customize
+      if (!portfolioData || portfolioData.templateId !== template.id) {
+        const newPortfolioData = createPortfolioFromTemplate(template.id);
+        setPortfolioData(ensureValidImageUrls(newPortfolioData));
+      }
+      setStep('customize');
+      setShowDesignTools(true);
     }
+  };
 
+  const handleSetupComplete = (setupData) => {
+    const { personalInfo, skillsArray, styling } = setupData;
+    
+    // Create portfolio from template with user data
+    const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, {
+      hero: {
+        name: personalInfo.name,
+        title: personalInfo.title,
+        description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
+        image: '', // User will upload this later
+      },
+      about: {
+        heading: 'About Me',
+        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work. I believe in the power of good design and development to solve problems and tell compelling stories.`,
+        image: '', // User will upload this later
+        skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
+      },
+      contact: {
+        heading: "Let's Work Together",
+        description: "I'm always interested in new projects and opportunities.",
+        form_fields: ['name', 'email', 'message'],
+        social_links: [
+          { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
+          ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
+          ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
+        ].filter(link => link.url && !link.url.includes('example.com')),
+      },
+      // Merge custom styling with template defaults
+      styling: {
+        ...styling,
+        colors: {
+          ...selectedTemplate.styling?.colors,
+          ...styling.colors,
+        },
+        fonts: {
+          ...selectedTemplate.styling?.fonts,
+          ...styling.fonts,
+        },
+      },
+    });
+
+    // Set the title and description from form data
+    setTitle(personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`);
+    setDescription(`Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`);
+    
+    // Apply the portfolio data
+    setPortfolioData(ensureValidImageUrls(newPortfolioData));
     setStep('customize');
     setShowDesignTools(true);
+  };
+
+  const handleBackToTemplates = () => {
+    if (step === 'setup') {
+      setStep('select');
+    } else {
+      setStep('select');
+      setShowDesignTools(false);
+    }
   };
 
   const handleContentChange = (sectionId, fieldId, value) => {
@@ -514,11 +580,6 @@ const PortfolioBuilderPage = () => {
     setShowDesignTools(true);
   };
 
-  const handleBackToTemplates = () => {
-    setStep('select');
-    setShowDesignTools(false);
-  };
-
   const contentChangeHandler = (sectionId, fieldId, value) => {
     handleContentChange(sectionId, fieldId, value);
   };
@@ -549,6 +610,8 @@ const PortfolioBuilderPage = () => {
                 <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
                   {step === 'select'
                     ? 'Choose Template'
+                    : step === 'setup'
+                    ? 'Setup Portfolio'
                     : step === 'customize'
                     ? 'Customize Portfolio'
                     : 'Preview Portfolio'}
@@ -686,10 +749,24 @@ const PortfolioBuilderPage = () => {
                 <div className="flex items-center space-x-2">
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === 'customize' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+                      step === 'setup' 
+                        ? 'bg-blue-500 text-white' 
+                        : ['customize', 'preview'].includes(step)
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-300 text-gray-600'
                     }`}
                   >
-                    {step === 'customize' ? '2' : '✓'}
+                    {['customize', 'preview'].includes(step) ? '✓' : '2'}
+                  </div>
+                  <span className="text-sm text-gray-600">Setup Information</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'customize' ? 'bg-blue-500 text-white' : step === 'preview' ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {step === 'preview' ? '✓' : '3'}
                   </div>
                   <span className="text-sm text-gray-600">Customize</span>
                 </div>
@@ -699,7 +776,7 @@ const PortfolioBuilderPage = () => {
                       step === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
                     }`}
                   >
-                    3
+                    4
                   </div>
                   <span className="text-sm text-gray-600">Preview & Publish</span>
                 </div>
@@ -722,6 +799,21 @@ const PortfolioBuilderPage = () => {
               <TemplateSelector
                 onSelectTemplate={handleTemplateSelect}
                 selectedTemplateId={selectedTemplate?.id}
+              />
+            </motion.div>
+          )}
+
+          {step === 'setup' && selectedTemplate && (
+            <motion.div
+              key="setup"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <TemplateSetupForm
+                template={selectedTemplate}
+                onComplete={handleSetupComplete}
+                onBack={handleBackToTemplates}
               />
             </motion.div>
           )}
