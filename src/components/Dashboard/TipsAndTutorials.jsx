@@ -249,12 +249,12 @@ const TipsAndTutorials = () => {
                     </div>
                   </div>
                   <div className="absolute top-3 left-3">
-                    <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    <span className="bg-[#fb8500]/70 text-white text-xs px-2 py-1 rounded">
                       {tutorial.type}
                     </span>
                   </div>
                   <div className="absolute bottom-3 right-3">
-                    <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    <span className="bg-[#fb8500]/70 text-white text-xs px-2 py-1 rounded">
                       {tutorial.duration}
                     </span>
                   </div>
@@ -297,7 +297,7 @@ const TipsAndTutorials = () => {
 
       {/* View All Button */}
       <div className="mt-8 text-center">
-        <button className="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+        <button className="bg-[#fb8500] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors">
           Browse All Resources
         </button>
       </div>

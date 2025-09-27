@@ -1,5 +1,4 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 
 const features = [
   {
@@ -40,60 +39,50 @@ const features = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.1
-    }
-  }
-};
+const FeatureSection = () => {
+  const sectionRef = useRef(null);
 
-const itemVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: 30
-  },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-slideUp');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      }
+    );
 
-const FeatureSection = () => (
-  <section id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
-    <div className="max-w-7xl mx-auto">
-      <div className="text-center mb-20">
-        <h2 className="text-5xl md:text-6xl font-bold text-[#1a1a1a] mb-8 tracking-wide">
-          Features
-        </h2>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Everything you need to elevate your design practice and build a thriving creative business
-        </p>
-      </div>
-      
-      <motion.div 
-        className="space-y-12"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-      >
+    const cards = sectionRef.current?.querySelectorAll('.feature-card');
+    cards?.forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.15}s`;
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-bold text-[#1a1a1a] mb-8 tracking-wide">
+            Features
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Everything you need to elevate your design practice and build a thriving creative business
+          </p>
+        </div>
+        
+        <div className="space-y-12">
         {features.map((feature, index) => (
-          <motion.div 
+          <div 
             key={feature.title}
-            variants={itemVariants}
-            className="group bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 border border-white/20 hover:border-blue-200/50"
-            whileHover={{ 
-              y: -8,
-              transition: { duration: 0.3 }
-            }}
+            className="feature-card group bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 border border-white/20 hover:border-blue-200/50 opacity-0 translate-y-8"
           >
             <div 
               className={`flex items-center gap-12 ${
@@ -128,11 +117,12 @@ const FeatureSection = () => (
                 <div className="mt-6 h-1 w-0 bg-[#fb8500] rounded-full group-hover:w-20 transition-all duration-500"></div>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
-    </div>
-  </section>
-);
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default FeatureSection;

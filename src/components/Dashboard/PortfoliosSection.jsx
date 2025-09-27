@@ -28,7 +28,7 @@ const PortfoliosSection = ({
         </div>
         <Link
           to="/portfolio-builder/new"
-          className="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center space-x-2"
+          className="bg-[#fb8500] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors flex items-center space-x-2"
         >
           <svg
             className="w-5 h-5"
@@ -70,7 +70,7 @@ const PortfoliosSection = ({
           </p>
           <Link
             to="/portfolio-builder/new"
-            className="inline-block bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="inline-block bg-[#fb8500] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors"
           >
             Create First Portfolio
           </Link>
@@ -149,7 +149,7 @@ const PortfoliosSection = ({
 
                 {/* Template Badge */}
                 {portfolio.templateId && (
-                  <div className="absolute top-3 left-3 bg-black/20 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute top-3 left-3 bg-[#fb8500]/20 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
                     Template
                   </div>
                 )}

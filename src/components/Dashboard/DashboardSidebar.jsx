@@ -80,25 +80,6 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
       ),
     },
     {
-      id: "activity",
-      name: "Activity",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-    },
-    {
       id: "learning",
       name: "Learning",
       icon: (
@@ -145,7 +126,7 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
   ];
 
   return (
-    <div className="w-48 lg:w-56 bg-white border-r border-gray-200 flex flex-col min-h-screen">
+    <div className="w-48 lg:w-56 bg-white border-r border-gray-200 flex flex-col h-full">
       {/* Sidebar Header */}
       <div className="p-4 lg:p-6 border-b border-gray-200">
         <h2 className="text-lg lg:text-xl font-bold text-gray-900">
@@ -164,7 +145,7 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
             onClick={() => setActiveSection(item.id)}
             className={`w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors ${
               activeSection === item.id
-                ? "bg-black text-white"
+                ? "bg-[#fb8500] text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
           >

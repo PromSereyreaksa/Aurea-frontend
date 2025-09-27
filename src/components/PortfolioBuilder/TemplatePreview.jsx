@@ -1181,7 +1181,7 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
     >
       {isEditing && activeSection === 'portfolio' && (
         <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-          Portfolio Section
+          Projects Section
         </div>
       )}
       
@@ -1744,7 +1744,13 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
       )}
 
       {/* Dynamic Section Rendering - sections render in the order they appear in portfolioData.content */}
-      {portfolioData?.content && Object.keys(portfolioData.content).map((sectionId) => {
+      {portfolioData?.content && Object.keys(portfolioData.content)
+        .filter(sectionId => {
+          // Only render actual content sections, not configuration sections or duplicates
+          const nonContentSections = ['styling', 'meta', 'config', 'settings', 'projects'];
+          return !nonContentSections.includes(sectionId);
+        })
+        .map((sectionId) => {
         const sectionData = portfolioData.content[sectionId];
         if (!sectionData) return null;
         
@@ -1880,129 +1886,6 @@ const TemplatePreview = ({ template, portfolioData, isEditing = false, onContent
             );
         }
       })}
-
-      {/* Legacy Dynamic Sections (kept for backwards compatibility) */}
-      {portfolioData?.content && Object.entries(portfolioData.content)
-        .filter(([sectionId]) => !['hero', 'about', 'portfolio', 'contact'].includes(sectionId))
-        .map(([sectionId, sectionData]) => (
-          <section
-            key={sectionId}
-            data-section-id={sectionId}
-            className="py-20 relative"
-            style={{ backgroundColor: styles.colors.surface }}
-            onMouseEnter={() => isEditing && setActiveSection(sectionId)}
-            onMouseLeave={() => isEditing && setActiveSection(null)}
-          >
-            {isEditing && activeSection === sectionId && (
-              <div className="absolute top-4 right-4 bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm z-10">
-                {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} Section
-              </div>
-            )}
-            
-            <div className="max-w-6xl mx-auto px-6">
-              {/* Section Title */}
-              {renderEditableText(
-                sectionData.title,
-                sectionId,
-                'title',
-                'text-4xl font-bold text-center mb-12',
-                'h2'
-              )}
-              
-              {/* Section Content */}
-              {sectionData.content && renderEditableText(
-                sectionData.content,
-                sectionId,
-                'content',
-                'text-lg leading-relaxed text-center max-w-3xl mx-auto mb-8',
-                'p'
-              )}
-              
-              {/* Section Items (for lists like experience, education, etc.) */}
-              {sectionData.items && Array.isArray(sectionData.items) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {sectionData.items.map((item, index) => (
-                    <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                      {item.name && renderEditableText(
-                        item.name,
-                        sectionId,
-                        `items.${index}.name`,
-                        'text-xl font-semibold mb-2',
-                        'h3'
-                      )}
-                      {item.title && renderEditableText(
-                        item.title,
-                        sectionId,
-                        `items.${index}.title`,
-                        'text-xl font-semibold mb-2',
-                        'h3'
-                      )}
-                      {item.company && renderEditableText(
-                        item.company,
-                        sectionId,
-                        `items.${index}.company`,
-                        'text-lg font-medium text-blue-600 mb-1',
-                        'div'
-                      )}
-                      {item.institution && renderEditableText(
-                        item.institution,
-                        sectionId,
-                        `items.${index}.institution`,
-                        'text-lg font-medium text-blue-600 mb-1',
-                        'div'
-                      )}
-                      {item.position && renderEditableText(
-                        item.position,
-                        sectionId,
-                        `items.${index}.position`,
-                        'text-gray-600 mb-1',
-                        'div'
-                      )}
-                      {item.degree && renderEditableText(
-                        item.degree,
-                        sectionId,
-                        `items.${index}.degree`,
-                        'text-gray-600 mb-1',
-                        'div'
-                      )}
-                      {item.duration && renderEditableText(
-                        item.duration,
-                        sectionId,
-                        `items.${index}.duration`,
-                        'text-sm text-gray-500 mb-2',
-                        'div'
-                      )}
-                      {item.description && renderEditableText(
-                        item.description,
-                        sectionId,
-                        `items.${index}.description`,
-                        'text-gray-700 text-sm',
-                        'p'
-                      )}
-                      {item.image && renderEditableImage(
-                        item.image,
-                        sectionId,
-                        `items.${index}.image`,
-                        'w-full h-48 object-cover rounded mb-4',
-                        'Upload image'
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {/* Section Image */}
-              {sectionData.image && renderEditableImage(
-                sectionData.image,
-                sectionId,
-                'image',
-                'w-full max-w-md mx-auto rounded-lg mb-8',
-                'Upload section image'
-              )}
-            </div>
-          </section>
-        ))
-      }
 
       {/* PDF Export Modal */}
       <PDFExport

@@ -347,7 +347,7 @@ const PriceCalculator = () => {
         </div>
 
         <div className="mt-6 flex space-x-4">
-          <button className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+          <button className="flex-1 bg-[#fb8500] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors">
             Upgrade to This Plan
           </button>
           <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">

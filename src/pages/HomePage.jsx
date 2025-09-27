@@ -31,7 +31,7 @@ const HomePage = () => {
             transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
             className="text-xl md:text-2xl font-medium text-black max-w-lg mx-auto"
           >
-            A toolkit for modern designers.
+            A toolkit for designers.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0 }}
@@ -40,8 +40,7 @@ const HomePage = () => {
             className="pt-8"
           >
             <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              AUREA helps designers showcase their work, pitch ideas with confidence, 
-              and calculate pricing with ease.
+              AUREA is a comprehensive launchpad dedicated to supporting emerging designers to build their identity, refine their skills, and succeed in the global creative market.
             </p>
           </motion.div>
         </div>

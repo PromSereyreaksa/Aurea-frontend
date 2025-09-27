@@ -10,7 +10,7 @@ const Footer = () => (
             AUREA
           </h3>
           <p className="text-gray-400 text-sm">
-            A toolkit for modern designers
+            A toolkit for designers
           </p>
         </div>
 

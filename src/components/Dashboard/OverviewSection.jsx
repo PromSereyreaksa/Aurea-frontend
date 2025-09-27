@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import StatsCard from "./StatsCard";
 
-const OverviewSection = ({ portfolios, user }) => {
+const OverviewSection = ({ portfolios, user, setActiveSection }) => {
   // Calculate stats
   const totalViews = portfolios.reduce(
     (sum, portfolio) => sum + (portfolio.viewCount || 0),
@@ -116,7 +116,7 @@ const OverviewSection = ({ portfolios, user }) => {
       title: "Create Portfolio",
       description: "Start building a new portfolio",
       link: "/portfolio-builder/new",
-      color: "bg-black hover:bg-gray-800",
+      color: "bg-[#fb8500] hover:bg-[#fb8500]/90",
       icon: (
         <svg
           className="w-5 h-5"
@@ -136,7 +136,7 @@ const OverviewSection = ({ portfolios, user }) => {
     {
       title: "Browse Templates",
       description: "Choose from curated templates",
-      link: "/templates",
+      link: "/portfolio-builder/new",
       color: "bg-blue-600 hover:bg-blue-700",
       icon: (
         <svg
@@ -182,10 +182,10 @@ const OverviewSection = ({ portfolios, user }) => {
       {/* Welcome Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.name}! 👋
+          Welcome back, {user?.name || 'User'}!
         </h1>
         <p className="text-lg text-gray-600">
-          Here's what's happening with your portfolios today.
+          Here's what's happening with your account today.
         </p>
       </div>
 
@@ -228,12 +228,12 @@ const OverviewSection = ({ portfolios, user }) => {
       <div className="bg-white p-6 rounded-xl border border-gray-200">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-gray-900">Recent Portfolios</h3>
-          <Link
-            to="#portfolios"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          <button
+            onClick={() => setActiveSection('portfolios')}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
           >
             View All
-          </Link>
+          </button>
         </div>
 
         {portfolios.length > 0 ? (
@@ -258,7 +258,7 @@ const OverviewSection = ({ portfolios, user }) => {
                   </span>
                   <Link
                     to={`/portfolio-builder/${portfolio._id}`}
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                    className="bg-[#fb8500] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#fb8500]/90 transition-colors"
                   >
                     Edit
                   </Link>
@@ -289,7 +289,7 @@ const OverviewSection = ({ portfolios, user }) => {
             </p>
             <Link
               to="/portfolio-builder/new"
-              className="inline-block bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="inline-block bg-[#fb8500] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors"
             >
               Create First Portfolio
             </Link>

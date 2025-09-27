@@ -44,7 +44,7 @@ const QuickActions = () => {
           />
         </svg>
       ),
-      link: "/templates",
+      link: "/portfolio-builder/new",
       color: "bg-purple-600 hover:bg-purple-700",
       priority: "medium",
     },

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
+import { Mail, MessageCircle, Linkedin, TrendingUp, DollarSign } from "lucide-react";
 import Navbar from "../components/Shared/Navbar";
 import Footer from "../components/Shared/Footer";
 
@@ -27,81 +28,100 @@ const itemVariants = {
 
 const values = [
   {
-    title: "Design Excellence",
+    title: "Prioritize designer growth",
     description:
-      "We believe great design has the power to transform businesses and inspire audiences.",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        viewBox="0 0 24 24"
-      >
-        <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-      </svg>
-    ),
+      "We are committed to helping designers develop their skills, expand their portfolios, and advance their creative careers.",
+    icon: <TrendingUp size={32} />,
   },
   {
-    title: "Simplicity",
+    title: "Support fair pricing for designers",
     description:
-      "Complex tools shouldn't complicate your creative process. We make powerful features accessible.",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        viewBox="0 0 24 24"
-      >
-        <path d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-      </svg>
-    ),
-  },
-  {
-    title: "Empowerment",
-    description:
-      "Every designer deserves tools that amplify their creativity and business potential.",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        viewBox="0 0 24 24"
-      >
-        <path d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-      </svg>
-    ),
+      "We believe designers deserve to be compensated fairly for their creative work and expertise in the market.",
+    icon: <DollarSign size={32} />,
   },
 ];
 
 const teamMembers = [
   {
-    name: "Sarah Chen",
-    role: "Founder & CEO",
-    description:
-      "Former design director at leading tech companies with 10+ years of experience building design teams.",
-    image:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=400&h=400&fit=crop&crop=face",
+    name: "Kao Sodavann",
+    role: "Founder",
+    image: "/Sodavann.jpg",
+    description: "Visionary leader focused on bridging creativity and technology to empower digital artists.",
+    contacts: [
+      { platform: "email", url: "mailto:kaosodavann714@gmail.com" },
+      { platform: "telegram", url: "https://t.me/vannnnn001"},
+      { platform: "linkedin", url: "https://www.linkedin.com/in/kao-sodavann-b4b173321/" }
+    ]
   },
   {
-    name: "Marcus Rodriguez",
-    role: "Head of Product",
-    description:
-      "Product strategist passionate about creating tools that solve real designer problems.",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+    name: "Prom Sereyreaksa",
+    role: "Co-Founder",
+    image: "/Sereyreaksa.jpg",
+    description: "Creative technologist passionate about intuitive user experience and platform innovation.",
+    contacts: [
+      { platform: "email", url: "mailto:prumsereyreaksa@gmail.com" },
+      { platform: "telegram", url: "https://t.me/souuJ" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/prom-sereyreaksa-2a2298364/" },
+    ]
   },
   {
-    name: "Emily Park",
-    role: "Lead Designer",
-    description:
-      "UI/UX expert focused on crafting intuitive experiences for creative professionals.",
-    image:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+    name: "Chea Ilong",
+    role: "Backend Developer",
+    image: "/Ilong.jpg",
+    description: "Specializes in backend architecture, security, and efficient API development.",
+    contacts: [
+      { platform: "email", url: "mailto:cheadara133@gmail.com" },
+      { platform: "telegram", url: "http://t.me/Chea_Ilong" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/chea-ilong-88bb83333" }
+    ]
+  },
+  {
+    name: "Huy Visa",
+    role: "Backend Developer",
+    image: "/Visa.jpg",
+    description: "Focused on scalable backend systems and reliable data operations.",
+    contacts: [
+      { platform: "email", url: "mailto:Visadekh@gmail.com" },
+      { platform: "telegram", url: "https://t.me/visahuy" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/huy-visa-8443b2308" }
+    ]
+  },
+  {
+    name: "Chheang Sovanpanha",
+    role: "Backend Developer",
+    image: "/Sovanpanha.jpg",
+    description: "Builds robust server-side logic and contributes to seamless data integration.",
+    contacts: [
+      { platform: "email", url: "mailto:Panhasovan51@gmail.com" },
+      { platform: "telegram", url: "https://t.me/nhaaZzz" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/sovanpanha-chheang-17473b32a/" }
+    ]
+  },
+  {
+    name: "Kosal Sophanith",
+    role: "Frontend Developer",
+    image: "/Sophanith.jpg",
+    description: "Frontend engineer with an eye for detail and commitment to excellent UX.",
+    contacts: [
+      { platform: "email", url: "mailto:sophanithkosal9@gmail.com" },
+      { platform: "telegram", url: "https://t.me/nithkidd" },
+      { platform: "linkedin", url: "" }
+    ]
   },
 ];
+
+const getContactIcon = (platform) => {
+  switch (platform) {
+    case 'email':
+      return <Mail size={18} />;
+    case 'telegram':
+      return <MessageCircle size={18} />;
+    case 'linkedin':
+      return <Linkedin size={18} />;
+    default:
+      return null;
+  }
+};
 
 const AboutPage = () => {
   useEffect(() => {
@@ -129,7 +149,7 @@ const AboutPage = () => {
             transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
             className="text-xl md:text-2xl font-medium text-black max-w-lg mx-auto"
           >
-            Empowering designers to showcase their brilliance.
+            Helping designers showcase their brilliance.
           </motion.p>
           <motion.div
             initial={{ opacity: 0 }}
@@ -138,16 +158,14 @@ const AboutPage = () => {
             className="pt-8"
           >
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We believe every designer has a unique story to tell. AUREA
-              provides the tools to tell that story beautifully, professionally,
-              and with confidence.
+              We are AUREA, an all-in-one launchpad for emerging designers. Our mission is to help designers confidently build their identity, present their work professionally, and succeed in the global creative market.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Story Section */}
-      <section className="py-24 px-6 bg-gray-50">
+      <section id="story" className="py-24 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -197,7 +215,7 @@ const AboutPage = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-24 px-6 bg-white">
+      <section id="values" className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
@@ -213,7 +231,7 @@ const AboutPage = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-12"
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"
           >
             {values.map((value, index) => (
               <motion.div
@@ -227,12 +245,12 @@ const AboutPage = () => {
                       scale: 1.1,
                       transition: { duration: 0.3 },
                     }}
-                    className="w-16 h-16 bg-black text-white flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-800 transition-colors duration-300"
+                    className="w-16 h-16 bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200 transition-colors duration-300 rounded-lg"
                   >
                     {value.icon}
                   </motion.div>
                 </div>
-                <h3 className="text-2xl font-bold text-black mb-4 tracking-wide group-hover:text-gray-700 transition-colors">
+                <h3 className="text-2xl font-bold text-black mb-4 tracking-wide group-hover:text-orange-600 transition-colors">
                   {value.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -245,7 +263,7 @@ const AboutPage = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-24 px-6 bg-gray-50">
+      <section id="team" className="py-24 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
@@ -261,13 +279,13 @@ const AboutPage = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-12"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {teamMembers.map((member, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="text-center group"
+                className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -277,18 +295,37 @@ const AboutPage = () => {
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-48 h-48 object-cover mx-auto mb-4 grayscale group-hover:grayscale-0 transition-all duration-300"
+                    className="w-32 h-32 object-cover mx-auto rounded-full mb-4 transition-all duration-300"
                   />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-black mb-2 tracking-wide">
-                  {member.name}
-                </h3>
-                <p className="text-lg font-medium text-gray-800 mb-4">
-                  {member.role}
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  {member.description}
-                </p>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-black mb-2 tracking-wide">
+                    {member.name}
+                  </h3>
+                  <p className="text-lg font-medium text-[#fb8500] mb-3">
+                    {member.role}
+                  </p>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                    {member.description}
+                  </p>
+                  
+                  {/* Contact Links */}
+                  <div className="flex justify-center space-x-3">
+                    {member.contacts.map((contact, contactIndex) => (
+                      contact.url && (
+                        <a
+                          key={contactIndex}
+                          href={contact.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-gray-100 hover:bg-[#fb8500] text-gray-600 hover:text-white rounded-full transition-all duration-300 transform hover:scale-110"
+                        >
+                          {getContactIcon(contact.platform)}
+                        </a>
+                      )
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -296,7 +333,7 @@ const AboutPage = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-24 px-6 bg-black text-white">
+      <section id="mission" className="py-24 px-6 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

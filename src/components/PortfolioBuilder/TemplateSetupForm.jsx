@@ -53,7 +53,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
     email: '',
     phone: '',
     location: '',
-    website: '',
     skills: [],
     bio: '',
   });
@@ -111,7 +110,7 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
       id: 'contact',
       title: 'Contact Details',
       description: 'How can people reach you?',
-      fields: ['email', 'phone', 'location', 'website']
+      fields: ['email', 'phone', 'location']
     },
     {
       id: 'skills',
@@ -236,10 +235,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         if (formData.phone && formData.phone.length < 10) {
           stepErrors.phone = 'Please enter a valid phone number';
         }
-        // URL validation if provided
-        if (formData.website && !formData.website.startsWith('http')) {
-          stepErrors.website = 'Please enter a valid URL (starting with http:// or https://)';
-        }
         break;
         
       case 'skills':
@@ -277,6 +272,33 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
     }
     
     setIsValidating(false);
+  };
+
+  const handleSkipSetup = () => {
+    // Provide minimal default data to skip the setup process
+    const defaultSetupData = {
+      personalInfo: {
+        name: 'Your Name',
+        title: 'Professional Title',
+        email: 'your.email@example.com',
+        bio: 'Add your professional bio here. You can edit this later.',
+        skills: ['Skill 1', 'Skill 2', 'Skill 3']
+      },
+      skillsArray: ['Skill 1', 'Skill 2', 'Skill 3'], // For backwards compatibility
+      styling: {
+        colors: {
+          primary: '#1f2937',
+          accent: '#1f2937',
+        },
+        fonts: {
+          heading: 'Inter',
+          body: 'Inter',
+          accent: 'Inter',
+        }
+      }
+    };
+
+    onComplete(defaultSetupData);
   };
 
   const handlePrevious = () => {
@@ -344,12 +366,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
         onChange={(e) => handleInputChange('description', e.target.value)}
         hasError={errors.description}
       />
-      
-      <div className="bg-[#fb8500]/10 border border-[#fb8500]/20 p-4 rounded-lg">
-        <p className="text-sm text-[#1a1a1a]">
-          💡 <strong>Getting started:</strong> Your name and title will be prominently displayed on your portfolio. Make your title specific and compelling!
-        </p>
-      </div>
     </motion.div>
   );
 
@@ -390,22 +406,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
           onChange={(e) => handleInputChange('location', e.target.value)}
           hasError={errors.location}
         />
-
-        <InputField
-          label="Website/Portfolio URL"
-          type="url"
-          field="website"
-          placeholder="https://yourwebsite.com"
-          value={formData.website}
-          onChange={(e) => handleInputChange('website', e.target.value)}
-          hasError={errors.website}
-        />
-      </div>
-
-      <div className="bg-[#fb8500]/10 border border-[#fb8500]/20 p-4 rounded-lg">
-        <p className="text-sm text-[#1a1a1a]">
-          💡 <strong>Tip:</strong> All contact information is optional, but adding it makes it easier for potential clients or employers to reach you.
-        </p>
       </div>
     </motion.div>
   );
@@ -532,12 +532,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
       <p className="text-sm text-gray-500 -mt-4">
         This will appear in your "About" section. Share your journey, passions, and what drives you professionally.
       </p>
-
-      <div className="bg-[#fb8500]/10 border border-[#fb8500]/20 p-4 rounded-lg">
-        <p className="text-sm text-[#1a1a1a]">
-          ✨ <strong>Pro tip:</strong> Add 3-8 key skills that best represent your expertise. These will appear as badges on your portfolio.
-        </p>
-      </div>
     </motion.div>
   );
 
@@ -621,12 +615,6 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="bg-[#fb8500]/10 border border-[#fb8500]/20 p-4 rounded-lg">
-        <p className="text-sm text-[#1a1a1a]">
-          🎨 <strong>Perfect!</strong> Your portfolio is almost ready. You can always change these styles later in the customization panel.
-        </p>
       </div>
     </motion.div>
   );
@@ -722,16 +710,30 @@ const TemplateSetupForm = ({ template, onComplete, onBack }) => {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between items-center">
-          <button
-            type="button"
-            onClick={currentStep === 0 ? onBack : handlePrevious}
-            className="px-6 py-3 border-2 border-[#1a1a1a] text-[#1a1a1a] bg-white rounded-lg hover:bg-[#1a1a1a] hover:text-white transition-all duration-200 flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {currentStep === 0 ? 'Back to Templates' : 'Previous'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={currentStep === 0 ? onBack : handlePrevious}
+              className="px-6 py-3 border-2 border-[#1a1a1a] text-[#1a1a1a] bg-white rounded-lg hover:bg-[#1a1a1a] hover:text-white transition-all duration-200 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              {currentStep === 0 ? 'Back to Templates' : 'Previous'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleSkipSetup}
+              className="px-4 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-800 transition-all duration-200 flex items-center gap-2 text-sm"
+              title="Skip setup and use default values"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3-3 3m0 0l-3-3m3 3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Skip Setup
+            </button>
+          </div>
           
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">

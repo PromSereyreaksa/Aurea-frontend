@@ -170,7 +170,7 @@ const SortableSection = ({ sectionId, sectionData, onDelete, onEdit, getSectionI
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-medium text-gray-900 capitalize truncate">
-                {sectionId.replace(/([A-Z])/g, ' $1').trim()}
+                {sectionId === 'portfolio' ? 'Projects' : sectionId.replace(/([A-Z])/g, ' $1').trim()}
               </h4>
               {imagePreview && (
                 <div className="w-10 h-10 md:w-8 md:h-8 rounded bg-gray-100 overflow-hidden flex-shrink-0 ml-2">
@@ -213,6 +213,24 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
 
   const currentStyles = portfolioData?.styling || template.styling;
+
+  // Icon mapping function
+  const getSectionIcon = (id) => {
+    const icons = {
+      hero: '🏠',
+      about: '👤',
+      experience: '💼',
+      education: '🎓',
+      skills: '⚡',
+      projects: '🚀',
+      contact: '📧',
+      testimonials: '💬',
+      certifications: '🏆',
+      portfolio: '📁',
+      services: '🛠️'
+    };
+    return icons[id] || '📄';
+  };
 
   // Notify parent about initial collapse state
   React.useEffect(() => {
@@ -300,7 +318,8 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
   };
 
   // Get section order for drag and drop
-  const sectionOrder = portfolioData?.content ? Object.keys(portfolioData.content) : [];
+  const sectionOrder = portfolioData?.content ? 
+    Object.keys(portfolioData.content).filter(sectionId => sectionId !== 'projects') : [];
 
   // Color presets for quick selection
   const colorPresets = [
@@ -559,13 +578,19 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
     };
 
     // Add the new section to portfolio content
+    console.log('Adding section:', sectionType.id, 'Current content keys:', Object.keys(portfolioData.content || {}));
+    
+    const newContent = {
+      ...portfolioData.content,
+      [sectionType.id]: newSectionData
+    };
+    
+    console.log('New content keys:', Object.keys(newContent));
+    
     onContentChange('_sections', 'add', { 
       sectionId: sectionType.id, 
       sectionData: newSectionData,
-      content: {
-        ...portfolioData.content,
-        [sectionType.id]: newSectionData
-      }
+      content: newContent
     });
   };
 
@@ -796,23 +821,6 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                               const sectionData = portfolioData.content[sectionId];
                               if (!sectionData) return null;
 
-                              const getSectionIcon = (id) => {
-                                const icons = {
-                                  hero: '🏠',
-                                  about: '👤',
-                                  experience: '💼',
-                                  education: '🎓',
-                                  skills: '⚡',
-                                  projects: '🚀',
-                                  contact: '📧',
-                                  testimonials: '💬',
-                                  certifications: '🏆',
-                                  portfolio: '📁',
-                                  services: '🛠️'
-                                };
-                                return icons[id] || '📄';
-                              };
-
                               return (
                                 <SortableSection
                                   key={sectionId}
@@ -839,7 +847,6 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
                         { id: 'experience', name: 'Experience', icon: '💼', description: 'Work history and positions' },
                         { id: 'education', name: 'Education', icon: '🎓', description: 'Academic background' },
                         { id: 'skills', name: 'Skills', icon: '⚡', description: 'Technical and soft skills' },
-                        { id: 'projects', name: 'Projects', icon: '🚀', description: 'Portfolio projects' },
                         { id: 'contact', name: 'Contact', icon: '📧', description: 'Contact information' },
                         { id: 'testimonials', name: 'Testimonials', icon: '💬', description: 'Client reviews and feedback' },
                         { id: 'certifications', name: 'Certifications', icon: '🏆', description: 'Professional certifications' },

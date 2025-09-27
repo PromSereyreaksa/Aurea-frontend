@@ -325,8 +325,8 @@ const PortfolioBuilderPage = () => {
   const handleSetupComplete = (setupData) => {
     const { personalInfo, skillsArray, styling } = setupData;
     
-    // Create portfolio from template with user data
-    const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, {
+    // Create portfolio from template with user data (content sections only)
+    const contentData = {
       hero: {
         name: personalInfo.name,
         title: personalInfo.title,
@@ -349,19 +349,28 @@ const PortfolioBuilderPage = () => {
           ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
         ].filter(link => link.url && !link.url.includes('example.com')),
       },
-      // Merge custom styling with template defaults
-      styling: {
-        ...styling,
-        colors: {
-          ...selectedTemplate.styling?.colors,
-          ...styling.colors,
-        },
-        fonts: {
-          ...selectedTemplate.styling?.fonts,
-          ...styling.fonts,
-        },
+    };
+
+    // Create styling configuration separately
+    const stylingConfig = {
+      colors: {
+        ...selectedTemplate.styling?.colors,
+        ...styling.colors,
       },
-    });
+      fonts: {
+        ...selectedTemplate.styling?.fonts,
+        ...styling.fonts,
+      },
+    };
+
+    // Create portfolio with separated content and styling
+    const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, contentData);
+    
+    // Apply styling configuration properly
+    newPortfolioData.styling = {
+      ...newPortfolioData.styling,
+      ...stylingConfig,
+    };
 
     // Set the title and description from form data
     setTitle(personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`);
