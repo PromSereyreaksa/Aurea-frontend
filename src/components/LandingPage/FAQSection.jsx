@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
@@ -26,9 +27,24 @@ const faqs = [
 
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState(null);
+  const navigate = useNavigate();
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
+  };
+
+  const handleContactSupport = () => {
+    navigate('/contact');
+    // Use setTimeout to ensure page has navigated before scrolling
+    setTimeout(() => {
+      const contactFormSection = document.getElementById('contact-form-section');
+      if (contactFormSection) {
+        contactFormSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   return (
@@ -109,7 +125,8 @@ const FAQSection = () => {
             Still have questions? We're here to help!
           </p>
           <button
-            className="bg-[#fb8500] text-white px-8 py-3 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90"
+            onClick={handleContactSupport}
+            className="inline-block bg-[#fb8500] text-white px-8 py-3 rounded-md font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90 hover:transform hover:-translate-y-1"
           >
             Contact Support
           </button>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import FeatureCard from "./FeatureCard";
 
 const features = [
   {
@@ -40,34 +41,8 @@ const features = [
 ];
 
 const FeatureSection = () => {
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-slideUp');
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
-      }
-    );
-
-    const cards = sectionRef.current?.querySelectorAll('.feature-card');
-    cards?.forEach((card, index) => {
-      card.style.animationDelay = `${index * 0.15}s`;
-      observer.observe(card);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section ref={sectionRef} id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <section id="features" className="py-32 px-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-bold text-[#1a1a1a] mb-8 tracking-wide">
@@ -78,47 +53,14 @@ const FeatureSection = () => {
           </p>
         </div>
         
-        <div className="space-y-12">
-        {features.map((feature, index) => (
-          <div 
-            key={feature.title}
-            className="feature-card group bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 border border-white/20 hover:border-blue-200/50 opacity-0 translate-y-8"
-          >
-            <div 
-              className={`flex items-center gap-12 ${
-                index === 1 ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              {/* Icon */}
-              <div className="flex-shrink-0">
-                <div className="w-24 h-24 flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 to-purple-100/50 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
-                  <div className="relative z-10 group-hover:scale-110 transition-transform duration-300">
-                    {React.cloneElement(feature.icon, {
-                      className: "w-16 h-16 text-[#fb8500] transition-transform duration-300"
-                    })}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Content */}
-              <div className="flex-1">
-                <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  {feature.desc}
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.details}
-                </p>
-                
-                {/* Subtle accent line */}
-                <div className="mt-6 h-1 w-0 bg-[#fb8500] rounded-full group-hover:w-20 transition-all duration-500"></div>
-              </div>
-            </div>
-          </div>
-        ))}
+        <div className="space-y-16">
+          {features.map((feature, index) => (
+            <FeatureCard 
+              key={feature.title}
+              feature={feature}
+              index={index}
+            />
+          ))}
         </div>
       </div>
     </section>

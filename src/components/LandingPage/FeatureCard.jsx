@@ -1,47 +1,88 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 
 const FeatureCard = ({ feature, index }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!cardRef.current) return;
+
+      const card = cardRef.current;
+      const rect = card.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Calculate visibility progress
+      const cardTop = rect.top;
+      const cardHeight = rect.height;
+      const triggerPoint = windowHeight * 0.8; // Start animation when card is 80% visible
+      
+      if (cardTop < triggerPoint && cardTop + cardHeight > 0) {
+        // Card is in view - animate in
+        const progress = Math.min((triggerPoint - cardTop) / (cardHeight * 0.5), 1);
+        const opacity = Math.max(0, Math.min(1, progress));
+        const translateY = (1 - progress) * 50;
+        const scale = 0.95 + (progress * 0.05);
+        
+        card.style.opacity = opacity;
+        card.style.transform = `translateY(${translateY}px) scale(${scale})`;
+      } else if (cardTop >= triggerPoint) {
+        // Card not reached yet
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px) scale(0.95)';
+      }
+    };
+
+    // Initial state
+    if (cardRef.current) {
+      cardRef.current.style.opacity = '0';
+      cardRef.current.style.transform = 'translateY(50px) scale(0.95)';
+      cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+    }
+
+    handleScroll(); // Initial call
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
-      viewport={{ once: true }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative"
+    <div 
+      ref={cardRef}
+      className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 border border-white/20 hover:border-blue-200/50"
     >
-      {/* Main Card */}
-      <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 relative z-10">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center mb-6">
-            {feature.icon}
-          </div>
-          <h3 className="text-2xl lg:text-3xl font-bold text-black mb-4 tracking-wide">
-            {feature.title}
-          </h3>
-          <p className="text-lg text-gray-700 mb-4 leading-relaxed font-medium">
-            {feature.desc}
-          </p>
-        </div>
-      </div>
-
-      {/* Expanded Details - Drops down below the card */}
       <div 
-        className={`absolute top-full left-0 right-0 bg-white rounded-xl border border-gray-100 shadow-lg z-20 transition-all duration-300 ${
-          isHovered ? 'opacity-100 translate-y-2' : 'opacity-0 translate-y-0 pointer-events-none'
+        className={`flex items-center gap-12 ${
+          index === 1 ? 'flex-row-reverse' : 'flex-row'
         }`}
       >
-        <div className="p-6 border-t border-gray-200">
-          <p className="text-base text-gray-600 leading-relaxed">
+        {/* Icon */}
+        <div className="flex-shrink-0">
+          <div className="w-24 h-24 flex items-center justify-center relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 to-purple-100/50 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+            <div className="relative z-10 group-hover:scale-110 transition-transform duration-300">
+              {React.cloneElement(feature.icon, {
+                className: "w-16 h-16 text-[#fb8500] transition-transform duration-300"
+              })}
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1">
+          <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">
+            {feature.title}
+          </h3>
+          <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+            {feature.desc}
+          </p>
+          <p className="text-gray-600 leading-relaxed">
             {feature.details}
           </p>
+          
+          {/* Subtle accent line */}
+          <div className="mt-6 h-1 w-0 bg-[#fb8500] rounded-full group-hover:w-20 transition-all duration-500"></div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

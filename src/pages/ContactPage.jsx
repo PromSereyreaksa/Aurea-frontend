@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { useForm, ValidationError } from '@formspree/react';
 import Navbar from "../components/Shared/Navbar";
 import Footer from "../components/Shared/Footer";
 
@@ -7,7 +9,7 @@ const contactMethods = [
   {
     title: "Email Us",
     description: "Get in touch with our team for any questions or support.",
-    contact: "hello@aurea.com",
+    contact: "aureatool@gmail.com",
     icon: (
       <svg
         className="w-8 h-8"
@@ -21,43 +23,71 @@ const contactMethods = [
     ),
   },
   {
-    title: "Support Center",
-    description: "Need help with your account or have technical questions?",
-    contact: "support@aurea.com",
+    title: "Contact Via Facebook",
+    description: "Connect with us on our official Facebook page.",
+    contact: "AUREA",
+    link: "https://web.facebook.com/profile.php?id=61580414833465",
     icon: (
       <svg
         className="w-8 h-8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
+        fill="currentColor"
         viewBox="0 0 24 24"
       >
-        <path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 109.75 9.75A9.75 9.75 0 0012 2.25z" />
-      </svg>
-    ),
-  },
-  {
-    title: "Business Inquiries",
-    description: "Interested in partnerships or enterprise solutions?",
-    contact: "business@aurea.com",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        viewBox="0 0 24 24"
-      >
-        <path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
       </svg>
     ),
   },
 ];
 
 const ContactPage = () => {
+  const [state, handleSubmit] = useForm("xnngjrqd");
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Show success modal when form is submitted successfully
+  useEffect(() => {
+    if (state.succeeded) {
+      setShowSuccessModal(true);
+      // Reset form data
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    }
+  }, [state.succeeded]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+  };
+
+  const scrollToContactForm = () => {
+    const contactFormSection = document.getElementById('contact-form-section');
+    if (contactFormSection) {
+      contactFormSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-black font-sans">
@@ -108,7 +138,7 @@ const ContactPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {contactMethods.map((method, index) => (
               <motion.div
                 key={index}
@@ -117,6 +147,15 @@ const ContactPage = () => {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
                 className="text-center group cursor-pointer"
+                onClick={() => {
+                  if (method.link) {
+                    window.open(method.link, '_blank');
+                  } else if (method.title === 'Email Us') {
+                    scrollToContactForm();
+                  } else {
+                    window.location.href = `mailto:${method.contact}`;
+                  }
+                }}
               >
                 <div className="relative mb-8">
                   <motion.div
@@ -135,13 +174,9 @@ const ContactPage = () => {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   {method.description}
                 </p>
-                <motion.a
-                  href={`mailto:${method.contact}`}
-                  whileHover={{ scale: 1.05 }}
-                  className="inline-block text-[#fb8500] font-medium border-b-2 border-[#fb8500] hover:border-[#fb8500]/80 transition-colors"
-                >
+                <p className="text-[#fb8500] font-medium tracking-wide hover:text-[#e07400] transition-colors">
                   {method.contact}
-                </motion.a>
+                </p>
               </motion.div>
             ))}
           </div>
@@ -149,7 +184,7 @@ const ContactPage = () => {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-24 px-6 bg-white">
+      <section id="contact-form-section" className="py-24 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
@@ -165,61 +200,94 @@ const ContactPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
+            onSubmit={handleSubmit}
             className="space-y-8"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
-                  placeholder="Enter your first name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
-                  placeholder="Enter your last name"
-                />
-              </div>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
+                placeholder="Enter your full name"
+                required
+              />
+              <ValidationError 
+                prefix="Name" 
+                field="name"
+                errors={state.errors}
+                className="text-red-500 text-sm mt-1"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label htmlFor="email" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                 placeholder="Enter your email address"
+                required
+              />
+              <ValidationError 
+                prefix="Email" 
+                field="email"
+                errors={state.errors}
+                className="text-red-500 text-sm mt-1"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label htmlFor="subject" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Subject
               </label>
               <input
+                id="subject"
                 type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors"
                 placeholder="What's this about?"
+                required
+              />
+              <ValidationError 
+                prefix="Subject" 
+                field="subject"
+                errors={state.errors}
+                className="text-red-500 text-sm mt-1"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label htmlFor="message" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
                 Message
               </label>
               <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
                 rows={6}
                 className="w-full px-4 py-3 border-2 border-gray-200 focus:border-[#fb8500] outline-none transition-colors resize-none"
                 placeholder="Tell us more about your inquiry..."
+                required
+              />
+              <ValidationError 
+                prefix="Message" 
+                field="message"
+                errors={state.errors}
+                className="text-red-500 text-sm mt-1"
               />
             </div>
 
@@ -227,38 +295,96 @@ const ContactPage = () => {
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-[#fb8500] text-white py-4 px-8 font-medium tracking-wide uppercase transition-all hover:bg-[#fb8500]/90"
+              disabled={state.submitting}
+              className={`w-full py-4 px-8 font-medium tracking-wide uppercase transition-all ${
+                state.submitting 
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                  : 'bg-[#fb8500] text-white hover:bg-[#fb8500]/90'
+              }`}
             >
-              Send Message
+              {state.submitting ? 'Sending...' : 'Send Message'}
             </motion.button>
           </motion.form>
         </div>
       </section>
 
-      {/* Office Section */}
-      <section className="py-24 px-6 bg-[#1a1a1a] text-white">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4" style={{ backdropFilter: 'blur(8px)' }}>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.7, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.7, y: 50 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-100"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-wide">
-              Visit Our Studio
-            </h2>
-            <p className="text-xl md:text-2xl leading-relaxed mb-8">
-              Located in the heart of the design district, our studio is always
-              open to creative minds and passionate designers.
-            </p>
-            <div className="text-lg">
-              <p className="mb-2">123 Design Street</p>
-              <p className="mb-2">Creative District, CD 12345</p>
-              <p>San Francisco, CA</p>
+            <div className="text-center">
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+                className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <svg
+                  className="w-10 h-10 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </motion.div>
+
+              {/* Success Message */}
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="text-2xl font-bold text-[#1a1a1a] mb-3"
+              >
+                Message Sent Successfully!
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+                className="text-gray-600 mb-2"
+              >
+                Thank you for reaching out to us.
+              </motion.p>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+                className="text-gray-600 mb-8"
+              >
+                We'll get back to you within 24 hours.
+              </motion.p>
+
+              {/* Close Button */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.4 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={closeSuccessModal}
+                className="w-full py-3 px-6 bg-[#fb8500] text-white font-medium tracking-wide uppercase rounded-lg hover:bg-[#e07400] transition-colors duration-200"
+              >
+                Continue
+              </motion.button>
             </div>
           </motion.div>
         </div>
-      </section>
+      )}
 
       <Footer />
     </div>

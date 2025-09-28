@@ -5,6 +5,8 @@ import ProtectedRoute from "./components/PortfolioBuilder/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import EventsPage from "./pages/EventsPage";
+import AllEventsPage from "./pages/AllEventsPage";
 import TermsPage from "./pages/TermsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -20,6 +22,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/all" element={<AllEventsPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />

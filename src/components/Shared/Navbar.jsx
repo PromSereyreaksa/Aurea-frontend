@@ -12,8 +12,8 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   
-  // Show navigation items only on landing page and about page
-  const showNavItems = location.pathname === '/' || location.pathname === '/about';
+  // Show navigation items only on landing page, about page, and events page
+  const showNavItems = location.pathname === '/' || location.pathname === '/about' || location.pathname === '/events';
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -47,6 +47,11 @@ const Navbar = () => {
           label: 'Features', 
           link: '#', 
           onClick: () => scrollToSection('features')
+        },
+        { 
+          label: 'Events', 
+          link: '#', 
+          onClick: () => scrollToSection('events')
         },
         { 
           label: 'FAQ', 
@@ -90,6 +95,33 @@ const Navbar = () => {
           onClick: () => scrollToSection('mission')
         }
       ];
+    } else if (location.pathname === '/events') {
+      baseItems = [
+        { 
+          label: 'Home', 
+          link: '/'
+        },
+        { 
+          label: 'Overview', 
+          link: '#', 
+          onClick: () => scrollToSection('home')
+        },
+        { 
+          label: 'Why Join', 
+          link: '#', 
+          onClick: () => scrollToSection('about')
+        },
+        { 
+          label: 'Events', 
+          link: '#', 
+          onClick: () => scrollToSection('events')
+        },
+        { 
+          label: 'Newsletter', 
+          link: '#', 
+          onClick: () => scrollToSection('newsletter')
+        }
+      ];
     } else {
       // Default items for other pages
       baseItems = [
@@ -115,9 +147,8 @@ const Navbar = () => {
   };
 
   const socialItems = [
-    { label: 'Facebook', link: 'https://facebook.com' },
-    { label: 'Twitter', link: 'https://twitter.com' },
-    { label: 'Instagram', link: 'https://instagram.com' }
+    { label: 'Facebook', link: 'https://web.facebook.com/profile.php?id=61580414833465' },
+    { label: 'Tiktok', link: 'https://www.tiktok.com/@aureatool?_t=ZS-906MF0fRW8W&_r=1' },
   ];
 
   // Close dropdown when clicking outside
@@ -134,8 +165,8 @@ const Navbar = () => {
     };
   }, []);
 
-  // For landing and about pages, use StaggeredMenu
-  if (location.pathname === '/' || location.pathname === '/about') {
+  // For landing, about, and events pages, use StaggeredMenu
+  if (location.pathname === '/' || location.pathname === '/about' || location.pathname === '/events') {
     return (
       <div className="fixed top-0 left-0 w-full h-screen pointer-events-none z-50">
         <StaggeredMenu

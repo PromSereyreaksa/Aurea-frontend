@@ -299,9 +299,9 @@ export const StaggeredMenu = ({
 
   return (
     <>
-      <div className="sm-scope w-full h-full">
+      <div className="sm-scope w-full h-full pointer-events-none">
         <div
-          className={(className ? className + ' ' : '') + 'staggered-menu-wrapper relative w-full h-full z-40'}
+          className={(className ? className + ' ' : '') + 'staggered-menu-wrapper relative w-full h-full z-40 pointer-events-none'}
           style={accentColor ? { ['--sm-accent']: accentColor } : undefined}
           data-position={position}
           data-open={open || undefined}
@@ -476,16 +476,34 @@ export const StaggeredMenu = ({
                   >
                     <span
                       className="sm-panel-itemLabel relative"
-                      onClick={item.onClick}
-                      style={{ cursor: item.onClick ? 'pointer' : 'default' }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (item.onClick) {
+                          item.onClick();
+                        } else if (item.link && item.link !== '#') {
+                          window.location.href = item.link;
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {item.link ? (
+                      {item.link && item.link !== '#' ? (
                         <a
                           href={item.link}
                           target={item.label.toLowerCase() === 'about' ? '_blank' : '_self'}
                           rel={item.label.toLowerCase() === 'about' ? 'noopener noreferrer' : undefined}
                           style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block', width: '100%' }}
-                          onClick={item.onClick}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (item.onClick) {
+                              item.onClick();
+                            } else {
+                              if (item.label.toLowerCase() === 'about') {
+                                window.open(item.link, '_blank');
+                              } else {
+                                window.location.href = item.link;
+                              }
+                            }
+                          }}
                         >
                           {item.label}
                           {item.label.toLowerCase() === 'about' && (
@@ -539,7 +557,7 @@ export const StaggeredMenu = ({
         </div>
       </div>
       <style>{`
-        .sm-scope .staggered-menu-wrapper { position: relative; width: 100%; height: 100%; z-index: 40; }
+        .sm-scope .staggered-menu-wrapper { position: relative; width: 100%; height: 100%; z-index: 40; pointer-events: none; }
         .sm-scope .staggered-menu-header { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 2em; background: transparent; pointer-events: none; z-index: 20; }
         .sm-scope .staggered-menu-header > * { pointer-events: auto; }
         .sm-scope .sm-logo { display: flex; align-items: center; user-select: none; }
@@ -550,8 +568,13 @@ export const StaggeredMenu = ({
         .sm-scope .sm-toggle:focus-visible { outline: 2px solid #fb8500; outline-offset: 2px; }
         .sm-scope .sm-line:last-of-type { margin-top: 6px; }
         .sm-scope .sm-line { display: none !important; }
-        .sm-scope .staggered-menu-panel { position: absolute; top: 0; right: 0; width: clamp(320px, 44vw, 600px); height: 100%; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 7em 2.5em 2.5em 2.5em; overflow-y: auto; z-index: 10; border-left: 8px solid #fb8500; }
-        .sm-scope [data-position='left'] .staggered-menu-panel { right: auto; left: 0; border-left: none; border-right: 8px solid #fb8500; }
+        .sm-scope .staggered-menu-panel { position: absolute; top: 0; right: 0; width: clamp(320px, 44vw, 600px); height: 100%; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 7em 2.5em 2.5em 2.5em; overflow-y: auto; z-index: 10; pointer-events: auto; }
+        .sm-scope .staggered-menu-panel::before { content: ''; position: absolute; left: -12px; top: 0; height: 100%; width: 4px; background: #e07400; }
+        .sm-scope .staggered-menu-panel::after { content: ''; position: absolute; left: -8px; top: 0; height: 100%; width: 4px; background: #fb8500; }
+        .sm-scope .staggered-menu-panel { border-left: 4px solid #ff8f00; }
+        .sm-scope [data-position='left'] .staggered-menu-panel { right: auto; left: 0; border-left: none; border-right: 4px solid #ff8f00; }
+        .sm-scope [data-position='left'] .staggered-menu-panel::before { left: auto; right: -12px; background: #e07400; }
+        .sm-scope [data-position='left'] .staggered-menu-panel::after { left: auto; right: -8px; background: #fb8500; }
         .sm-scope .sm-prelayers { position: absolute; top: 0; right: 0; bottom: 0; width: clamp(320px, 44vw, 600px); pointer-events: none; z-index: 5; }
         .sm-scope [data-position='left'] .sm-prelayers { right: auto; left: 0; }
         .sm-scope .sm-prelayer { position: absolute; top: 0; right: 0; height: 100%; width: 100%; transform: translateX(0); }
