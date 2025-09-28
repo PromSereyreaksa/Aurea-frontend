@@ -1,0 +1,106 @@
+{
+  "_id": "68d94111ba238f22b1f8f372",
+  "userId": "68d7bae4ba238f22b1f8e956",
+  "title": "Your Name's Portfolio",
+  "description": "Portfolio showcasing the work of Your Name - Professional Title",
+  "template": "minimal-designer",
+  "sections": [
+    {
+      "type": "hero",
+      "content": {
+        "name": "mine  mine mine",
+        "title": "Professional Title",
+        "description": "Passionate professional title with expertise in creating exceptional experiences.",
+        "image": "",
+        "background": "#f8fafc"
+      },
+      "_id": "68d94111ba238f22b1f8f373"
+    },
+    {
+      "type": "about",
+      "content": {
+        "heading": "About Me",
+        "content": "Add your professional bio here. You can edit this later.",
+        "image": "",
+        "skills": [
+          "Skill 1",
+          "Skill 2",
+          "Skill 3"
+        ]
+      },
+      "_id": "68d94111ba238f22b1f8f374"
+    },
+    {
+      "type": "contact",
+      "content": {
+        "heading": "Let's Work Together",
+        "description": "I'm always interested in new projects and opportunities.",
+        "form_fields": [
+          "name",
+          "email",
+          "message"
+        ],
+        "social_links": [
+          {
+            "platform": "New Platform",
+            "url": "https://"
+          },
+          {
+            "platform": "New Platform",
+            "url": "https://"
+          },
+          {
+            "platform": "New Platform",
+            "url": "https://"
+          }
+        ]
+      },
+      "_id": "68d94111ba238f22b1f8f375"
+    },
+    {
+      "type": "projects",
+      "content": [],
+      "_id": "68d94111ba238f22b1f8f376"
+    }
+  ],
+  "styling": {
+    "colors": {
+      "primary": "#1f2937",
+      "secondary": "#6b7280",
+      "accent": "#1f2937",
+      "background": "#ffffff",
+      "surface": "#f8fafc",
+      "text": "#1f2937",
+      "textSecondary": "#6b7280"
+    },
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter",
+      "accent": "Inter"
+    },
+    "spacing": {
+      "section": "5rem",
+      "element": "2rem",
+      "tight": "1rem"
+    },
+    "borderRadius": {
+      "small": "0.375rem",
+      "medium": "0.5rem",
+      "large": "0.75rem"
+    },
+    "shadows": {
+      "small": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "medium": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+      "large": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+    }
+  },
+  "published": false,
+  "isPublic": false,
+  "viewCount": 0,
+  "createdAt": "2025-09-28T14:07:13.111Z",
+  "updatedAt": "2025-09-28T14:10:37.815Z",
+  "slug": "your-name-s-portfolio",
+  "__v": 0,
+  "url": "/portfolio/your-name-s-portfolio",
+  "id": "68d94111ba238f22b1f8f372"
+}

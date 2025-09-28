@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:html": "node scripts/generateHTML.js",
+    "build:html-sample": "node scripts/generateSampleHTML.js",
+    "build:html-exact": "node scripts/generateExactHTML.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -18,6 +21,7 @@
     "@formspree/react": "^3.0.0",
     "@gsap/react": "^2.1.2",
     "@react-pdf/renderer": "^4.3.0",
+    "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/vite": "^4.1.13",
     "@tiptap/react": "^3.4.2",
     "@tiptap/starter-kit": "^3.4.2",
@@ -37,6 +41,7 @@
     "react-hot-toast": "^2.6.0",
     "react-image-crop": "^11.0.10",
     "react-router-dom": "^7.9.0",
+    "react-to-html": "^0.0.4",
     "tailwindcss": "^4.1.13",
     "zustand": "^5.0.8"
   },

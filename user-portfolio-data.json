@@ -1,0 +1,98 @@
+{
+  "_id": "68d7bb7cba238f22b1f8e972",
+  "userId": "68d7bae4ba238f22b1f8e956",
+  "title": "chea ilong's Portfolio",
+  "description": "Portfolio showcasing the work of chea ilong - fullstack",
+  "template": "minimal-designer",
+  "sections": [
+    {
+      "type": "hero",
+      "content": {
+        "name": "chea ilong",
+        "title": "fullstack",
+        "description": "nkaskndsaasdkasdjk",
+        "image": "",
+        "background": "#f8fafc"
+      },
+      "_id": "68d7bb7cba238f22b1f8e973"
+    },
+    {
+      "type": "about",
+      "content": {
+        "heading": "About Me",
+        "content": "I'm a fullstack with a passion for creating meaningful work. I believe in the power of good design and development to solve problems and tell compelling stories.",
+        "image": "",
+        "skills": [
+          "Professional Skills",
+          "Creative Thinking",
+          "Problem Solving"
+        ]
+      },
+      "_id": "68d7bb7cba238f22b1f8e974"
+    },
+    {
+      "type": "contact",
+      "content": {
+        "heading": "Let's Work Together",
+        "description": "I'm always interested in new projects and opportunities.",
+        "form_fields": [
+          "name",
+          "email",
+          "message"
+        ],
+        "social_links": [
+          {
+            "platform": "Phone",
+            "url": "tel:298329832BUhbuaHB"
+          }
+        ]
+      },
+      "_id": "68d7bb7cba238f22b1f8e975"
+    },
+    {
+      "type": "projects",
+      "content": [],
+      "_id": "68d7bb7cba238f22b1f8e976"
+    }
+  ],
+  "styling": {
+    "colors": {
+      "primary": "#fb8500",
+      "secondary": "#6b7280",
+      "accent": "#fb8500",
+      "background": "#ffffff",
+      "surface": "#f8fafc",
+      "text": "#1f2937",
+      "textSecondary": "#6b7280"
+    },
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter",
+      "accent": "Inter"
+    },
+    "spacing": {
+      "section": "5rem",
+      "element": "2rem",
+      "tight": "1rem"
+    },
+    "borderRadius": {
+      "small": "0.375rem",
+      "medium": "0.5rem",
+      "large": "0.75rem"
+    },
+    "shadows": {
+      "small": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "medium": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+      "large": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+    }
+  },
+  "published": true,
+  "isPublic": false,
+  "viewCount": 0,
+  "createdAt": "2025-09-27T10:25:00.484Z",
+  "updatedAt": "2025-09-27T16:43:47.343Z",
+  "slug": "testuser-1758991425546",
+  "__v": 0,
+  "url": "/portfolio/testuser-1758991425546",
+  "id": "68d7bb7cba238f22b1f8e972"
+}
