@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import useAuthStore from "../../stores/authStore";
+import { StaggeredMenu } from "./StaggeredMenu";
 import aureaLogo from "../../assets/AUREA - Logo.png";
 
 const Navbar = () => {
@@ -31,6 +32,94 @@ const Navbar = () => {
     return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
 
+  // Define menu items based on current page
+  const getMenuItems = () => {
+    let baseItems = [];
+    
+    if (location.pathname === '/') {
+      baseItems = [
+        { 
+          label: 'Home', 
+          link: '#', 
+          onClick: () => scrollToSection('home')
+        },
+        { 
+          label: 'Features', 
+          link: '#', 
+          onClick: () => scrollToSection('features')
+        },
+        { 
+          label: 'FAQ', 
+          link: '#', 
+          onClick: () => scrollToSection('faq')
+        },
+        { 
+          label: 'Pricing', 
+          link: '#', 
+          onClick: () => scrollToSection('pricing')
+        },
+        { 
+          label: 'About', 
+          link: '/about'
+        }
+      ];
+    } else if (location.pathname === '/about') {
+      baseItems = [
+        { 
+          label: 'Home', 
+          link: '/'
+        },
+        { 
+          label: 'Our Story', 
+          link: '#', 
+          onClick: () => scrollToSection('story')
+        },
+        { 
+          label: 'Our Values', 
+          link: '#', 
+          onClick: () => scrollToSection('values')
+        },
+        { 
+          label: 'Our Team', 
+          link: '#', 
+          onClick: () => scrollToSection('team')
+        },
+        { 
+          label: 'Our Mission', 
+          link: '#', 
+          onClick: () => scrollToSection('mission')
+        }
+      ];
+    } else {
+      // Default items for other pages
+      baseItems = [
+        { label: 'Home', link: '/' },
+        { label: 'About', link: '/about' },
+        { label: 'Contact', link: '/contact' }
+      ];
+    }
+
+    // Add user-specific items if authenticated
+    if (isAuthenticated) {
+      baseItems.push(
+        { label: 'Dashboard', link: '/dashboard' }
+      );
+    } else {
+      baseItems.push(
+        { label: 'Login', link: '/login' },
+        { label: 'Sign Up', link: '/signup' }
+      );
+    }
+
+    return baseItems;
+  };
+
+  const socialItems = [
+    { label: 'Facebook', link: 'https://facebook.com' },
+    { label: 'Twitter', link: 'https://twitter.com' },
+    { label: 'Instagram', link: 'https://instagram.com' }
+  ];
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,6 +133,34 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // For landing and about pages, use StaggeredMenu
+  if (location.pathname === '/' || location.pathname === '/about') {
+    return (
+      <div className="fixed top-0 left-0 w-full h-screen pointer-events-none z-50">
+        <StaggeredMenu
+          position="right"
+          colors={['#fb8500', '#e07400']}
+          items={getMenuItems()}
+          socialItems={socialItems}
+          displaySocials={true}
+          displayItemNumbering={true}
+          logoUrl={aureaLogo}
+          menuButtonColor="#1a1a1a"
+          openMenuButtonColor="#1a1a1a"
+          changeMenuColorOnOpen={false}
+          accentColor="#fb8500"
+          className="staggered-menu-container pointer-events-auto"
+          user={user}
+          isAuthenticated={isAuthenticated}
+          onLogout={() => {
+            logout();
+            navigate('/');
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <motion.nav 
