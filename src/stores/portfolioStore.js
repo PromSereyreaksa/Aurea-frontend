@@ -14,9 +14,19 @@ const usePortfolioStore = create((set, get) => ({
   // Actions
   createPortfolio: async (portfolioData) => {
     try {
+      console.log('📤 Creating portfolio with data:', portfolioData);
       set({ isCreating: true });
       
-      const newPortfolio = await portfolioApi.create(portfolioData);
+      const response = await portfolioApi.create(portfolioData);
+      console.log('📥 Portfolio API response:', response);
+      
+      // Handle different response structures
+      const newPortfolio = response.data?.portfolio || response.portfolio || response;
+      console.log('✅ Extracted portfolio:', newPortfolio);
+      
+      if (!newPortfolio || !newPortfolio._id) {
+        throw new Error('Invalid portfolio response - no ID returned');
+      }
       
       set((state) => ({
         portfolios: [newPortfolio, ...state.portfolios],
@@ -24,14 +34,17 @@ const usePortfolioStore = create((set, get) => ({
         isCreating: false,
       }));
 
-      toast.success('Portfolio created successfully!');
+      // Don't show toast here - let the calling component handle it
+      // to prevent duplicate toasts (hook also shows toast)
       return { success: true, portfolio: newPortfolio };
       
     } catch (error) {
+      console.error('❌ Portfolio creation error:', error);
+      console.error('Error details:', error.response?.data || error.message);
       set({ isCreating: false });
       return { 
         success: false, 
-        error: error.message || 'Failed to create portfolio' 
+        error: error.response?.data?.message || error.message || 'Failed to create portfolio' 
       };
     }
   },

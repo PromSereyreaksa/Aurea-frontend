@@ -1,343 +1,518 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+/**
+ * Portfolio Builder Page
+ * 
+ * Main page for creating and editing portfolios. Orchestrates the multi-step
+ * portfolio creation process: Template Selection → Setup → Customize → Preview
+ * 
+ * This component is intentionally kept clean by delegating complex logic to:
+ * - Custom hooks (useAutoSave, usePortfolioData, etc.)
+ * - Utility functions (portfolioUtils.js)
+ * - UI components (FloatingActionButtons, StepIndicator, etc.)
+ */
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
+
+// Stores
 import usePortfolioStore from '../stores/portfolioStore';
+
+
+// Template utilities
 import { getTemplate, createPortfolioFromTemplate } from '../templates';
+
+// Components
 import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
 import TemplateSetupForm from '../components/PortfolioBuilder/TemplateSetupForm';
 import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
-import DesignToolsPanel from '../components/PortfolioBuilder/DesignToolsPanel';
+import FloatingActionButtons from '../components/PortfolioBuilder/FloatingActionButtons';
+import StepIndicator from '../components/PortfolioBuilder/StepIndicator';
+import MaintenanceModal from '../components/PortfolioBuilder/MaintenanceModal';
+import { SettingsPanel, HelpTooltip, AutoSaveStatus } from '../components/PortfolioBuilder/PortfolioBuilderUI';
+
+// Custom hooks
+import {
+  useAutoSave,
+  useKeyboardShortcuts,
+  usePortfolioSave,
+  usePortfolioData,
+  useBeforeUnloadWarning,
+  useClickOutside,
+} from '../hooks/usePortfolioBuilder';
+
+// Utilities
+import {
+  convertToTemplateFormat,
+  convertContentToSections,
+  cleanupPlaceholderData,
+  ensureValidImageUrls,
+  isValidImageUrl,
+  isImageField,
+} from '../utils/portfolioUtils';
+
+// ========================================
+// MAIN COMPONENT
+// ========================================
 
 const PortfolioBuilderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentPortfolio, isLoading, createPortfolio, updatePortfolio, fetchPortfolioById } = usePortfolioStore();
+  const [searchParams] = useSearchParams();
+  const portfolioStore = usePortfolioStore();
 
-  // Template-based state
+  // ========================================
+  // STATE MANAGEMENT
+  // ========================================
+
+  // Step navigation
   const [step, setStep] = useState('select'); // 'select', 'setup', 'customize', 'preview'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [portfolioData, setPortfolioData] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
-  const [showDesignTools, setShowDesignTools] = useState(false);
-  const [isDesignToolsCollapsed, setIsDesignToolsCollapsed] = useState(false);
-  const [showPDFExport, setShowPDFExport] = useState(false);
-  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+
+  // Portfolio metadata
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
-  const [initializing, setInitializing] = useState(true);
-  const [isUserCurrentlyEditing, setIsUserCurrentlyEditing] = useState(false); // Track if user is actively editing
 
-  // Default image URLs for fallback
-  const DEFAULT_HERO_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Image';
-  const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Project';
+  // UI state
+  const [showPDFExport, setShowPDFExport] = useState(false);
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Local Storage key for auto-save
-  const getLocalStorageKey = () => `portfolio-draft-${id || 'new'}`;
+  // Dirty state tracking - track if there are unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const lastSavedDataRef = useRef(null);
+  const isNavigatingAwayRef = useRef(false); // Prevent saves during navigation
 
-  // Debounced auto-save to local storage - only when not actively editing
-  const autoSaveToLocalStorage = useCallback(
-    debounce((data) => {
-      // Only auto-save if user is not currently editing
-      if (!isUserCurrentlyEditing) {
-        setAutoSaveStatus('saving');
-        try {
-          const key = getLocalStorageKey();
-
-          const saveData = {
-            portfolioData: data,
-            title,
-            description,
-            selectedTemplateId: selectedTemplate?.id,
-            timestamp: Date.now(),
-          };
-
-          localStorage.setItem(key, JSON.stringify(saveData));
-          setAutoSaveStatus('saved');
-        } catch (error) {
-          console.error('Failed to auto-save to localStorage:', error);
-          setAutoSaveStatus('error');
-        }
-      }
-    }, 2000), // Increased debounce time to 2 seconds
-    [id, title, description, selectedTemplate?.id, isUserCurrentlyEditing]
+  // Custom hooks for complex logic
+  const { portfolioData, setPortfolioData, isUserEditing, setIsUserEditing } = usePortfolioData(null);
+  
+  const { autoSaveStatus, autoSaveToLocalStorage, clearDraft } = useAutoSave(
+    id,
+    portfolioData,
+    title,
+    description,
+    selectedTemplate?.id,
+    isUserEditing
   );
 
-  // Helper function to convert portfolio to template format
-  const convertToTemplateFormat = (portfolio) => {
+  const { isSaving, isPublishing, save, publish } = usePortfolioSave(id, portfolioStore, clearDraft);
 
-    if (portfolio.templateId && portfolio.content) {
-      return portfolio;
+  // ========================================
+  // EVENT HANDLERS (defined early for hooks)
+  // ========================================
+
+  // Save & Publish handlers
+  const handleSave = async () => {
+    console.log('=== HANDLE SAVE CALLED ===');
+    console.log('Current id from route:', id);
+    console.log('isNavigatingAwayRef.current:', isNavigatingAwayRef.current);
+    console.log('hasUnsavedChanges:', hasUnsavedChanges);
+    
+    // Prevent saving if navigating away (for new portfolios)
+    if (isNavigatingAwayRef.current) {
+      console.log('❌ Navigation in progress, blocking save');
+      return;
     }
 
-    const templateData = {
-      templateId: portfolio.template || 'minimal-designer',
-      content: portfolio.sections?.reduce((acc, section) => {
-        acc[section.type] = section.content;
-        return acc;
-      }, {}) || {},
-      styling: portfolio.styling || {},
-      structure: portfolio.structure || {},
-      metadata: portfolio.metadata || {},
-    };
-
-    return templateData;
-  };
-
-  // Clear local storage draft when successfully saved to server
-  const clearLocalStorageDraft = () => {
-    try {
-      const key = getLocalStorageKey();
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Failed to clear localStorage draft:', error);
+    // Prevent saving if no changes
+    if (!hasUnsavedChanges) {
+      console.log('❌ No changes to save');
+      toast.info('No changes to save', { id: 'no-changes' });
+      return;
     }
-  };
 
-  // Debounce utility function
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
+    console.log('✅ Proceeding with save...');
+    const result = await save(
+      portfolioData,
+      selectedTemplate,
+      title,
+      description,
+      cleanupPlaceholderData,
+      convertContentToSections
+    );
+
+    console.log('Save completed, result:', result);
+
+    if (result.success) {
+      console.log('Save successful!');
+      
+      // Update last saved data reference
+      lastSavedDataRef.current = {
+        content: portfolioData.content,
+        styling: portfolioData.styling,
+        title,
+        description,
       };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  // Function to clean up placeholder data (only for backend saving)
-  const cleanupPlaceholderData = (portfolioData) => {
-    if (!portfolioData || !portfolioData.content) {
-      return portfolioData;
-    }
-
-    const cleanedContent = { ...portfolioData.content };
-
-    const cleanPlaceholderPath = (value) => {
-      if (typeof value === 'string' && value.includes('/placeholder') && !value.startsWith('http')) {
-        return '';
+      
+      // Mark as no unsaved changes IMMEDIATELY to prevent duplicate saves
+      setHasUnsavedChanges(false);
+      console.log('Set hasUnsavedChanges to false');
+      
+      // Show success animation
+      setShowSaveSuccess(true);
+      
+      // Navigate if creating new portfolio - do it IMMEDIATELY with replace
+      if (id === 'new' && result.result?.portfolio?._id) {
+        const newId = result.result.portfolio._id;
+        console.log('🚀 NEW PORTFOLIO - Navigating to:', newId);
+        
+        // Set navigation flag to block any additional saves
+        isNavigatingAwayRef.current = true;
+        console.log('Set isNavigatingAwayRef to true');
+        
+        // Use replace: true to prevent going back to 'new' route
+        // Navigate immediately to prevent duplicate saves
+        navigate(`/portfolio-builder/${newId}`, { replace: true });
+        console.log('Navigation triggered');
+      } else {
+        console.log('Existing portfolio updated, no navigation');
       }
-      return value;
-    };
-
-    Object.keys(cleanedContent).forEach((sectionKey) => {
-      const section = cleanedContent[sectionKey];
-
-      if (typeof section === 'object' && section !== null) {
-        Object.keys(section).forEach((fieldKey) => {
-          const fieldValue = section[fieldKey];
-
-          if (fieldKey === 'image') {
-            cleanedContent[sectionKey][fieldKey] = cleanPlaceholderPath(fieldValue);
-          } else if (fieldKey === 'projects' && Array.isArray(fieldValue)) {
-            cleanedContent[sectionKey][fieldKey] = fieldValue.map((project) => ({
-              ...project,
-              image: cleanPlaceholderPath(project.image),
-            }));
-          }
-        });
-      }
-    });
-
-    const cleanedData = {
-      ...portfolioData,
-      content: cleanedContent,
-      _version: (portfolioData._version || 0) + 1,
-    };
-
-    return cleanedData;
-  };
-
-  // Function to ensure valid image URLs for rendering
-  const ensureValidImageUrls = (portfolioData) => {
-    if (!portfolioData || !portfolioData.content) {
-      return portfolioData;
-    }
-
-    const updatedContent = { ...portfolioData.content };
-
-    // Ensure hero image - don't add default placeholder, let it be empty for proper placeholder rendering
-    updatedContent.hero = {
-      ...updatedContent.hero,
-      image: updatedContent.hero?.image || '', // Use empty string instead of default placeholder
-    };
-
-    // Ensure project images
-    if (updatedContent.projects && Array.isArray(updatedContent.projects)) {
-      updatedContent.projects = updatedContent.projects.map((project) => ({
-        ...project,
-        image: project.image || DEFAULT_PROJECT_IMAGE,
-      }));
     } else {
-      updatedContent.projects = [];
+      console.log('❌ Save failed:', result);
     }
-
-    return {
-      ...portfolioData,
-      content: updatedContent,
-      _version: (portfolioData._version || 0) + 1,
-    };
   };
 
-  // Load portfolio data when component mounts or ID changes
-  useEffect(() => {
-    const loadPortfolio = async () => {
-      setInitializing(true);
-      if (id && id !== 'new') {
+  const handlePublish = async () => {
+    const result = await publish(
+      portfolioData,
+      selectedTemplate,
+      title,
+      description,
+      cleanupPlaceholderData,
+      convertContentToSections
+    );
 
+    if (result.success && id === 'new' && result.result?.portfolio?._id) {
+      navigate(`/portfolio-builder/${result.result.portfolio._id}`);
+    }
+  };
+
+  // ========================================
+  // LIFECYCLE - LOAD PORTFOLIO
+  // ========================================
+
+  useEffect(() => {
+    let isMounted = true; // Prevent state updates after unmount
+
+    const loadPortfolio = async () => {
+      if (!isMounted) return;
+      setInitializing(true);
+
+      if (id && id !== 'new') {
         try {
-          const result = await fetchPortfolioById(id);
+          const result = await portfolioStore.fetchPortfolioById(id);
+
+          if (!isMounted) return; // Don't update if component unmounted
 
           if (result && result.success && result.portfolio) {
-
             setTitle(result.portfolio.title || '');
             setDescription(result.portfolio.description || '');
 
             const templateData = convertToTemplateFormat(result.portfolio);
+            const template = getTemplate(templateData.templateId);
 
-            if (templateData) {
-              // Ensure valid image URLs for rendering
-              const dataWithValidImages = ensureValidImageUrls(templateData);
-              setPortfolioData(dataWithValidImages);
-              const template = getTemplate(templateData.templateId);
-
-              if (template) {
-                setSelectedTemplate(template);
-                setStep('customize');
-                setInitializing(false);
-              } else {
-                console.error('Template not found:', templateData.templateId);
-                toast.error('Template not found');
-                setInitializing(false);
+            if (template) {
+              setSelectedTemplate(template);
+              
+              // Merge with template defaults to ensure all sections have default content
+              const mergedContent = {
+                ...template.defaultContent, // Start with template defaults
+                ...templateData.content,    // Override with saved content
+              };
+              
+              // Ensure work and gallery have template defaults if they're empty
+              if (!mergedContent.work?.projects || mergedContent.work.projects.length === 0) {
+                mergedContent.work = template.defaultContent.work;
               }
+              if (!mergedContent.gallery?.images || mergedContent.gallery.images.length === 0) {
+                mergedContent.gallery = template.defaultContent.gallery;
+              }
+              
+              const mergedTemplateData = {
+                ...templateData,
+                content: mergedContent
+              };
+              
+              const portfolioDataWithImages = ensureValidImageUrls(mergedTemplateData);
+              setPortfolioData(portfolioDataWithImages);
+              
+              // Initialize last saved data reference
+              lastSavedDataRef.current = {
+                content: portfolioDataWithImages.content,
+                styling: portfolioDataWithImages.styling,
+                title: result.portfolio.title || '',
+                description: result.portfolio.description || '',
+              };
+              setHasUnsavedChanges(false);
+              
+              // Check if we should show setup form via URL parameter
+              // Setup shows ONLY when coming from new portfolio creation (indicated by ?setup=true)
+              const shouldShowSetup = searchParams.get('setup') === 'true';
+              
+              console.log('Portfolio loaded:', {
+                id: result.portfolio._id,
+                title: result.portfolio.title,
+                shouldShowSetup
+              });
+              
+              if (shouldShowSetup) {
+                console.log('New portfolio - showing setup form');
+                setStep('setup');
+                // Remove setup parameter so refresh doesn't show setup again
+                searchParams.delete('setup');
+                const newSearch = searchParams.toString();
+                navigate(`/portfolio-builder/${id}${newSearch ? '?' + newSearch : ''}`, { replace: true });
+              } else {
+                console.log('Existing portfolio - going to customize');
+                setStep('customize');
+              }
+              
+              setInitializing(false);
             } else {
-              console.error('Failed to convert portfolio to template format');
-              toast.error('Invalid portfolio format');
+              console.error('Template not found:', templateData.templateId);
+              toast.error('Template not found', { id: `template-not-found-${id}` });
+              setTimeout(() => navigate('/dashboard'), 500);
+            }
+          } else {
+            console.error('Portfolio not found:', id, result);
+            toast.error('Portfolio not found', { id: `portfolio-not-found-${id}` });
+            setTimeout(() => navigate('/dashboard'), 500);
+          }
+        } catch (error) {
+          if (!isMounted) return;
+          console.error('Error loading portfolio:', error);
+          toast.error('Failed to load portfolio', { id: `portfolio-error-${id}` });
+          setTimeout(() => navigate('/dashboard'), 500);
+        }
+      } else if (id === 'new') {
+        // New portfolio - start from template selection
+        if (isMounted) {
+          setPortfolioData(null);
+          setTitle('');
+          setDescription('');
+          
+          // Check if there's a template query parameter
+          const templateParam = searchParams.get('template');
+          if (templateParam) {
+            console.log('📋 Auto-selecting template from URL:', templateParam);
+            const template = getTemplate(templateParam);
+            if (template) {
+              // Auto-select the template
+              setSelectedTemplate(template);
+              setStep('select'); // Will be handled by separate effect
+              setInitializing(false);
+            } else {
+              console.warn('Template not found:', templateParam);
+              setSelectedTemplate(null);
+              setStep('select');
               setInitializing(false);
             }
           } else {
-            console.error('Failed to load portfolio:', result);
-            toast.error('Portfolio not found');
+            setSelectedTemplate(null);
+            setStep('select');
             setInitializing(false);
           }
-        } catch (error) {
-          console.error('Error loading portfolio:', error);
-          toast.error('Failed to load portfolio');
-          setInitializing(false);
         }
-      } else if (id === 'new') {
-        setPortfolioData(null);
-        setSelectedTemplate(null);
-        setTitle('');
-        setDescription('');
-        setStep('select');
-        setInitializing(false);
       }
     };
 
     loadPortfolio();
-  }, [id]);
 
-  // Warn user before leaving page with unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      const key = getLocalStorageKey();
-      const saved = localStorage.getItem(key);
-      if (saved && autoSaveStatus !== 'saved') {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return 'You have unsaved changes. Are you sure you want to leave?';
-      }
+    return () => {
+      isMounted = false; // Cleanup flag
+      // Reset navigation flag when component unmounts or id changes
+      isNavigatingAwayRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // Only depend on id, not portfolioStore or navigate
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [autoSaveStatus, id]);
+  // ========================================
+  // HOOKS - KEYBOARD SHORTCUTS & WARNINGS
+  // ========================================
 
-  // Close maintenance menu when clicking outside
+  // Auto-reset save success state after showing animation
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showMaintenancePopup && !event.target.closest('.maintenance-popup')) {
-        setShowMaintenancePopup(false);
-      }
-    };
+    if (showSaveSuccess) {
+      const timer = setTimeout(() => {
+        setShowSaveSuccess(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSaveSuccess]);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showMaintenancePopup]);
-
-  // Add Ctrl+S save functionality
+  // Track changes to portfolio data to enable/disable save button
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      // Check if Ctrl+S (or Cmd+S on Mac) is pressed
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault(); // Prevent browser's default save action
-        
-        // Only save if we're in customize or preview mode and have portfolio data
-        if ((step === 'customize' || step === 'preview') && portfolioData && selectedTemplate) {
-          toast.success('Saving portfolio... (Ctrl+S)', {
-            duration: 1500,
-            icon: '💾',
-          });
-          handleSave();
+    // Don't track changes if we're navigating away (new portfolio saved)
+    if (isNavigatingAwayRef.current) {
+      console.log('Skipping change detection - navigation in progress');
+      return;
+    }
+
+    if (!portfolioData || !selectedTemplate) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+
+    // If no saved data yet (new portfolio or just loaded), consider it changed
+    if (!lastSavedDataRef.current) {
+      setHasUnsavedChanges(true);
+      return;
+    }
+
+    // Compare current data with last saved data
+    const currentDataString = JSON.stringify({
+      content: portfolioData.content,
+      styling: portfolioData.styling,
+      title,
+      description,
+    });
+    const savedDataString = JSON.stringify(lastSavedDataRef.current);
+
+    const hasChanges = currentDataString !== savedDataString;
+    console.log('Change detection:', hasChanges ? 'CHANGES DETECTED' : 'No changes');
+    setHasUnsavedChanges(hasChanges);
+  }, [portfolioData, title, description, selectedTemplate]);
+
+  // Auto-trigger template selection when template is pre-selected from URL
+  useEffect(() => {
+    const autoTriggerTemplateSelection = async () => {
+      if (id === 'new' && selectedTemplate && step === 'select' && !initializing) {
+        // Only trigger if we have a template pre-selected but haven't started the flow
+        const templateParam = searchParams.get('template');
+        if (templateParam && selectedTemplate.id === templateParam) {
+          console.log('🚀 Auto-triggering template selection for:', selectedTemplate.name);
+          // Call the template select handler
+          await handleTemplateSelect(selectedTemplate);
         }
       }
     };
+    
+    autoTriggerTemplateSelection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, selectedTemplate, step, initializing]);
 
-    // Add the event listener
-    document.addEventListener('keydown', handleKeyDown);
+  useKeyboardShortcuts(
+    handleSave,
+    (step === 'customize' || step === 'preview') && portfolioData && selectedTemplate && hasUnsavedChanges
+  );
 
-    // Cleanup the event listener
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [step, portfolioData, selectedTemplate]); // Removed handleSave from dependencies
+  useBeforeUnloadWarning(id, autoSaveStatus);
+  useClickOutside(showMaintenancePopup, setShowMaintenancePopup, 'maintenance-popup');
 
-  const handleTemplateSelect = (template) => {
+  // ========================================
+  // EVENT HANDLERS
+  // ========================================
+
+  // Template selection
+  const handleTemplateSelect = async (template) => {
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
-        'Switching templates will reset your current customizations. Are you sure you want to continue?'
+        'Switching templates will reset your current customizations. Are you sure?'
       );
-      if (!confirmSwitch) {
-        return;
-      }
+      if (!confirmSwitch) return;
     }
 
     setSelectedTemplate(template);
-    
-    // For new portfolios, go to setup step
+
     if (id === 'new') {
-      setStep('setup');
+      // NEW APPROACH: Create portfolio immediately when template is selected
+      console.log('🎨 Creating new portfolio immediately with template:', template.id);
+      
+      try {
+        // Create a minimal portfolio with the template
+        const initialPortfolioData = {
+          title: `${template.name} Portfolio`,
+          description: `Portfolio created with ${template.name} template`,
+          template: template.id,
+          sections: [], // Empty sections for now
+          styling: template.styling || {},
+          published: false,
+        };
+
+        console.log('📤 Calling createPortfolio with:', initialPortfolioData);
+
+        // Create the portfolio in the database
+        const result = await portfolioStore.createPortfolio(initialPortfolioData);
+        
+        console.log('📥 createPortfolio result:', result);
+        
+        if (result && result.success && result.portfolio?._id) {
+          console.log('✅ Portfolio created with ID:', result.portfolio._id);
+          
+          // Navigate to the new portfolio ID with setup=true parameter
+          // This tells the page to show the setup form for this new portfolio
+          navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
+          
+          // The useEffect will reload the portfolio data and show setup
+          toast.success('Template selected! Setting up your portfolio...', { 
+            duration: 2000,
+            id: 'template-selected' 
+          });
+        } else {
+          console.error('❌ Invalid result:', result);
+          const errorMsg = result?.error || 'Failed to create portfolio';
+          throw new Error(errorMsg);
+        }
+      } catch (error) {
+        console.error('❌ Failed to create initial portfolio:', error);
+        console.error('Error stack:', error.stack);
+        toast.error(`Failed to create portfolio: ${error.message || 'Please try again.'}`);
+      }
     } else {
-      // For existing portfolios, create portfolio data and go directly to customize
       if (!portfolioData || portfolioData.templateId !== template.id) {
         const newPortfolioData = createPortfolioFromTemplate(template.id);
         setPortfolioData(ensureValidImageUrls(newPortfolioData));
       }
       setStep('customize');
-      setShowDesignTools(true);
     }
   };
 
+  // Setup completion
   const handleSetupComplete = (setupData) => {
     const { personalInfo, skillsArray, styling } = setupData;
-    
-    // Create portfolio from template with user data (content sections only)
+
+    // Create content from setup data, preserving template defaults for work and gallery
     const contentData = {
       hero: {
         name: personalInfo.name,
         title: personalInfo.title,
         description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
-        image: '', // User will upload this later
+        image: '',
       },
       about: {
         heading: 'About Me',
-        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work. I believe in the power of good design and development to solve problems and tell compelling stories.`,
-        image: '', // User will upload this later
+        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work.`,
+        image: '',
         skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
+      },
+      // Preserve work section from template defaults
+      work: selectedTemplate.defaultContent?.work || {
+        heading: 'SELECTED WORK',
+        projects: [
+          {
+            id: 1,
+            title: 'PROJECT TITLE',
+            description: 'Brief description of your project and what it accomplishes.',
+            image: '',
+            meta: '2025 — Category',
+            category: 'design'
+          }
+        ]
+      },
+      // Preserve gallery section from template defaults
+      gallery: selectedTemplate.defaultContent?.gallery || {
+        heading: 'VISUAL GALLERY',
+        images: [
+          { src: '', caption: 'Visual exploration 01', meta: '01' },
+          { src: '', caption: 'Visual exploration 02', meta: '02' },
+          { src: '', caption: 'Visual exploration 03', meta: '03' },
+          { src: '', caption: 'Visual exploration 04', meta: '04' },
+          { src: '', caption: 'Visual exploration 05', meta: '05' },
+          { src: '', caption: 'Visual exploration 06', meta: '06' }
+        ]
       },
       contact: {
         heading: "Let's Work Together",
@@ -347,122 +522,97 @@ const PortfolioBuilderPage = () => {
           { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
           ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
           ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
-        ].filter(link => link.url && !link.url.includes('example.com')),
+        ].filter((link) => link.url && !link.url.includes('example.com')),
       },
     };
 
-    // Create styling configuration separately
-    const stylingConfig = {
-      colors: {
-        ...selectedTemplate.styling?.colors,
-        ...styling.colors,
-      },
-      fonts: {
-        ...selectedTemplate.styling?.fonts,
-        ...styling.fonts,
-      },
-    };
-
-    // Create portfolio with separated content and styling
     const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, contentData);
     
-    // Apply styling configuration properly
+    // Apply styling
     newPortfolioData.styling = {
       ...newPortfolioData.styling,
-      ...stylingConfig,
+      colors: { ...selectedTemplate.styling?.colors, ...styling.colors },
+      fonts: { ...selectedTemplate.styling?.fonts, ...styling.fonts },
     };
 
-    // Set the title and description from form data
-    setTitle(personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`);
-    setDescription(`Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`);
+    const newTitle = personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`;
+    const newDescription = `Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`;
     
-    // Apply the portfolio data
-    setPortfolioData(ensureValidImageUrls(newPortfolioData));
+    setTitle(newTitle);
+    setDescription(newDescription);
+    const portfolioDataWithImages = ensureValidImageUrls(newPortfolioData);
+    setPortfolioData(portfolioDataWithImages);
+    
+    // Mark as changed so it will be saved
+    lastSavedDataRef.current = null; // Force it to be detected as changed
+    setHasUnsavedChanges(true);
+    
     setStep('customize');
-    setShowDesignTools(true);
+    
+    // Auto-save after setup completion (since portfolio already exists in DB)
+    console.log('📝 Setup complete, auto-saving portfolio...');
+    setTimeout(() => {
+      handleSave();
+    }, 500);
   };
 
-  const handleBackToTemplates = () => {
-    if (step === 'setup') {
-      setStep('select');
-    } else {
-      setStep('select');
-      setShowDesignTools(false);
-    }
-  };
-
+  // Content changes
   const handleContentChange = (sectionId, fieldId, value) => {
-
-    // Handle special section management operations
+    // Handle section management operations
     if (sectionId === '_sections') {
       if (fieldId === 'add') {
-        setPortfolioData((prev) => ({
-          ...prev,
-          content: value.content
-        }));
-        toast.success(`Added "${value.sectionData.title}" section successfully!`);
+        setPortfolioData((prev) => ({ ...prev, content: value.content }));
+        toast.success(`Added "${value.sectionData.title}" section!`);
         return;
       } else if (fieldId === 'delete') {
-        setPortfolioData((prev) => ({
-          ...prev,
-          content: value.content
-        }));
-        toast.success(`Deleted "${value.sectionId}" section successfully!`);
+        setPortfolioData((prev) => ({ ...prev, content: value.content }));
+        toast.success(`Deleted "${value.sectionId}" section!`);
         return;
       } else if (fieldId === 'reorder') {
-        setPortfolioData((prev) => ({
-          ...prev,
-          content: value.content
-        }));
+        setPortfolioData((prev) => ({ ...prev, content: value.content }));
         return;
       }
     }
-    
-    // Check if this is an image field or contains image data
-    const isImageField = fieldId === 'image' || fieldId.includes('image') || 
-                        (typeof value === 'string' && value.startsWith('data:image/'));
-    
-    // Allow data URLs for images (from cropped images), as well as http/https URLs and relative paths
-    if (isImageField && value && typeof value === 'string' && !value.match(/^(https?:\/\/|\/|data:image\/)/)) {
-      console.warn('Invalid image URL:', value);
-      toast.error('Please use a valid image URL (http://, https://, relative path, or data URL)');
+
+    // Validate image fields
+    if (isImageField(fieldId, value) && value && !isValidImageUrl(value)) {
+      toast.error('Please use a valid image URL');
       return;
     }
 
+    // Update content
     setPortfolioData((prev) => {
-      if (!prev || !prev.content) {
-        console.error('Portfolio data or content is null:', prev);
-        return prev;
-      }
+      if (!prev || !prev.content) return prev;
 
-      const updatedContent = {
-        ...prev.content,
-        [sectionId]: {
-          ...prev.content[sectionId],
-          [fieldId]: value,
+      return {
+        ...prev,
+        content: {
+          ...prev.content,
+          [sectionId]: {
+            ...prev.content[sectionId],
+            [fieldId]: value,
+          },
         },
       };
-
-      // Apply fallback images for rendering
-      const updated = ensureValidImageUrls({
-        ...prev,
-        content: updatedContent,
-        // Do not bump _version for every keystroke - only change _version on explicit save
-      });
-      
-      // Don't auto-save during active editing - only trigger auto-save when user stops editing
-      return updated;
     });
   };
 
+  // Navigation
+  const handleBackToTemplates = () => setStep('select');
+  const handlePreview = () => {
+    setStep('preview');
+    setIsEditing(false);
+  };
+  const handleBackToEdit = () => {
+    setStep('customize');
+    setIsEditing(true);
+  };
+
+  // Metadata changes
   const handleTitleChange = (newTitle) => {
     setTitle(newTitle);
     if (portfolioData) {
-      const updatedData = {
-        ...portfolioData,
-        title: newTitle,
-        _version: (portfolioData._version || 0) + 1,
-      };
+      const updatedData = { ...portfolioData, title: newTitle, _version: (portfolioData._version || 0) + 1 };
       setPortfolioData(updatedData);
       autoSaveToLocalStorage(updatedData);
     }
@@ -471,176 +621,23 @@ const PortfolioBuilderPage = () => {
   const handleDescriptionChange = (newDescription) => {
     setDescription(newDescription);
     if (portfolioData) {
-      const updatedData = {
-        ...portfolioData,
-        description: newDescription,
-        _version: (portfolioData._version || 0) + 1,
-      };
+      const updatedData = { ...portfolioData, description: newDescription, _version: (portfolioData._version || 0) + 1 };
       setPortfolioData(updatedData);
       autoSaveToLocalStorage(updatedData);
     }
   };
 
-  const handleStyleChange = (styleCategory, newStyles) => {
-    setPortfolioData((prev) => ({
-      ...prev,
-      styling: {
-        ...prev.styling,
-        [styleCategory]: newStyles,
-      },
-    }));
-  };
-
-  const handleSave = async () => {
-    try {
-
-      if (!selectedTemplate) {
-        toast.error('No template selected');
-        return;
-      }
-
-      if (!portfolioData) {
-        toast.error('No portfolio data to save');
-        return;
-      }
-
-      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
-
-      const convertContentToSections = (content) => {
-        if (!content) return [];
-
-        const sections = [];
-        // Exclude non-content fields like styling, metadata, etc.
-        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
-        
-        Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          // Only include actual content sections, not metadata/styling
-          if (contentFields.includes(sectionType) && sectionContent) {
-            sections.push({
-              type: sectionType,
-              content: sectionContent,
-            });
-          }
-        });
-        return sections;
-      };
-
-      const saveData = {
-        title: title || `${selectedTemplate.name} Portfolio`,
-        description: description || `Portfolio created with ${selectedTemplate.name} template`,
-        template: selectedTemplate.id,
-        sections: convertContentToSections(cleanedData.content),
-        styling: cleanedData.styling || {},
-        published: false,
-      };
-
-      console.log('=== SAVE DATA DEBUG ===');
-      console.log('Portfolio Data:', portfolioData);
-      console.log('Cleaned Data:', cleanedData);
-      console.log('Save Data:', saveData);
-      console.log('Sections:', saveData.sections);
-      console.log('========================');
-
-      let result;
-      if (id && id !== 'new') {
-        result = await updatePortfolio(id, saveData);
-      } else {
-        result = await createPortfolio(saveData);
-      }
-
-      if (result && result.success) {
-        toast.success('Portfolio saved successfully!');
-        clearLocalStorageDraft();
-        if (id === 'new' && result.portfolio?._id) {
-          navigate(`/portfolio-builder/${result.portfolio._id}`);
-        }
-      } else {
-        throw new Error(result?.error || 'Save failed');
-      }
-    } catch (error) {
-      console.error('=== SAVE ERROR ===');
-      console.error('Error:', error);
-      toast.error('Failed to save portfolio: ' + (error.message || 'Unknown error'));
-    }
-  };
-
-  const handlePublish = async () => {
-    try {
-      if (!selectedTemplate || !portfolioData) {
-        toast.error('Cannot publish - missing template or data');
-        return;
-      }
-
-      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
-
-      const convertContentToSections = (content) => {
-        if (!content) return [];
-
-        const sections = [];
-        // Exclude non-content fields like styling, metadata, etc.
-        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
-        
-        Object.entries(content).forEach(([sectionType, sectionContent]) => {
-          // Only include actual content sections, not metadata/styling
-          if (contentFields.includes(sectionType) && sectionContent) {
-            sections.push({
-              type: sectionType,
-              content: sectionContent,
-            });
-          }
-        });
-        return sections;
-      };
-
-      const publishData = {
-        title: title || `${selectedTemplate.name} Portfolio`,
-        description: description || `Portfolio created with ${selectedTemplate.name} template`,
-        template: selectedTemplate.id,
-        sections: convertContentToSections(cleanedData.content),
-        styling: cleanedData.styling || {},
-        published: true,
-      };
-
-      let result;
-      if (id && id !== 'new') {
-        result = await updatePortfolio(id, publishData);
-      } else {
-        result = await createPortfolio(publishData);
-      }
-
-      if (result && result.success) {
-        toast.success('Portfolio published successfully!');
-        clearLocalStorageDraft();
-        if (id === 'new' && result.portfolio?._id) {
-          navigate(`/portfolio-builder/${result.portfolio._id}`);
-        }
-      } else {
-        throw new Error(result?.error || 'Publish failed');
-      }
-    } catch (error) {
-      console.error('Publish error:', error);
-      toast.error('Failed to publish portfolio: ' + (error.message || 'Unknown error'));
-    }
-  };
-
-  const handlePreview = () => {
-    setStep('preview');
-    setIsEditing(false);
-    setShowDesignTools(false);
-  };
-
-  const handleBackToEdit = () => {
-    setStep('customize');
-    setIsEditing(true);
-    setShowDesignTools(true);
-  };
-
+  // Content change handler for TemplatePreview
   const contentChangeHandler = (sectionId, fieldId, value) => {
     handleContentChange(sectionId, fieldId, value);
   };
   contentChangeHandler.onSave = handleSave;
 
-  if (initializing || isLoading) {
+  // ========================================
+  // LOADING STATE
+  // ========================================
+
+  if (initializing || portfolioStore.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -648,12 +645,17 @@ const PortfolioBuilderPage = () => {
     );
   }
 
+  // ========================================
+  // RENDER
+  // ========================================
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b relative z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 min-w-0">
+            {/* Back button & Title */}
             <div className="flex items-center space-x-2 md:space-x-4 min-w-0 flex-shrink">
               <button
                 onClick={() => navigate('/dashboard')}
@@ -661,188 +663,34 @@ const PortfolioBuilderPage = () => {
               >
                 ← Back to Dashboard
               </button>
-              <div className="flex items-center space-x-1 md:space-x-2 min-w-0">
-                <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
-                  {step === 'select'
-                    ? 'Choose Template'
-                    : step === 'setup'
-                    ? 'Setup Portfolio'
-                    : step === 'customize'
-                    ? 'Customize Portfolio'
-                    : 'Preview Portfolio'}
-                </h1>
+              <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
+                {step === 'select'
+                  ? 'Choose Template'
+                  : step === 'setup'
+                  ? 'Setup Portfolio'
+                  : step === 'customize'
+                  ? 'Customize Portfolio'
+                  : 'Preview Portfolio'}
+              </h1>
+            </div>
+
+            {/* Auto-save status */}
+            {(step === 'customize' || step === 'preview') && (
+              <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
+                <AutoSaveStatus status={autoSaveStatus} />
               </div>
-            </div>
-
-            <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
-              {step === 'customize' && (
-                <>
-                  <button
-                    onClick={handleBackToTemplates}
-                    className="px-3 py-2 md:px-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
-                  >
-                    Change Template
-                  </button>
-                  <button
-                    onClick={() => setShowDesignTools(!showDesignTools)}
-                    className={`px-3 py-2 md:px-4 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap ${
-                      showDesignTools
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Design Tools
-                  </button>
-                  <button
-                    onClick={handlePreview}
-                    className="px-3 py-2 md:px-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
-                  >
-                    Preview
-                  </button>
-                </>
-              )}
-
-              {step === 'preview' && (
-                <button
-                  onClick={handleBackToEdit}
-                  className="px-3 py-2 md:px-4 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
-                >
-                  Back to Edit
-                </button>
-              )}
-
-              {(step === 'customize' || step === 'preview') && (
-                <>
-                  <div className="flex items-center text-sm text-gray-600">
-                    {autoSaveStatus === 'saving' && (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                        <span>Saving...</span>
-                      </>
-                    )}
-                    {autoSaveStatus === 'saved' && (
-                      <>
-                        <div className="h-4 w-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-                          <svg
-                            className="h-3 w-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5 13l4 4L19 7"
-                            ></path>
-                          </svg>
-                        </div>
-                        <span>Auto-saved</span>
-                      </>
-                    )}
-                    {autoSaveStatus === 'error' && (
-                      <>
-                        <div className="h-4 w-4 bg-red-500 rounded-full mr-2 flex items-center justify-center">
-                          <svg
-                            className="h-3 w-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            ></path>
-                          </svg>
-                        </div>
-                        <span>Save failed</span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Export PDF Button */}
-                  <button
-                    onClick={() => setShowMaintenancePopup(true)}
-                    className="flex items-center px-2 py-2 md:px-3 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base whitespace-nowrap"
-                    title="Export PDF"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={handleSave}
-                    className="px-3 py-2 md:px-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
-                  >
-                    Save Draft
-                  </button>
-                  <button
-                    onClick={handlePublish}
-                    className="px-3 py-2 md:px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
-                  >
-                    Publish
-                  </button>
-                </>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        {step !== 'select' && (
-          <div className="border-t border-gray-200 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center py-3 space-x-6">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">
-                    ✓
-                  </div>
-                  <span className="text-sm text-gray-600">Template Selected</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === 'setup' 
-                        ? 'bg-blue-500 text-white' 
-                        : ['customize', 'preview'].includes(step)
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-300 text-gray-600'
-                    }`}
-                  >
-                    {['customize', 'preview'].includes(step) ? '✓' : '2'}
-                  </div>
-                  <span className="text-sm text-gray-600">Setup Information</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === 'customize' ? 'bg-blue-500 text-white' : step === 'preview' ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}
-                  >
-                    {step === 'preview' ? '✓' : '3'}
-                  </div>
-                  <span className="text-sm text-gray-600">Customize</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}
-                  >
-                    4
-                  </div>
-                  <span className="text-sm text-gray-600">Preview & Publish</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Step Indicator */}
+        <StepIndicator currentStep={step} />
       </div>
 
+      {/* Main Content */}
       <div className="relative">
         <AnimatePresence mode="wait">
+          {/* Template Selection */}
           {step === 'select' && (
             <motion.div
               key="select"
@@ -858,6 +706,7 @@ const PortfolioBuilderPage = () => {
             </motion.div>
           )}
 
+          {/* Setup Form */}
           {step === 'setup' && selectedTemplate && (
             <motion.div
               key="setup"
@@ -873,6 +722,7 @@ const PortfolioBuilderPage = () => {
             </motion.div>
           )}
 
+          {/* Customize & Preview */}
           {(step === 'customize' || step === 'preview') && selectedTemplate && portfolioData && (
             <motion.div
               key="customize"
@@ -881,65 +731,46 @@ const PortfolioBuilderPage = () => {
               exit={{ opacity: 0, x: 20 }}
               className="relative"
             >
-              {step === 'customize' && !showDesignTools && (
-                <div className="absolute top-6 left-6 bg-white rounded-lg shadow-lg p-4 z-30 w-80">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Settings</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Portfolio Title
-                      </label>
-                      <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => handleTitleChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder={`${selectedTemplate.name} Portfolio`}
-                      />
-                    </div>
+              {/* Floating Action Buttons */}
+              <FloatingActionButtons
+                step={step}
+                isSaving={isSaving}
+                showSaveSuccess={showSaveSuccess}
+                showSettings={showSettings}
+                hasUnsavedChanges={hasUnsavedChanges}
+                onChangeTemplate={handleBackToTemplates}
+                onPreview={handlePreview}
+                onExportPDF={() => setShowMaintenancePopup(true)}
+                onToggleSettings={() => setShowSettings(!showSettings)}
+                onSave={handleSave}
+                onPublish={handlePublish}
+                onBackToEdit={handleBackToEdit}
+              />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description
-                      </label>
-                      <textarea
-                        value={description}
-                        onChange={(e) => handleDescriptionChange(e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder={`Portfolio created with ${selectedTemplate.name} template`}
-                      />
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-200">
-                      <button
-                        onClick={() => setShowDesignTools(true)}
-                        className="w-full px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
-                      >
-                        Open Design Tools
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              {/* Settings Panel */}
+              {step === 'customize' && (
+                <SettingsPanel
+                  isOpen={showSettings}
+                  onClose={() => setShowSettings(false)}
+                  title={title}
+                  description={description}
+                  onTitleChange={handleTitleChange}
+                  onDescriptionChange={handleDescriptionChange}
+                  templateName={selectedTemplate.name}
+                />
               )}
 
-              <div className={`${
-                showDesignTools 
-                  ? isDesignToolsCollapsed 
-                    ? 'mr-16' 
-                    : 'mr-[28rem]' 
-                  : ''
-              } transition-all duration-300`}>
+              {/* Template Preview */}
+              <div className={`transition-all duration-300 ${step === 'customize' ? 'pt-20' : ''}`}>
                 <TemplatePreview
-                  key={`${selectedTemplate?.id}`}
+                  key={selectedTemplate?.id}
                   template={selectedTemplate}
-                  portfolioData={portfolioData} // Pass portfolioData with ensured valid image URLs
+                  portfolioData={portfolioData}
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
-                  onEditingStateChange={(isCurrentlyEditing) => {
-                    setIsUserCurrentlyEditing(isCurrentlyEditing);
-                    // Trigger auto-save when user stops editing
-                    if (!isCurrentlyEditing && portfolioData) {
+                  onEditingStateChange={(editing) => {
+                    setIsUserEditing(editing);
+                    if (!editing && portfolioData) {
                       autoSaveToLocalStorage(portfolioData);
                     }
                   }}
@@ -948,125 +779,19 @@ const PortfolioBuilderPage = () => {
                 />
               </div>
 
-              <AnimatePresence>
-                {showDesignTools && step === 'customize' && (
-                  <DesignToolsPanel
-                    template={selectedTemplate}
-                    portfolioData={portfolioData}
-                    onStyleChange={handleStyleChange}
-                    onContentChange={contentChangeHandler}
-                    onCollapseChange={setIsDesignToolsCollapsed}
-                  />
-                )}
-              </AnimatePresence>
-
-              {step === 'customize' && isEditing && (
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-40 max-w-md">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <div className="text-sm">
-                      <div>Click on any text to edit it. Use the Design Tools panel to customize colors and fonts.</div>
-                      <div className="flex items-center space-x-1 mt-1 text-blue-200">
-                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">Ctrl</kbd>
-                        <span>+</span>
-                        <kbd className="px-1 py-0.5 bg-blue-700 rounded text-xs">S</kbd>
-                        <span>to save quickly</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Help Tooltip */}
+              <HelpTooltip isVisible={step === 'customize' && isEditing} />
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Maintenance Popup Modal */}
-        {showMaintenancePopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="maintenance-popup bg-white rounded-lg shadow-xl max-w-md w-full">
-              {/* Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Maintenance Notice</h3>
-                      <p className="text-sm text-gray-500">Beta Feature</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowMaintenancePopup(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-lg">📄</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">PDF Export</h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        This feature is currently in beta testing. You may experience some limitations or unexpected behavior.
-                      </p>
-                      <ul className="text-xs text-gray-500 mt-2 space-y-1">
-                        <li>• Export may not include all styling</li>
-                        <li>• Image quality may vary</li>
-                        <li>• Some sections might not display correctly</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-500">
-                    We're working to improve this feature
-                  </p>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => setShowMaintenancePopup(false)}
-                      className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowMaintenancePopup(false);
-                        setShowPDFExport(true);
-                      }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Continue Anyway
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Maintenance Modal */}
+      <MaintenanceModal
+        isOpen={showMaintenancePopup}
+        onClose={() => setShowMaintenancePopup(false)}
+        onContinue={() => setShowPDFExport(true)}
+      />
     </div>
   );
 };

@@ -11,7 +11,16 @@ const LoginPage = () => {
   const location = useLocation();
   const [authChecked, setAuthChecked] = useState(false);
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  // Get return URL from query params or state
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('return');
+  const template = searchParams.get('template');
+  
+  // Build redirect URL with template parameter if present
+  let redirectUrl = returnUrl || location.state?.from?.pathname || "/dashboard";
+  if (template && redirectUrl.includes('/portfolio-builder/new')) {
+    redirectUrl = `${redirectUrl}?template=${template}`;
+  }
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -29,10 +38,10 @@ const LoginPage = () => {
   useEffect(() => {
     console.log('Auth effect - authChecked:', authChecked, 'isAuthenticated:', isAuthenticated); // Debug log
     if (authChecked && isAuthenticated) {
-      console.log('Auto-navigating to:', from); // Debug log
-      navigate(from, { replace: true });
+      console.log('Auto-navigating to:', redirectUrl); // Debug log
+      navigate(redirectUrl, { replace: true });
     }
-  }, [isAuthenticated, navigate, from, authChecked]);
+  }, [isAuthenticated, navigate, redirectUrl, authChecked]);
 
   const onSubmit = async (data) => {
     console.log('Submitting login...'); // Debug log
@@ -40,8 +49,8 @@ const LoginPage = () => {
     console.log('Login result in component:', result); // Debug log
     
     if (result.success) {
-      console.log('Login successful, navigating to:', from); // Debug log
-      navigate(from, { replace: true });
+      console.log('Login successful, navigating to:', redirectUrl); // Debug log
+      navigate(redirectUrl, { replace: true });
     } else {
       console.log('Login failed:', result.error); // Debug log
     }

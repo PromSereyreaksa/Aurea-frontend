@@ -13,6 +13,10 @@ import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import PortfolioBuilderPage from "./pages/PortfolioBuilderPage";
+import EchelonPreviewPage from "./pages/EchelonPreviewPage";
+import TemplatesShowcasePage from "./pages/TemplatesShowcasePage";
+import EchelonCaseStudyPage from "./templates/Echelon/EchelonCaseStudyPage";
+import EchelonCaseStudyEditorPage from "./templates/Echelon/EchelonCaseStudyEditorPage";
 
 function App() {
   return (
@@ -50,6 +54,26 @@ function App() {
                 <PortfolioBuilderPage />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/portfolio-builder/:portfolioId/case-study/:projectId" 
+            element={
+              <ProtectedRoute>
+                <EchelonCaseStudyEditorPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/template-preview/echelon" 
+            element={<EchelonPreviewPage />} 
+          />
+          <Route 
+            path="/templates" 
+            element={<TemplatesShowcasePage />} 
+          />
+          <Route 
+            path="/case-study/logo-design-process" 
+            element={<EchelonCaseStudyPage />} 
           />
         </Routes>
         

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { getAllTemplates } from '../../templates';
 
 const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
-  const [hoveredTemplate, setHoveredTemplate] = useState(null);
   const templates = getAllTemplates();
+  const navigate = useNavigate();
 
   const handleTemplateSelect = (template) => {
     onSelectTemplate(template);
@@ -28,15 +29,11 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
         {templates.map((template) => (
           <motion.div
             key={template.id}
-            className={`relative bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer border-2 transition-all duration-300 ${
+            className={`relative bg-white rounded-xl shadow-lg overflow-hidden border-2 transition-all duration-300 ${
               selectedTemplateId === template.id 
-                ? 'border-blue-500 shadow-xl scale-105' 
+                ? 'border-[#FF6B35] shadow-xl' 
                 : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
             }`}
-            whileHover={{ y: -5 }}
-            onHoverStart={() => setHoveredTemplate(template.id)}
-            onHoverEnd={() => setHoveredTemplate(null)}
-            onClick={() => handleTemplateSelect(template)}
           >
             {/* Selected/In Progress Badge */}
             {selectedTemplateId === template.id && (
@@ -85,24 +82,6 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
                 </div>
               </div>
 
-              {/* Hover overlay */}
-              {hoveredTemplate === template.id && (
-                <motion.div
-                  className="absolute inset-0 bg-blue-600 bg-opacity-90 flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="text-center text-white">
-                    <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <p className="font-semibold">Preview Template</p>
-                  </div>
-                </motion.div>
-              )}
-
               {/* Selected indicator */}
               {selectedTemplateId === template.id && (
                 <div className="absolute top-3 right-3 bg-blue-500 text-white p-2 rounded-full">
@@ -135,20 +114,35 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
                 </span>
               </div>
 
-              <motion.button
-                className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
-                  selectedTemplateId === template.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                whileTap={{ scale: 0.98 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTemplateSelect(template);
-                }}
-              >
-                {selectedTemplateId === template.id ? 'Selected' : 'Use Template'}
-              </motion.button>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {template.previewUrl && (
+                  <motion.button
+                    className="flex-1 py-2 px-3 rounded-lg font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(template.previewUrl, '_blank');
+                    }}
+                  >
+                    Preview
+                  </motion.button>
+                )}
+                <motion.button
+                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-colors text-sm ${
+                    selectedTemplateId === template.id
+                      ? 'bg-[#FF6B35] text-white hover:bg-[#E55A2B]'
+                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                  }`}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTemplateSelect(template);
+                  }}
+                >
+                  {selectedTemplateId === template.id ? 'Selected' : 'Use This'}
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         ))}

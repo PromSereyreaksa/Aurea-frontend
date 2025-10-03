@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const DashboardSidebar = ({ activeSection, setActiveSection }) => {
   const sidebarItems = [
@@ -40,6 +41,27 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
           />
         </svg>
       ),
+    },
+    {
+      id: "templates",
+      name: "Templates",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"
+          />
+        </svg>
+      ),
+      isLink: true,
+      link: "/templates",
     },
     {
       id: "analytics",
@@ -139,22 +161,41 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 space-y-1">
-        {sidebarItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveSection(item.id)}
-            className={`w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors ${
-              activeSection === item.id
-                ? "bg-[#fb8500] text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <span className="mr-2 lg:mr-3 flex-shrink-0">{item.icon}</span>
-            <span className="font-medium text-sm lg:text-base truncate">
-              {item.name}
-            </span>
-          </button>
-        ))}
+        {sidebarItems.map((item) => {
+          // If item is a link, render as Link component
+          if (item.isLink) {
+            return (
+              <Link
+                key={item.id}
+                to={item.link}
+                className="w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100"
+              >
+                <span className="mr-2 lg:mr-3 flex-shrink-0">{item.icon}</span>
+                <span className="font-medium text-sm lg:text-base truncate">
+                  {item.name}
+                </span>
+              </Link>
+            );
+          }
+          
+          // Otherwise, render as button for section navigation
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors ${
+                activeSection === item.id
+                  ? "bg-[#fb8500] text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <span className="mr-2 lg:mr-3 flex-shrink-0">{item.icon}</span>
+              <span className="font-medium text-sm lg:text-base truncate">
+                {item.name}
+              </span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

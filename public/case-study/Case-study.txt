@@ -1,0 +1,158 @@
+
+
+In this article I will share my logo design process from start to finish, that I have built in 8 years as a graphic designer. 
+
+The reasons why I am doing this is mostly because I get asked a lot by clients and other designers — how do I go around my process of creating logos, and of course because I want to share some of my knowledge.
+
+There are 4 major steps I take when designing a logo:
+
+[pic 1]
+
+
+
+Now let’s take each step and elaborate on it for a better understanding.
+01. Research
+01.1 Questionnaire
+
+After receiving an email and discussing terms and price with the client, getting paid with 50% payment I send them a Google Form Questionnaire that gets completed with the relevant info about their brand, vision and needs. 
+
+This is a crucial part of the research process because it eliminates a lot of guesses and it helps you better understand, what is it that the client wants and what should you do about it.
+
+An alternative to a questionnaire is a discovery call with the client, in which you can ask important questions about their WHAT and their WHY. Make sure you take notes as you go along to ensure you keep in mind something you might forget.
+
+Personally I like to do both, a discovery call helps to establish a connection with the client and a questionnaire helps in moments when you are stuck and need to get back to the info you gathered.
+01.2 Dig Deep
+
+With the form printed I start to read it and mark keywords that would help in narrowing down possible ideas / concepts for the logo. I also do competitor analysis and try to gather as much info about the brand as I can
+
+[pic2]
+
+
+02. Sketch
+02.1 Sketching Ideas
+
+This is by far my favourite part of the whole process because it is where my creativity goes wild and I am free to experiment with various ideas I had in mind.
+
+It usually starts by having the form in front of me and by associating keywords with very simple graphical forms. I try to roughly sketch them without being to detailed.
+
+
+[pic3]
+
+
+02.2 Narrowing Down
+
+After having a couple of pages of sketches I can already see which of them are good enough to make it to the client as concepts because while sketching simultaneously I test the ideas digitally to ensure they work and are not busy or irelevant.
+
+My number one tip when sketching is to go fast and don’t strive to make perfect sketches as that tends to break the flow of whole process.
+
+Sketch rough and fast, and always work with copies. Lay down a shape and then try to improve it by drawing the same one but with an update, maybe a different path? maybe some negative space. There are countless ways a shape can be adjusted when you are sketching.
+
+I then scan all of the pages and from each I take the ones I find best and place them into a separate file that I save and send to the client.
+
+[pic4]
+
+Narrowed directions for apilayer — suite of productivity-boosting Web APIs used by developers, startups as well as Fortune 500s.
+03. Digital
+03.1 Digitizing Directions
+
+Once we have approved the scanned directions I take them and start on the digital process. I use them only as a guidance, because my best ideas usually come when working in front of the computer. However I have to mention that the sketching phase is crucial as it helps to visualize better the outcome and sometimes the initial sketch can be very close to the final logo.
+
+[pic5]
+
+
+03.2 Presentations & Mockups
+
+After a lot of experimenting and trying to make things look good I take 3 of my best directions and craft 3 presentations in which I present the logo in various scenarios:
+
+— Main Logo + Wordmark in Color Version
+
+— Main Logo + Wordmark in Dark / Light Version (Single Color)
+
+— Simple Mockups (I would place the logo on an image, T-shirt, Cup, Office Wall) this helps people better visualize how the logo might work in various contexts as opposed to only presenting it on a white background which might not work that well.
+03.3 Adjustments
+
+Having received an answer from the client regarding the best concept that is close to the company vision I proceed to making the changes / adjustments to the logo (if there are any).
+
+Usually since the direction has been locked in, in the sketch phase, the changes are relatively small — get rid of rounded corners, experiment with colors or some modifications to the typography.
+04. Source Files
+04.1 Preparing Source Files
+
+Now that the final logo has been approved and there are no more changes I proceed to creating the source files.
+
+I start by creating a new document with an artboard that has a size of 2880 x 1800 RGB (size is relative, this is just something I work with) in which I place the main logo and text on a white background in horizontal alignment followed by other variations: logo + text in single color, logo only in color/single color, grayscale (for print) and the same variations for the stacked version of the logo.
+
+I save everything in different folders:
+
+— Vector (.AI / .EPS / .PDF)
+
+— PNG (Transparent / with White Background)
+
+
+[pic6]
+
+
+04.2 Logo and/or Brand Guidelines
+
+Along with the source files I offer a PDF guideline where I demonstrate logo usage to ensure that everything is used accordingly to the rules I have set.
+
+I tend to think that there’s more to providing a good looking logo only.
+
+A logo sometimes can be as good as how it is being used, so for example when placed against a colored background, if contrast isn’t respected — you might have a problem because there is a certain version of the logo that has to be used. Or let’s suppose someone intends on placing the logo near a corner, it is your duty as a designer and creator of the logo to make sure you indicate an allowed safe margin and how to calculate it relatively to the logo’s size.
+
+The pages include:
+
+— Logo Variations (Horizontal and Stacked)
+
+— Safe Margins for Logo + Wordmark, Logo only and wordmark only
+
+— Brand Colors (HEX / Pantone Codes / Gradients)
+
+— Brand Fonts
+
+If we are developing a full brand identity then I would create Brand Guidelines document in which I outline the following
+
+— About
+
+—  Brand Mission
+
+— Logo Variations and Usage
+
+— Brand Colors & Palettes 
+
+— Brand Fonts & Typography
+
+— Brand Imagery
+
+— Brand Stationery
+
+— Logo and Brand Identity Applications (i.e. Banners, Business Cards, Presentations, Vehicles, Product Mockups)
+
+An example can be seen in this case study for Secureist
+
+After everything is done I save the whole document in a web friendly format PDF with some tweaks for the setting to make sure it’s size isn’t very big and have everything sent to the client.
+
+
+[pic7] & [pic8]
+
+
+
+Bottom line as an epilogue — having a process and sticking to it, will definetely  give you and your work a sense of ownership.
+
+You will position yourself as an expert and people will be most likely to trust you and hand over their projects and ideas so you can convert them into useful graphical solutions.
+
+Happy to know if this was helpful for you, comment bellow or share it with a friend so we can spread the word,
+
+Thank you,
+
+Mihai.
+
+
+
+
+
+
+
+
+
+
+
