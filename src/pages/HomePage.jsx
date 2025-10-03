@@ -1,9 +1,9 @@
-import Navbar from "../components/shared/Navbar";
+import Navbar from "../components/Shared/Navbar";
 import Carousel from "../components/LandingPage/Carousel";
 import ContentSection from "../components/LandingPage/ContentSection";
 import Playground from "../components/LandingPage/Playground";
 import CallToAction from "../components/LandingPage/CallToAction";
-import Footer from "../components/shared/Footer";
+import Footer from "../components/Shared/Footer";
 import MemeSurvey from "../components/LandingPage/MemeSurvey";
 
 export default function HomePage() {
