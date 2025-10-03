@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mail, MessageCircle, Linkedin, TrendingUp, DollarSign } from "lucide-react";
+import {
+  Mail,
+  MessageCircle,
+  Linkedin,
+  TrendingUp,
+  DollarSign,
+} from "lucide-react";
 import Navbar from "../components/Shared/Navbar";
 import Footer from "../components/Shared/Footer";
 
@@ -46,77 +52,98 @@ const teamMembers = [
     name: "Kao Sodavann",
     role: "Founder",
     image: "/Sodavann.jpg",
-    description: "Visionary leader focused on bridging creativity and technology to empower digital artists.",
+    description:
+      "Visionary leader focused on bridging creativity and technology to empower digital artists.",
     contacts: [
       { platform: "email", url: "mailto:kaosodavann714@gmail.com" },
-      { platform: "telegram", url: "https://t.me/vannnnn001"},
-      { platform: "linkedin", url: "https://www.linkedin.com/in/kao-sodavann-b4b173321/" }
-    ]
+      { platform: "telegram", url: "https://t.me/vannnnn001" },
+      {
+        platform: "linkedin",
+        url: "https://www.linkedin.com/in/kao-sodavann-b4b173321/",
+      },
+    ],
   },
   {
     name: "Prom Sereyreaksa",
     role: "Co-Founder",
     image: "/Sereyreaksa.jpg",
-    description: "Creative technologist passionate about intuitive user experience and platform innovation.",
+    description:
+      "Creative technologist passionate about intuitive user experience and platform innovation.",
     contacts: [
       { platform: "email", url: "mailto:prumsereyreaksa@gmail.com" },
       { platform: "telegram", url: "https://t.me/souuJ" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/prom-sereyreaksa-2a2298364/" },
-    ]
+      {
+        platform: "linkedin",
+        url: "https://www.linkedin.com/in/prom-sereyreaksa-2a2298364/",
+      },
+    ],
   },
   {
     name: "Chea Ilong",
     role: "Backend Developer",
     image: "/Ilong.jpg",
-    description: "Specializes in backend architecture, security, and efficient API development.",
+    description:
+      "Specializes in backend architecture, security, and efficient API development.",
     contacts: [
       { platform: "email", url: "mailto:cheadara133@gmail.com" },
       { platform: "telegram", url: "http://t.me/Chea_Ilong" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/chea-ilong-88bb83333" }
-    ]
+      {
+        platform: "linkedin",
+        url: "https://www.linkedin.com/in/chea-ilong-88bb83333",
+      },
+    ],
   },
   {
     name: "Huy Visa",
     role: "Backend Developer",
     image: "/Visa.jpg",
-    description: "Focused on scalable backend systems and reliable data operations.",
+    description:
+      "Focused on scalable backend systems and reliable data operations.",
     contacts: [
       { platform: "email", url: "mailto:Visadekh@gmail.com" },
       { platform: "telegram", url: "https://t.me/visahuy" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/huy-visa-8443b2308" }
-    ]
+      {
+        platform: "linkedin",
+        url: "https://www.linkedin.com/in/huy-visa-8443b2308",
+      },
+    ],
   },
   {
     name: "Chheang Sovanpanha",
     role: "Backend Developer",
     image: "/Sovanpanha.jpg",
-    description: "Builds robust server-side logic and contributes to seamless data integration.",
+    description:
+      "Builds robust server-side logic and contributes to seamless data integration.",
     contacts: [
       { platform: "email", url: "mailto:Panhasovan51@gmail.com" },
       { platform: "telegram", url: "https://t.me/nhaaZzz" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/sovanpanha-chheang-17473b32a/" }
-    ]
+      {
+        platform: "linkedin",
+        url: "https://www.linkedin.com/in/sovanpanha-chheang-17473b32a/",
+      },
+    ],
   },
   {
     name: "Kosal Sophanith",
     role: "Frontend Developer",
     image: "/Sophanith.jpg",
-    description: "Frontend engineer with an eye for detail and commitment to excellent UX.",
+    description:
+      "Frontend engineer with an eye for detail and commitment to excellent UX.",
     contacts: [
       { platform: "email", url: "mailto:sophanithkosal9@gmail.com" },
       { platform: "telegram", url: "https://t.me/nithkidd" },
-      { platform: "linkedin", url: "" }
-    ]
+      { platform: "linkedin", url: "" },
+    ],
   },
 ];
 
 const getContactIcon = (platform) => {
   switch (platform) {
-    case 'email':
+    case "email":
       return <Mail size={18} />;
-    case 'telegram':
+    case "telegram":
       return <MessageCircle size={18} />;
-    case 'linkedin':
+    case "linkedin":
       return <Linkedin size={18} />;
     default:
       return null;
@@ -158,7 +185,10 @@ const AboutPage = () => {
             className="pt-8"
           >
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We are AUREA, an all-in-one launchpad for emerging designers. Our mission is to help designers confidently build their identity, present their work professionally, and succeed in the global creative market.
+              We are AUREA, an all-in-one launchpad for emerging designers. Our
+              mission is to help designers confidently build their identity,
+              present their work professionally, and succeed in the global
+              creative market.
             </p>
           </motion.div>
         </div>
@@ -308,22 +338,23 @@ const AboutPage = () => {
                   <p className="text-gray-600 text-sm leading-relaxed mb-4">
                     {member.description}
                   </p>
-                  
+
                   {/* Contact Links */}
                   <div className="flex justify-center space-x-3">
-                    {member.contacts.map((contact, contactIndex) => (
-                      contact.url && (
-                        <a
-                          key={contactIndex}
-                          href={contact.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-gray-100 hover:bg-[#fb8500] text-gray-600 hover:text-white rounded-full transition-all duration-300 transform hover:scale-110"
-                        >
-                          {getContactIcon(contact.platform)}
-                        </a>
-                      )
-                    ))}
+                    {member.contacts.map(
+                      (contact, contactIndex) =>
+                        contact.url && (
+                          <a
+                            key={contactIndex}
+                            href={contact.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-gray-100 hover:bg-[#fb8500] text-gray-600 hover:text-white rounded-full transition-all duration-300 transform hover:scale-110"
+                          >
+                            {getContactIcon(contact.platform)}
+                          </a>
+                        )
+                    )}
                   </div>
                 </div>
               </motion.div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { useForm, ValidationError } from '@formspree/react';
+import { useForm, ValidationError } from "@formspree/react";
 import Navbar from "../components/Shared/Navbar";
 import Footer from "../components/Shared/Footer";
 
@@ -28,12 +28,8 @@ const contactMethods = [
     contact: "AUREA",
     link: "https://web.facebook.com/profile.php?id=61580414833465",
     icon: (
-      <svg
-        className="w-8 h-8"
-        fill="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
       </svg>
     ),
   },
@@ -42,10 +38,10 @@ const contactMethods = [
 const ContactPage = () => {
   const [state, handleSubmit] = useForm("xnngjrqd");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -59,19 +55,19 @@ const ContactPage = () => {
       setShowSuccessModal(true);
       // Reset form data
       setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
       });
     }
   }, [state.succeeded]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -80,11 +76,11 @@ const ContactPage = () => {
   };
 
   const scrollToContactForm = () => {
-    const contactFormSection = document.getElementById('contact-form-section');
+    const contactFormSection = document.getElementById("contact-form-section");
     if (contactFormSection) {
-      contactFormSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+      contactFormSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     }
   };
@@ -149,8 +145,8 @@ const ContactPage = () => {
                 className="text-center group cursor-pointer"
                 onClick={() => {
                   if (method.link) {
-                    window.open(method.link, '_blank');
-                  } else if (method.title === 'Email Us') {
+                    window.open(method.link, "_blank");
+                  } else if (method.title === "Email Us") {
                     scrollToContactForm();
                   } else {
                     window.location.href = `mailto:${method.contact}`;
@@ -204,7 +200,10 @@ const ContactPage = () => {
             className="space-y-8"
           >
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase"
+              >
                 Full Name
               </label>
               <input
@@ -217,8 +216,8 @@ const ContactPage = () => {
                 placeholder="Enter your full name"
                 required
               />
-              <ValidationError 
-                prefix="Name" 
+              <ValidationError
+                prefix="Name"
                 field="name"
                 errors={state.errors}
                 className="text-red-500 text-sm mt-1"
@@ -226,7 +225,10 @@ const ContactPage = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase"
+              >
                 Email Address
               </label>
               <input
@@ -239,8 +241,8 @@ const ContactPage = () => {
                 placeholder="Enter your email address"
                 required
               />
-              <ValidationError 
-                prefix="Email" 
+              <ValidationError
+                prefix="Email"
                 field="email"
                 errors={state.errors}
                 className="text-red-500 text-sm mt-1"
@@ -248,7 +250,10 @@ const ContactPage = () => {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase"
+              >
                 Subject
               </label>
               <input
@@ -261,8 +266,8 @@ const ContactPage = () => {
                 placeholder="What's this about?"
                 required
               />
-              <ValidationError 
-                prefix="Subject" 
+              <ValidationError
+                prefix="Subject"
                 field="subject"
                 errors={state.errors}
                 className="text-red-500 text-sm mt-1"
@@ -270,7 +275,10 @@ const ContactPage = () => {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-[#1a1a1a] mb-2 tracking-wide uppercase"
+              >
                 Message
               </label>
               <textarea
@@ -283,8 +291,8 @@ const ContactPage = () => {
                 placeholder="Tell us more about your inquiry..."
                 required
               />
-              <ValidationError 
-                prefix="Message" 
+              <ValidationError
+                prefix="Message"
                 field="message"
                 errors={state.errors}
                 className="text-red-500 text-sm mt-1"
@@ -297,12 +305,12 @@ const ContactPage = () => {
               type="submit"
               disabled={state.submitting}
               className={`w-full py-4 px-8 font-medium tracking-wide uppercase transition-all ${
-                state.submitting 
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                  : 'bg-[#fb8500] text-white hover:bg-[#fb8500]/90'
+                state.submitting
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-[#fb8500] text-white hover:bg-[#fb8500]/90"
               }`}
             >
-              {state.submitting ? 'Sending...' : 'Send Message'}
+              {state.submitting ? "Sending..." : "Send Message"}
             </motion.button>
           </motion.form>
         </div>
@@ -310,7 +318,10 @@ const ContactPage = () => {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4" style={{ backdropFilter: 'blur(8px)' }}>
+        <div
+          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4"
+          style={{ backdropFilter: "blur(8px)" }}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.7, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -350,7 +361,7 @@ const ContactPage = () => {
               >
                 Message Sent Successfully!
               </motion.h3>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -359,7 +370,7 @@ const ContactPage = () => {
               >
                 Thank you for reaching out to us.
               </motion.p>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
