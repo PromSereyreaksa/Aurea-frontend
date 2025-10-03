@@ -62,23 +62,23 @@ export default function Carousel() {
               index === currentSlide ? "opacity-100" : "opacity-0"
             } ${slide.color}`}
           >
-            <div className="h-full w-full flex items-center justify-center px-6 md:px-12 lg:px-24">
-              <div className="max-w-7xl w-full grid grid-cols-12 gap-8">
+            <div className="h-full w-full flex items-center justify-center px-4 sm:px-6 md:px-12 lg:px-24">
+              <div className="max-w-7xl w-full grid grid-cols-12 gap-4 sm:gap-8">
                 <div className="col-span-12 lg:col-span-8">
                   <div className="text-white">
-                    <div className="text-sm font-mono mb-4">
+                    <div className="text-xs sm:text-sm font-mono mb-3 sm:mb-4">
                       {String(index + 1).padStart(2, "0")} /{" "}
                       {String(slides.length).padStart(2, "0")}
                     </div>
-                    <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-none">
+                    <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 leading-none">
                       {slide.title}
                     </h2>
-                    <div className="w-16 h-1 bg-white mb-6"></div>
-                    <p className="text-xl md:text-2xl leading-relaxed max-w-2xl mb-8">
+                    <div className="w-12 sm:w-16 h-1 bg-white mb-4 sm:mb-6"></div>
+                    <p className="text-base sm:text-lg md:text-2xl leading-relaxed max-w-2xl mb-6 sm:mb-8">
                       {slide.description}
                     </p>
                     {slide.stat && (
-                      <div className="inline-block px-6 py-3 bg-white text-black font-mono text-sm font-bold">
+                      <div className="inline-block px-4 sm:px-6 py-2 sm:py-3 bg-white text-black font-mono text-xs sm:text-sm font-bold">
                         {slide.stat}
                       </div>
                     )}
@@ -91,30 +91,30 @@ export default function Carousel() {
       </div>
 
       {/* Navigation */}
-      <div className="absolute bottom-12 right-12 flex gap-4 z-10">
+      <div className="absolute bottom-6 sm:bottom-12 right-4 sm:right-12 flex gap-2 sm:gap-4 z-10">
         <button
           onClick={prevSlide}
-          className="w-12 h-12 border-2 border-white text-white hover:bg-[#fb8500] hover:border-[#fb8500] transition-all flex items-center justify-center rounded"
+          className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white text-white hover:bg-[#fb8500] hover:border-[#fb8500] transition-all flex items-center justify-center rounded"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         <button
           onClick={nextSlide}
-          className="w-12 h-12 border-2 border-white text-white hover:bg-[#fb8500] hover:border-[#fb8500] transition-all flex items-center justify-center rounded"
+          className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white text-white hover:bg-[#fb8500] hover:border-[#fb8500] transition-all flex items-center justify-center rounded"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
 
       {/* Indicators */}
-      <div className="absolute bottom-12 left-12 flex gap-3 z-10">
+      <div className="absolute bottom-6 sm:bottom-12 left-4 sm:left-12 flex gap-2 sm:gap-3 z-10">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-12 h-1 transition-all rounded ${
+            className={`w-8 sm:w-12 h-1 transition-all rounded ${
               index === currentSlide ? "bg-[#fb8500]" : "bg-white/30"
             }`}
             aria-label={`Go to slide ${index + 1}`}
