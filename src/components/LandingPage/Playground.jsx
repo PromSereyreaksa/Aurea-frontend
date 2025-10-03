@@ -211,7 +211,9 @@ export default function Playground() {
                 <div className="aspect-video bg-neutral-200 flex items-center justify-center">
                   <div className="text-center text-neutral-400">
                     <Upload className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 mx-auto mb-2" />
-                    <p className="text-xs sm:text-sm">Upload an image to preview</p>
+                    <p className="text-xs sm:text-sm">
+                      Upload an image to preview
+                    </p>
                   </div>
                 </div>
               )}

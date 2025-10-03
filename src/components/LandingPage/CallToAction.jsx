@@ -21,22 +21,34 @@ export default function CallToAction() {
             {/* Value Props */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
               <div>
-                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">✓</div>
-                <div className="font-bold mb-1 text-sm sm:text-base">Free to Start</div>
+                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">
+                  ✓
+                </div>
+                <div className="font-bold mb-1 text-sm sm:text-base">
+                  Free to Start
+                </div>
                 <div className="text-xs sm:text-sm text-neutral-400">
                   No credit card needed
                 </div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">✓</div>
-                <div className="font-bold mb-1 text-sm sm:text-base">Custom Domain</div>
+                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">
+                  ✓
+                </div>
+                <div className="font-bold mb-1 text-sm sm:text-base">
+                  Custom Domain
+                </div>
                 <div className="text-xs sm:text-sm text-neutral-400">
                   yourname.com ready
                 </div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">✓</div>
-                <div className="font-bold mb-1 text-sm sm:text-base">24/7 Support</div>
+                <div className="text-2xl sm:text-3xl mb-2 text-[#fb8500]">
+                  ✓
+                </div>
+                <div className="font-bold mb-1 text-sm sm:text-base">
+                  24/7 Support
+                </div>
                 <div className="text-xs sm:text-sm text-neutral-400">
                   Designers helping designers
                 </div>

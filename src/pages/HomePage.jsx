@@ -45,7 +45,9 @@ export default function HomePage() {
                   <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 text-[#fb8500]">
                     Zero
                   </div>
-                  <div className="text-xs sm:text-sm text-neutral-600">Code Needed</div>
+                  <div className="text-xs sm:text-sm text-neutral-600">
+                    Code Needed
+                  </div>
                 </div>
                 <div>
                   <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 text-[#fb8500]">
@@ -81,8 +83,12 @@ export default function HomePage() {
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 sm:w-32 md:w-40 h-28 sm:h-32 md:h-40 border border-white sm:border-2 rotate-45"></div>
                 </div>
                 <div className="text-white text-center z-10">
-                  <div className="text-6xl sm:text-7xl md:text-8xl font-bold mb-3 sm:mb-4">⚡</div>
-                  <div className="text-xl sm:text-2xl font-bold">Fast & Beautiful</div>
+                  <div className="text-6xl sm:text-7xl md:text-8xl font-bold mb-3 sm:mb-4">
+                    ⚡
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    Fast & Beautiful
+                  </div>
                 </div>
               </div>
             </div>
