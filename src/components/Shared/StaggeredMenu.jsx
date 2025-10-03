@@ -1,4 +1,10 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { Menu, X, ExternalLink } from "lucide-react";
@@ -39,6 +45,18 @@ export const StaggeredMenu = ({
   const toggleBtnRef = useRef(null);
   const busyRef = useRef(false);
 
+  // Memoize colors array to prevent recreating on every render
+  const prelayerColors = useMemo(() => {
+    const raw =
+      colors && colors.length ? colors.slice(0, 4) : ["#1e1e22", "#35353c"];
+    let arr = [...raw];
+    if (arr.length >= 3) {
+      const mid = Math.floor(arr.length / 2);
+      arr.splice(mid, 1);
+    }
+    return arr;
+  }, [colors]);
+
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
@@ -73,12 +91,13 @@ export const StaggeredMenu = ({
     }
     itemEntranceTweenRef.current?.kill();
 
-    const itemEls = Array.from(panel.querySelectorAll(".sm-panel-itemLabel"));
-    const numberEls = Array.from(
-      panel.querySelectorAll(".sm-panel-list[data-numbering] .sm-panel-item")
+    // Use more efficient selectors and cache them
+    const itemEls = panel.querySelectorAll(".sm-panel-itemLabel");
+    const numberEls = panel.querySelectorAll(
+      ".sm-panel-list[data-numbering] .sm-panel-item"
     );
     const socialTitle = panel.querySelector(".sm-socials-title");
-    const socialLinks = Array.from(panel.querySelectorAll(".sm-socials-link"));
+    const socialLinks = panel.querySelectorAll(".sm-socials-link");
 
     const layerStates = layers.map((el) => ({
       el,
@@ -205,22 +224,16 @@ export const StaggeredMenu = ({
       ease: "power3.in",
       overwrite: "auto",
       onComplete: () => {
-        const itemEls = Array.from(
-          panel.querySelectorAll(".sm-panel-itemLabel")
-        );
+        const itemEls = panel.querySelectorAll(".sm-panel-itemLabel");
         if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
 
-        const numberEls = Array.from(
-          panel.querySelectorAll(
-            ".sm-panel-list[data-numbering] .sm-panel-item"
-          )
+        const numberEls = panel.querySelectorAll(
+          ".sm-panel-list[data-numbering] .sm-panel-item"
         );
         if (numberEls.length) gsap.set(numberEls, { ["--sm-num-opacity"]: 0 });
 
         const socialTitle = panel.querySelector(".sm-socials-title");
-        const socialLinks = Array.from(
-          panel.querySelectorAll(".sm-socials-link")
-        );
+        const socialLinks = panel.querySelectorAll(".sm-socials-link");
         if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
         if (socialLinks.length) gsap.set(socialLinks, { y: 25, opacity: 0 });
 
@@ -367,24 +380,13 @@ export const StaggeredMenu = ({
             className="sm-prelayers absolute top-0 right-0 bottom-0 pointer-events-none z-[5]"
             aria-hidden="true"
           >
-            {(() => {
-              const raw =
-                colors && colors.length
-                  ? colors.slice(0, 4)
-                  : ["#1e1e22", "#35353c"];
-              let arr = [...raw];
-              if (arr.length >= 3) {
-                const mid = Math.floor(arr.length / 2);
-                arr.splice(mid, 1);
-              }
-              return arr.map((c, i) => (
-                <div
-                  key={i}
-                  className="sm-prelayer absolute top-0 right-0 h-full w-full translate-x-0"
-                  style={{ background: c }}
-                />
-              ));
-            })()}
+            {prelayerColors.map((c, i) => (
+              <div
+                key={i}
+                className="sm-prelayer absolute top-0 right-0 h-full w-full translate-x-0"
+                style={{ background: c }}
+              />
+            ))}
           </div>
           <header
             className="staggered-menu-header absolute top-0 left-0 w-full flex items-center justify-between p-[2em] bg-transparent pointer-events-none"
@@ -718,9 +720,9 @@ export const StaggeredMenu = ({
         .sm-scope .sm-toggle:focus-visible { outline: 2px solid #fb8500; outline-offset: 2px; }
         .sm-scope .sm-line:last-of-type { margin-top: 6px; }
         .sm-scope .sm-line { display: none !important; }
-        .sm-scope .staggered-menu-panel { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100vh; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 7em 4em 2em 4em; overflow-y: auto; z-index: 40; pointer-events: auto; border-bottom: 4px solid #fb8500; }
+        .sm-scope .staggered-menu-panel { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100vh; background: white; padding: 7em 4em 2em 4em; overflow-y: auto; z-index: 40; pointer-events: auto; border-bottom: 4px solid #fb8500; will-change: transform; }
         .sm-scope .sm-prelayers { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100vh; pointer-events: none; z-index: 36; }
-        .sm-scope .sm-prelayer { position: absolute; top: 0; left: 0; right: 0; height: 100%; width: 100%; transform: translateY(0); }
+        .sm-scope .sm-prelayer { position: absolute; top: 0; left: 0; right: 0; height: 100%; width: 100%; transform: translateY(0); will-change: transform; }
         .sm-scope .sm-panel-inner { flex: 1; display: flex; flex-direction: column; gap: 2rem; }
         .sm-scope .sm-socials { margin-top: auto; padding-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
         .sm-scope .sm-socials-title { margin: 0; font-size: 1rem; font-weight: 500; color: var(--sm-accent, #ff0000); }
@@ -735,13 +737,13 @@ export const StaggeredMenu = ({
         .sm-scope .sm-socials-link:hover { color: var(--sm-accent, #ff0000); }
         .sm-scope .sm-panel-title { margin: 0; font-size: 1rem; font-weight: 600; color: #fff; text-transform: uppercase; }
         .sm-scope .sm-panel-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-        .sm-scope .sm-panel-item { position: relative; color: #000; font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.8rem); cursor: pointer; line-height: 1.2; letter-spacing: -0.04em; text-transform: uppercase; transition: background 0.25s, color 0.25s; display: inline-block; text-decoration: none; padding-right: 0.5em; white-space: normal; word-break: break-word; overflow: visible; max-width: 100%; }
+        .sm-scope .sm-panel-item { position: relative; color: #000; font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.8rem); cursor: pointer; line-height: 1.2; letter-spacing: -0.04em; text-transform: uppercase; transition: color 0.25s; display: inline-block; text-decoration: none; padding-right: 0.5em; white-space: normal; word-break: break-word; overflow: visible; max-width: 100%; }
         .sm-scope .sm-panel-itemLabel { display: inline-block; will-change: transform; transform-origin: 50% 100%; }
         .sm-scope .sm-panel-item:hover { color: var(--sm-accent, #ff0000); }
         .sm-scope .sm-panel-list[data-numbering] { counter-reset: smItem; }
         .sm-scope .sm-panel-list[data-numbering] .sm-panel-item::after { counter-increment: smItem, decimal-leading-zero); position: absolute; top: 0.1em; right: 3.2em; font-size: 18px; font-weight: 400; color: var(--sm-accent, #ff0000); letter-spacing: 0; pointer-events: none; user-select: none; opacity: var(--sm-num-opacity, 0); }
-        @media (max-width: 1024px) { .sm-scope .staggered-menu-panel { width: clamp(280px, 85vw, 360px); max-width: 360px; padding: 5em 1.5em 2em 1.5em; } .sm-scope .sm-prelayers { width: clamp(280px, 85vw, 360px); max-width: 360px; } .sm-scope .sm-panel-item { font-size: clamp(1.6rem, 4.5vw, 2.4rem); } }
-        @media (max-width: 640px) { .sm-scope .staggered-menu-panel { width: clamp(260px, 80vw, 320px); max-width: 320px; padding: 5em 1.2em 1.5em 1.2em; } .sm-scope .sm-prelayers { width: clamp(260px, 80vw, 320px); max-width: 320px; } .sm-scope .sm-panel-item { font-size: clamp(1.4rem, 4vw, 2rem); line-height: 1.3; padding-right: 0.3em; } .sm-scope .sm-panel-list { gap: 0.3rem; } }
+        @media (max-width: 1024px) { .sm-scope .staggered-menu-panel { width: clamp(280px, 85vw, 360px); max-width: 360px; padding: 5em 1.5em 2em 1.5em; } .sm-scope .sm-panel-item { font-size: clamp(1.6rem, 4.5vw, 2.4rem); } }
+        @media (max-width: 640px) { .sm-scope .staggered-menu-panel { width: clamp(260px, 80vw, 320px); max-width: 320px; padding: 5em 1.2em 1.5em 1.2em; } .sm-scope .sm-panel-item { font-size: clamp(1.4rem, 4vw, 2rem); line-height: 1.3; padding-right: 0.3em; } .sm-scope .sm-panel-list { gap: 0.3rem; } }
       `}</style>
     </>
   );
