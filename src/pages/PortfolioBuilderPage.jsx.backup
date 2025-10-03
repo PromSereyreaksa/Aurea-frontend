@@ -1,0 +1,1132 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import usePortfolioStore from '../stores/portfolioStore';
+import { getTemplate, createPortfolioFromTemplate } from '../templates';
+import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
+import TemplateSetupForm from '../components/PortfolioBuilder/TemplateSetupForm';
+import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
+import { useRef } from 'react';
+
+
+const PortfolioBuilderPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { currentPortfolio, isLoading, createPortfolio, updatePortfolio, fetchPortfolioById } = usePortfolioStore();
+
+  // Template-based state
+  const [step, setStep] = useState('select'); // 'select', 'setup', 'customize', 'preview'
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [isEditing, setIsEditing] = useState(true);
+
+  const [showPDFExport, setShowPDFExport] = useState(false);
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
+  const [initializing, setInitializing] = useState(true);
+  const [isUserCurrentlyEditing, setIsUserCurrentlyEditing] = useState(false); // Track if user is actively editing
+
+  // Default image URLs for fallback
+  const DEFAULT_HERO_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Image';
+  const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Project';
+
+  // Local Storage key for auto-save
+  const getLocalStorageKey = () => `portfolio-draft-${id || 'new'}`;
+
+  // Debounced auto-save to local storage - only when not actively editing
+  const autoSaveToLocalStorage = useCallback(
+    debounce((data) => {
+      // Only auto-save if user is not currently editing
+      if (!isUserCurrentlyEditing) {
+        setAutoSaveStatus('saving');
+        try {
+          const key = getLocalStorageKey();
+
+          const saveData = {
+            portfolioData: data,
+            title,
+            description,
+            selectedTemplateId: selectedTemplate?.id,
+            timestamp: Date.now(),
+          };
+
+          localStorage.setItem(key, JSON.stringify(saveData));
+          setAutoSaveStatus('saved');
+        } catch (error) {
+          console.error('Failed to auto-save to localStorage:', error);
+          setAutoSaveStatus('error');
+        }
+      }
+    }, 2000), // Increased debounce time to 2 seconds
+    [id, title, description, selectedTemplate?.id, isUserCurrentlyEditing]
+  );
+
+  // Helper function to convert portfolio to template format
+  const convertToTemplateFormat = (portfolio) => {
+
+    if (portfolio.templateId && portfolio.content) {
+      return portfolio;
+    }
+
+    const templateData = {
+      templateId: portfolio.template || 'minimal-designer',
+      content: portfolio.sections?.reduce((acc, section) => {
+        acc[section.type] = section.content;
+        return acc;
+      }, {}) || {},
+      styling: portfolio.styling || {},
+      structure: portfolio.structure || {},
+      metadata: portfolio.metadata || {},
+    };
+
+    return templateData;
+  };
+
+  // Clear local storage draft when successfully saved to server
+  const clearLocalStorageDraft = () => {
+    try {
+      const key = getLocalStorageKey();
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Failed to clear localStorage draft:', error);
+    }
+  };
+
+  // Debounce utility function
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Function to clean up placeholder data (only for backend saving)
+  const cleanupPlaceholderData = (portfolioData) => {
+    if (!portfolioData || !portfolioData.content) {
+      return portfolioData;
+    }
+
+    const cleanedContent = { ...portfolioData.content };
+
+    const cleanPlaceholderPath = (value) => {
+      if (typeof value === 'string' && value.includes('/placeholder') && !value.startsWith('http')) {
+        return '';
+      }
+      return value;
+    };
+
+    Object.keys(cleanedContent).forEach((sectionKey) => {
+      const section = cleanedContent[sectionKey];
+
+      if (typeof section === 'object' && section !== null) {
+        Object.keys(section).forEach((fieldKey) => {
+          const fieldValue = section[fieldKey];
+
+          if (fieldKey === 'image') {
+            cleanedContent[sectionKey][fieldKey] = cleanPlaceholderPath(fieldValue);
+          } else if (fieldKey === 'projects' && Array.isArray(fieldValue)) {
+            cleanedContent[sectionKey][fieldKey] = fieldValue.map((project) => ({
+              ...project,
+              image: cleanPlaceholderPath(project.image),
+            }));
+          }
+        });
+      }
+    });
+
+    const cleanedData = {
+      ...portfolioData,
+      content: cleanedContent,
+      _version: (portfolioData._version || 0) + 1,
+    };
+
+    return cleanedData;
+  };
+
+  // Function to ensure valid image URLs for rendering
+  const ensureValidImageUrls = (portfolioData) => {
+    if (!portfolioData || !portfolioData.content) {
+      return portfolioData;
+    }
+
+    const updatedContent = { ...portfolioData.content };
+
+    // Ensure hero image - don't add default placeholder, let it be empty for proper placeholder rendering
+    updatedContent.hero = {
+      ...updatedContent.hero,
+      image: updatedContent.hero?.image || '', // Use empty string instead of default placeholder
+    };
+
+    // Ensure project images
+    if (updatedContent.projects && Array.isArray(updatedContent.projects)) {
+      updatedContent.projects = updatedContent.projects.map((project) => ({
+        ...project,
+        image: project.image || DEFAULT_PROJECT_IMAGE,
+      }));
+    } else {
+      updatedContent.projects = [];
+    }
+
+    return {
+      ...portfolioData,
+      content: updatedContent,
+      _version: (portfolioData._version || 0) + 1,
+    };
+  };
+
+  // Load portfolio data when component mounts or ID changes
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      setInitializing(true);
+      if (id && id !== 'new') {
+
+        try {
+          const result = await fetchPortfolioById(id);
+
+          if (result && result.success && result.portfolio) {
+
+            setTitle(result.portfolio.title || '');
+            setDescription(result.portfolio.description || '');
+
+            const templateData = convertToTemplateFormat(result.portfolio);
+
+            if (templateData) {
+              // Ensure valid image URLs for rendering
+              const dataWithValidImages = ensureValidImageUrls(templateData);
+              setPortfolioData(dataWithValidImages);
+              const template = getTemplate(templateData.templateId);
+
+              if (template) {
+                setSelectedTemplate(template);
+                setStep('customize');
+                setInitializing(false);
+              } else {
+                console.error('Template not found:', templateData.templateId);
+                toast.error('Template not found');
+                setInitializing(false);
+              }
+            } else {
+              console.error('Failed to convert portfolio to template format');
+              toast.error('Invalid portfolio format');
+              setInitializing(false);
+            }
+          } else {
+            console.error('Failed to load portfolio:', result);
+            toast.error('Portfolio not found');
+            setInitializing(false);
+          }
+        } catch (error) {
+          console.error('Error loading portfolio:', error);
+          toast.error('Failed to load portfolio');
+          setInitializing(false);
+        }
+      } else if (id === 'new') {
+        setPortfolioData(null);
+        setSelectedTemplate(null);
+        setTitle('');
+        setDescription('');
+        setStep('select');
+        setInitializing(false);
+      }
+    };
+
+    loadPortfolio();
+  }, [id]);
+
+  // Warn user before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      const key = getLocalStorageKey();
+      const saved = localStorage.getItem(key);
+      if (saved && autoSaveStatus !== 'saved') {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [autoSaveStatus, id]);
+
+  // Close maintenance menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMaintenancePopup && !event.target.closest('.maintenance-popup')) {
+        setShowMaintenancePopup(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMaintenancePopup]);
+
+  // Add Ctrl+S save functionality
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Check if Ctrl+S (or Cmd+S on Mac) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent browser's default save action
+        
+        // Only save if we're in customize or preview mode and have portfolio data
+        if ((step === 'customize' || step === 'preview') && portfolioData && selectedTemplate) {
+          toast.success('Saving portfolio... (Ctrl+S)', {
+            duration: 1500,
+            icon: '💾',
+          });
+          handleSave();
+        }
+      }
+    };
+
+    // Add the event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [step, portfolioData, selectedTemplate]); // Removed handleSave from dependencies
+
+  const handleTemplateSelect = (template) => {
+    if (portfolioData && portfolioData.templateId !== template.id) {
+      const confirmSwitch = window.confirm(
+        'Switching templates will reset your current customizations. Are you sure you want to continue?'
+      );
+      if (!confirmSwitch) {
+        return;
+      }
+    }
+
+    setSelectedTemplate(template);
+    
+    // For new portfolios, go to setup step
+    if (id === 'new') {
+      setStep('setup');
+    } else {
+      // For existing portfolios, create portfolio data and go directly to customize
+      if (!portfolioData || portfolioData.templateId !== template.id) {
+        const newPortfolioData = createPortfolioFromTemplate(template.id);
+        setPortfolioData(ensureValidImageUrls(newPortfolioData));
+      }
+      setStep('customize');
+      setShowDesignTools(true);
+    }
+  };
+
+  const handleSetupComplete = (setupData) => {
+    const { personalInfo, skillsArray, styling } = setupData;
+    
+    // Create portfolio from template with user data (content sections only)
+    const contentData = {
+      hero: {
+        name: personalInfo.name,
+        title: personalInfo.title,
+        description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
+        image: '', // User will upload this later
+      },
+      about: {
+        heading: 'About Me',
+        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work. I believe in the power of good design and development to solve problems and tell compelling stories.`,
+        image: '', // User will upload this later
+        skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
+      },
+      contact: {
+        heading: "Let's Work Together",
+        description: "I'm always interested in new projects and opportunities.",
+        form_fields: ['name', 'email', 'message'],
+        social_links: [
+          { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
+          ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
+          ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
+        ].filter(link => link.url && !link.url.includes('example.com')),
+      },
+    };
+
+    // Create styling configuration separately
+    const stylingConfig = {
+      colors: {
+        ...selectedTemplate.styling?.colors,
+        ...styling.colors,
+      },
+      fonts: {
+        ...selectedTemplate.styling?.fonts,
+        ...styling.fonts,
+      },
+    };
+
+    // Create portfolio with separated content and styling
+    const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, contentData);
+    
+    // Apply styling configuration properly
+    newPortfolioData.styling = {
+      ...newPortfolioData.styling,
+      ...stylingConfig,
+    };
+
+    // Set the title and description from form data
+    setTitle(personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`);
+    setDescription(`Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`);
+    
+    // Apply the portfolio data
+    setPortfolioData(ensureValidImageUrls(newPortfolioData));
+    setStep('customize');
+  };
+
+  const handleBackToTemplates = () => {
+    if (step === 'setup') {
+      setStep('select');
+    } else {
+      setStep('select');
+    }
+  };
+
+  const handleContentChange = (sectionId, fieldId, value) => {
+
+    // Handle special section management operations
+    if (sectionId === '_sections') {
+      if (fieldId === 'add') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        toast.success(`Added "${value.sectionData.title}" section successfully!`);
+        return;
+      } else if (fieldId === 'delete') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        toast.success(`Deleted "${value.sectionId}" section successfully!`);
+        return;
+      } else if (fieldId === 'reorder') {
+        setPortfolioData((prev) => ({
+          ...prev,
+          content: value.content
+        }));
+        return;
+      }
+    }
+    
+    // Check if this is an image field or contains image data
+    const isImageField = fieldId === 'image' || fieldId.includes('image') || 
+                        (typeof value === 'string' && value.startsWith('data:image/'));
+    
+    // Allow data URLs for images (from cropped images), as well as http/https URLs and relative paths
+    if (isImageField && value && typeof value === 'string' && !value.match(/^(https?:\/\/|\/|data:image\/)/)) {
+      console.warn('Invalid image URL:', value);
+      toast.error('Please use a valid image URL (http://, https://, relative path, or data URL)');
+      return;
+    }
+
+    setPortfolioData((prev) => {
+      if (!prev || !prev.content) {
+        console.error('Portfolio data or content is null:', prev);
+        return prev;
+      }
+
+      const updatedContent = {
+        ...prev.content,
+        [sectionId]: {
+          ...prev.content[sectionId],
+          [fieldId]: value,
+        },
+      };
+
+      // Apply fallback images for rendering
+      const updated = ensureValidImageUrls({
+        ...prev,
+        content: updatedContent,
+        // Do not bump _version for every keystroke - only change _version on explicit save
+      });
+      
+      // Don't auto-save during active editing - only trigger auto-save when user stops editing
+      return updated;
+    });
+  };
+
+  const handleTitleChange = (newTitle) => {
+    setTitle(newTitle);
+    if (portfolioData) {
+      const updatedData = {
+        ...portfolioData,
+        title: newTitle,
+        _version: (portfolioData._version || 0) + 1,
+      };
+      setPortfolioData(updatedData);
+      autoSaveToLocalStorage(updatedData);
+    }
+  };
+
+  const handleDescriptionChange = (newDescription) => {
+    setDescription(newDescription);
+    if (portfolioData) {
+      const updatedData = {
+        ...portfolioData,
+        description: newDescription,
+        _version: (portfolioData._version || 0) + 1,
+      };
+      setPortfolioData(updatedData);
+      autoSaveToLocalStorage(updatedData);
+    }
+  };
+
+  const handleStyleChange = (styleCategory, newStyles) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      styling: {
+        ...prev.styling,
+        [styleCategory]: newStyles,
+      },
+    }));
+  };
+
+  const [isSaving, setIsSaving] = useState(false);
+  const saveTimeoutRef = useRef(null);
+
+  const handleSave = async () => {
+    // Prevent spam-saving
+    if (isSaving) {
+      console.log('Save already in progress, ignoring duplicate save request');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      if (!selectedTemplate) {
+        toast.error('No template selected');
+        setIsSaving(false);
+        return;
+      }
+
+      if (!portfolioData) {
+        toast.error('No portfolio data to save');
+        setIsSaving(false);
+        return;
+      }
+
+      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
+
+      const convertContentToSections = (content) => {
+        if (!content) return [];
+
+        const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
+        Object.entries(content).forEach(([sectionType, sectionContent]) => {
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
+        });
+        return sections;
+      };
+
+      const saveData = {
+        title: title || `${selectedTemplate.name} Portfolio`,
+        description: description || `Portfolio created with ${selectedTemplate.name} template`,
+        template: selectedTemplate.id,
+        sections: convertContentToSections(cleanedData.content),
+        styling: cleanedData.styling || {},
+        published: false,
+      };
+
+      console.log('=== SAVE DATA DEBUG ===');
+      console.log('Portfolio Data:', portfolioData);
+      console.log('Cleaned Data:', cleanedData);
+      console.log('Save Data:', saveData);
+      console.log('Sections:', saveData.sections);
+      console.log('========================');
+
+      let result;
+      if (id && id !== 'new') {
+        result = await updatePortfolio(id, saveData);
+      } else {
+        result = await createPortfolio(saveData);
+      }
+
+      if (result && result.success) {
+        toast.success('Portfolio saved successfully!');
+        clearLocalStorageDraft();
+        if (id === 'new' && result.portfolio?._id) {
+          navigate(`/portfolio-builder/${result.portfolio._id}`);
+        }
+      } else {
+        throw new Error(result?.error || 'Save failed');
+      }
+    } catch (error) {
+      console.error('=== SAVE ERROR ===');
+      console.error('Error:', error);
+      toast.error('Failed to save portfolio: ' + (error.message || 'Unknown error'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    try {
+      if (!selectedTemplate || !portfolioData) {
+        toast.error('Cannot publish - missing template or data');
+        return;
+      }
+
+      const cleanedData = cleanupPlaceholderData({ ...portfolioData });
+
+      const convertContentToSections = (content) => {
+        if (!content) return [];
+
+        const sections = [];
+        // Exclude non-content fields like styling, metadata, etc.
+        const contentFields = ['hero', 'about', 'projects', 'contact', 'experience', 'education', 'skills', 'testimonials', 'certifications', 'services'];
+        
+        Object.entries(content).forEach(([sectionType, sectionContent]) => {
+          // Only include actual content sections, not metadata/styling
+          if (contentFields.includes(sectionType) && sectionContent) {
+            sections.push({
+              type: sectionType,
+              content: sectionContent,
+            });
+          }
+        });
+        return sections;
+      };
+
+      const publishData = {
+        title: title || `${selectedTemplate.name} Portfolio`,
+        description: description || `Portfolio created with ${selectedTemplate.name} template`,
+        template: selectedTemplate.id,
+        sections: convertContentToSections(cleanedData.content),
+        styling: cleanedData.styling || {},
+        published: true,
+      };
+
+      let result;
+      if (id && id !== 'new') {
+        result = await updatePortfolio(id, publishData);
+      } else {
+        result = await createPortfolio(publishData);
+      }
+
+      if (result && result.success) {
+        toast.success('Portfolio published successfully!');
+        clearLocalStorageDraft();
+        if (id === 'new' && result.portfolio?._id) {
+          navigate(`/portfolio-builder/${result.portfolio._id}`);
+        }
+      } else {
+        throw new Error(result?.error || 'Publish failed');
+      }
+    } catch (error) {
+      console.error('Publish error:', error);
+      toast.error('Failed to publish portfolio: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  const handlePreview = () => {
+    setStep('preview');
+    setIsEditing(false);
+  };
+
+  const handleBackToEdit = () => {
+    setStep('customize');
+    setIsEditing(true);
+  };
+
+  const contentChangeHandler = (sectionId, fieldId, value) => {
+    handleContentChange(sectionId, fieldId, value);
+  };
+  contentChangeHandler.onSave = handleSave;
+
+  if (initializing || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b relative z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 min-w-0">
+            <div className="flex items-center space-x-2 md:space-x-4 min-w-0 flex-shrink">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap text-sm md:text-base"
+              >
+                ← Back to Dashboard
+              </button>
+              <div className="flex items-center space-x-1 md:space-x-2 min-w-0">
+                <h1 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
+                  {step === 'select'
+                    ? 'Choose Template'
+                    : step === 'setup'
+                    ? 'Setup Portfolio'
+                    : step === 'customize'
+                    ? 'Customize Portfolio'
+                    : 'Preview Portfolio'}
+                </h1>
+              </div>
+            </div>
+
+            {/* Auto-save status indicator only */}
+            <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
+              {(step === 'customize' || step === 'preview') && (
+                <div className="flex items-center text-sm text-gray-600">
+                  {autoSaveStatus === 'saving' && (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
+                      <span>Saving...</span>
+                    </>
+                  )}
+                  {autoSaveStatus === 'saved' && (
+                    <>
+                      <div className="h-4 w-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                        <svg
+                          className="h-3 w-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span>Auto-saved</span>
+                    </>
+                  )}
+                  {autoSaveStatus === 'error' && (
+                    <>
+                      <div className="h-4 w-4 bg-red-500 rounded-full mr-2 flex items-center justify-center">
+                        <svg
+                          className="h-3 w-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span>Save failed</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {step !== 'select' && (
+          <div className="border-t border-gray-200 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center py-3 space-x-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm">
+                    1
+                  </div>
+                  <span className="text-sm text-gray-600">Template Selected</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'setup' 
+                        ? 'bg-orange-500 text-white' 
+                        : ['customize', 'preview'].includes(step)
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    2
+                  </div>
+                  <span className="text-sm text-gray-600">Setup Information</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'customize' ? 'bg-orange-400 text-white' : step === 'preview' ? 'bg-orange-400 text-white' : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    3
+                  </div>
+                  <span className="text-sm text-gray-600">Customize</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                      step === 'preview' ? 'bg-orange-300 text-white' : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    4
+                  </div>
+                  <span className="text-sm text-gray-600">Preview & Publish</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="relative">
+        <AnimatePresence mode="wait">
+          {step === 'select' && (
+            <motion.div
+              key="select"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="py-8"
+            >
+              <TemplateSelector
+                onSelectTemplate={handleTemplateSelect}
+                selectedTemplateId={selectedTemplate?.id}
+              />
+            </motion.div>
+          )}
+
+          {step === 'setup' && selectedTemplate && (
+            <motion.div
+              key="setup"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <TemplateSetupForm
+                template={selectedTemplate}
+                onComplete={handleSetupComplete}
+                onBack={handleBackToTemplates}
+              />
+            </motion.div>
+          )}
+
+          {(step === 'customize' || step === 'preview') && selectedTemplate && portfolioData && (
+            <motion.div
+              key="customize"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="relative"
+            >
+              {/* Floating Action Buttons */}
+              {step === 'customize' && (
+                <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-3">
+                  {/* Change Template Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={handleBackToTemplates}
+                      className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.79 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.79 4 8 4s8-1.79 8-4M4 7c0-2.21 3.79-4 8-4s8 1.79 8 4" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Change Template
+                    </div>
+                  </div>
+                  
+                  {/* Preview Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={handlePreview}
+                      className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Preview
+                    </div>
+                  </div>
+                  
+                  {/* Export PDF Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => setShowMaintenancePopup(true)}
+                      className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Export PDF
+                    </div>
+                  </div>
+                  
+                  {/* Settings Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => setShowSettings(!showSettings)}
+                      className={`w-12 h-12 ${showSettings ? 'bg-orange-600' : 'bg-orange-500'} hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center`}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Portfolio Settings
+                    </div>
+                  </div>
+
+                  {/* Save Draft Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className={`w-12 h-12 ${isSaving ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center`}
+                    >
+                      {isSaving ? (
+                        <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                      )}
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      {isSaving ? 'Saving...' : 'Save Draft'}
+                    </div>
+                  </div>
+                  
+                  {/* Publish Button */}
+                  <div className="group relative">
+                    <button
+                      onClick={handlePublish}
+                      className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Publish
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Floating Back Button for Preview */}
+              {step === 'preview' && (
+                <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50">
+                  <div className="group relative">
+                    <button
+                      onClick={handleBackToEdit}
+                      className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                      Back to Edit
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 'customize' && showSettings && (
+                <div className="absolute top-6 left-6 bg-white rounded-lg shadow-lg p-4 z-30 w-80">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Portfolio Settings</h3>
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Portfolio Title
+                      </label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => handleTitleChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder={`${selectedTemplate.name} Portfolio`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder={`Portfolio created with ${selectedTemplate.name} template`}
+                      />
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
+              <div className={`transition-all duration-300 ${step === 'customize' ? 'pt-20' : ''}`}>
+                <TemplatePreview
+                  key={`${selectedTemplate?.id}`}
+                  template={selectedTemplate}
+                  portfolioData={portfolioData} // Pass portfolioData with ensured valid image URLs
+                  isEditing={isEditing}
+                  onContentChange={contentChangeHandler}
+                  onEditingStateChange={(isCurrentlyEditing) => {
+                    setIsUserCurrentlyEditing(isCurrentlyEditing);
+                    // Trigger auto-save when user stops editing
+                    if (!isCurrentlyEditing && portfolioData) {
+                      autoSaveToLocalStorage(portfolioData);
+                    }
+                  }}
+                  showPDFExport={showPDFExport}
+                  onClosePDFExport={() => setShowPDFExport(false)}
+                />
+              </div>
+
+              {step === 'customize' && isEditing && (
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg z-40 max-w-md">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <div className="text-sm">
+                      <div>Click on any text to edit it. Use the floating buttons on the right to manage your portfolio.</div>
+                      <div className="flex items-center space-x-1 mt-1 text-orange-200">
+                        <kbd className="px-1 py-0.5 bg-orange-600 rounded text-xs">Ctrl</kbd>
+                        <span>+</span>
+                        <kbd className="px-1 py-0.5 bg-orange-600 rounded text-xs">S</kbd>
+                        <span>to save quickly</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Maintenance Popup Modal */}
+        {showMaintenancePopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="maintenance-popup bg-white rounded-lg shadow-xl max-w-md w-full">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Maintenance Notice</h3>
+                      <p className="text-sm text-gray-500">Beta Feature</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowMaintenancePopup(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-lg">📄</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">PDF Export</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        This feature is currently in beta testing. You may experience some limitations or unexpected behavior.
+                      </p>
+                      <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                        <li>• Export may not include all styling</li>
+                        <li>• Image quality may vary</li>
+                        <li>• Some sections might not display correctly</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-gray-500">
+                    We're working to improve this feature
+                  </p>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowMaintenancePopup(false)}
+                      className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMaintenancePopup(false);
+                        setShowPDFExport(true);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Continue Anyway
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PortfolioBuilderPage;

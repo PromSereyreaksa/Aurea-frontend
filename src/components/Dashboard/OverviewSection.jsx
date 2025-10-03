@@ -136,7 +136,7 @@ const OverviewSection = ({ portfolios, user, setActiveSection }) => {
     {
       title: "Browse Templates",
       description: "Choose from curated templates",
-      link: "/portfolio-builder/new",
+      link: "/templates",
       color: "bg-blue-600 hover:bg-blue-700",
       icon: (
         <svg

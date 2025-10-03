@@ -1,0 +1,142 @@
+{
+  "template": "Echelon",
+  "philosophy": "Swiss/International Typographic Style — clarity, precision, grid-driven, white background with black text. No decorative overlays.",
+  "global": {
+    "background": "#FFFFFF",
+    "textColor": "#000000",
+    "grid": {
+      "columns": 12,
+      "gutter": 24,
+      "margin": 80,
+      "baseline": 8
+    },
+    "typography": {
+      "heading": {
+        "fontFamily": "Neue Haas Grotesk",
+        "weights": ["Bold"],
+        "transform": "uppercase",
+        "scale": [72, 48, 32, 24, 18]
+      },
+      "body": {
+        "fontFamily": "Neue Haas Grotesk",
+        "weights": ["Regular"],
+        "scale": [18, 16, 14]
+      },
+      "meta": {
+        "fontFamily": "IBM Plex Mono",
+        "weights": ["Regular"],
+        "scale": [14, 12]
+      }
+    },
+    "navigation": {
+      "fixed": true,
+      "background": "#FFFFFF",
+      "textColor": "#000000",
+      "position": "top",
+      "alignLeft": "SiteTitle",
+      "alignRight": ["About", "Work", "Gallery", "Contact"],
+      "hoverStyle": {
+        "underline": true,
+        "accentColor": "#B80000"
+      }
+    }
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "label": "Hero Section",
+      "type": "text-block",
+      "layout": "full-width",
+      "fields": {
+        "title": {
+          "type": "string",
+          "default": "Designing with Precision",
+          "editable": true
+        },
+        "subtitle": {
+          "type": "string",
+          "default": "Case studies in clarity and form",
+          "editable": true
+        }
+      }
+    },
+    {
+      "id": "about",
+      "label": "About Section",
+      "type": "two-column",
+      "fields": {
+        "image": {
+          "type": "image",
+          "default": "/assets/placeholder-portrait.jpg",
+          "editable": true
+        },
+        "bio": {
+          "type": "richtext",
+          "default": "I am a designer focused on minimalism, clarity, and modernist design systems.",
+          "editable": true
+        }
+      }
+    },
+    {
+      "id": "work",
+      "label": "Work Section",
+      "type": "project-list",
+      "fields": {
+        "projects": {
+          "type": "array",
+          "editable": true,
+          "default": [
+            {
+              "title": "Case Study 01",
+              "description": "Exploring typography and modular systems.",
+              "image": "/assets/project-1.jpg",
+              "meta": "2025 — Editorial"
+            },
+            {
+              "title": "Case Study 02",
+              "description": "Architectural identity design.",
+              "image": "/assets/project-2.jpg",
+              "meta": "2024 — Branding"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gallery",
+      "label": "Gallery Section",
+      "type": "image-grid",
+      "fields": {
+        "images": {
+          "type": "array",
+          "editable": true,
+          "default": [
+            { "src": "/assets/gallery-1.jpg", "caption": "Study in form" },
+            { "src": "/assets/gallery-2.jpg", "caption": "Grid alignment" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "contact",
+      "label": "Contact Section",
+      "type": "form",
+      "fields": {
+        "text": {
+          "type": "string",
+          "default": "Get in touch",
+          "editable": true
+        },
+        "button": {
+          "type": "string",
+          "default": "Contact Me",
+          "editable": true
+        }
+      }
+    }
+  ],
+  "assembly": {
+    "order": ["hero", "about", "work", "gallery", "contact"],
+    "finalPage": true
+  }
+}

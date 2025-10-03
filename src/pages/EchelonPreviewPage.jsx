@@ -1,0 +1,227 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import EchelonTemplate from '../templates/Echelon/EchelonTemplate';
+import useAuthStore from '../stores/authStore';
+
+const EchelonPreviewPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
+  const handleUseTemplate = () => {
+    if (isAuthenticated) {
+      // If logged in, go directly to portfolio builder with template pre-selected
+      navigate('/portfolio-builder/new?template=echolon');
+    } else {
+      // If not logged in, redirect to signup with return URL
+      navigate('/signup?return=/portfolio-builder/new&template=echolon');
+    }
+  };
+
+  // Mock data for the Echelon template preview
+  const mockData = {
+    hero: {
+      title: 'DESIGNING WITH PRECISION',
+      subtitle: 'Crafting experiences through minimalism, clarity, and Swiss design principles'
+    },
+    about: {
+      name: 'ALEXANDER MÜLLER',
+      role: 'CREATIVE DIRECTOR / DESIGNER',
+      image: '/mockDataImage/bai.webp',
+      bio: 'I am a designer focused on minimalism, clarity, and modernist design systems. My work emphasizes grid-based layouts, precise typography, and functional design solutions that prioritize clarity and usability above all else. With over 10 years of experience, I bring Swiss precision to every project.'
+    },
+    work: {
+      heading: 'SELECTED WORK',
+      projects: [
+        {
+          id: 1,
+          title: 'LOGO DESIGN PROCESS',
+          description: 'A comprehensive case study exploring my logo design process from research to delivery. Showcasing 8 years of experience in graphic design.',
+          image: '/case-study/mihai/pic1.jpg',
+          meta: '2025 — BRANDING / IDENTITY',
+          category: 'branding',
+          caseStudyUrl: '/case-study/logo-design-process'
+        }
+      ]
+    },
+    gallery: {
+      heading: 'VISUAL GALLERY',
+      images: [
+        { id: 1, src: '/mockDataImage/10.jpg', caption: 'Minimalist composition', meta: '01' },
+        { id: 2, src: '/mockDataImage/11.jpg', caption: 'Grid-based layout', meta: '02' },
+        { id: 3, src: '/mockDataImage/12.jpg', caption: 'Typography study', meta: '03' },
+        { id: 4, src: '/mockDataImage/13.jpg', caption: 'Color exploration', meta: '04' },
+        { id: 5, src: '/mockDataImage/14.jpg', caption: 'Swiss precision', meta: '05' },
+        { id: 6, src: '/mockDataImage/2.jpg', caption: 'Brand identity', meta: '06' }
+      ]
+    },
+    contact: {
+      heading: "LET'S WORK TOGETHER",
+      subheading: 'Ready to create something extraordinary?',
+      email: 'hello@alexandermuller.com',
+      phone: '+41 (0) 79 123 4567',
+      address: 'Zürich, Switzerland',
+      availability: 'Available for new projects',
+      social: {
+        linkedin: 'https://linkedin.com/in/alexandermuller',
+        twitter: 'https://twitter.com/alexmuller',
+        instagram: 'https://instagram.com/alexmuller',
+        behance: 'https://behance.net/alexandermuller',
+        dribbble: 'https://dribbble.com/alexandermuller'
+      }
+    }
+  };
+
+  return (
+    <div style={{ 
+      width: '100%', 
+      minHeight: '100vh',
+      backgroundColor: '#FFFFFF'
+    }}>
+      {/* Preview Header */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#FFFFFF',
+        color: '#000000',
+        padding: '20px 40px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 1000,
+        borderBottom: '2px solid #FF6B35',
+        boxShadow: '0 2px 12px rgba(255, 107, 53, 0.15)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px'
+        }}>
+          <div style={{
+            fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontSize: '20px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.02em',
+            color: '#000000'
+          }}>
+            ECHELON
+          </div>
+          <div style={{
+            fontFamily: '"IBM Plex Mono", monospace',
+            fontSize: '12px',
+            color: '#FF6B35',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
+            Template Preview
+          </div>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          gap: '15px',
+          alignItems: 'center'
+        }}>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              fontFamily: '"IBM Plex Mono", monospace',
+              fontSize: '13px',
+              color: '#000000',
+              backgroundColor: 'transparent',
+              border: '2px solid #000000',
+              padding: '10px 20px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              borderRadius: '4px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#000000';
+              e.target.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = '#000000';
+            }}
+          >
+            ← BACK
+          </button>
+          
+          <button
+            onClick={handleUseTemplate}
+            style={{
+              fontFamily: '"IBM Plex Mono", monospace',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#FFFFFF',
+              backgroundColor: '#FF6B35',
+              border: '2px solid #FF6B35',
+              padding: '10px 30px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              borderRadius: '4px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#E55A2B';
+              e.target.style.borderColor = '#E55A2B';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#FF6B35';
+              e.target.style.borderColor = '#FF6B35';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            USE THIS TEMPLATE
+          </button>
+        </div>
+      </div>
+
+      {/* Template Content with margin for fixed header */}
+      <div style={{ marginTop: '80px' }}>
+        <EchelonTemplate 
+          content={mockData}
+          isEditing={false}
+          onContentChange={() => {}}
+        />
+      </div>
+
+      {/* Preview Footer */}
+      <div style={{
+        backgroundColor: '#F8F8F8',
+        color: '#000000',
+        padding: '40px',
+        textAlign: 'center',
+        borderTop: '2px solid #FF6B35'
+      }}>
+        <div style={{
+          fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+          fontSize: '16px',
+          marginBottom: '15px',
+          fontWeight: 600
+        }}>
+          This is a preview of the ECHELON template
+        </div>
+        <div style={{
+          fontFamily: '"IBM Plex Mono", monospace',
+          fontSize: '12px',
+          color: '#999999',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}>
+          Swiss Design / International Typographic Style
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EchelonPreviewPage;

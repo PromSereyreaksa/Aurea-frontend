@@ -13,18 +13,27 @@ const SignupPage = () => {
   });
   const { signup, isLoading, isAuthenticated } = useAuthStore();
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  // Get return URL from query params or state
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('return');
+  const template = searchParams.get('template');
+  
+  // Build redirect URL with template parameter if present
+  let redirectUrl = returnUrl || location.state?.from?.pathname || "/dashboard";
+  if (template && redirectUrl.includes('/portfolio-builder/new')) {
+    redirectUrl = `${redirectUrl}?template=${template}`;
+  }
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true });
+      navigate(redirectUrl, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, redirectUrl]);
 
   const onSubmit = async (data) => {
     const result = await signup(data.name, data.email, data.password);
     if (result.success) {
-      navigate(from, { replace: true });
+      navigate(redirectUrl, { replace: true });
     }
   };
 
