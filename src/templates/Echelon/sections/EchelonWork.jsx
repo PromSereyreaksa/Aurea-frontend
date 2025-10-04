@@ -5,7 +5,9 @@ import { SwissSpiral } from '../components/SwissDecorations';
 const EchelonWork = ({ 
   content,
   isEditing = false,
-  onContentChange 
+  onContentChange,
+  portfolioId = null,
+  caseStudies = {}
 }) => {
   const { 
     heading = 'SELECTED WORK',
@@ -416,67 +418,25 @@ const EchelonWork = ({
 
                     {/* Project Description */}
                     {isEditing ? (
-                      <>
-                        <textarea
-                          value={project.description || ''}
-                          onChange={(e) => handleProjectChange(index, 'description', e.target.value)}
-                          placeholder="Project description..."
-                          rows={4}
-                          style={{
-                            fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                            fontSize: '18px',
-                            fontWeight: 400,
-                            lineHeight: 1.5,
-                            color: '#000000',
-                            backgroundColor: 'transparent',
-                            border: '1px dashed #CCCCCC',
-                            padding: '16px',
-                            width: '100%',
-                            resize: 'vertical',
-                            marginBottom: '20px'
-                          }}
-                        />
-                        
-                        {/* Edit Case Study Button (Edit Mode) */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Get current portfolio ID from URL
-                            const pathParts = window.location.pathname.split('/');
-                            const portfolioId = pathParts[pathParts.indexOf('portfolio-builder') + 1];
-                            // Navigate to case study editor
-                            window.location.href = `/portfolio-builder/${portfolioId}/case-study/${project.id}`;
-                          }}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            fontFamily: '"IBM Plex Mono", monospace',
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            color: '#FFFFFF',
-                            backgroundColor: '#FF0000',
-                            border: '2px solid #FF0000',
-                            padding: '14px 28px',
-                            cursor: 'pointer',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em',
-                            transition: 'all 0.3s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#CC0000';
-                            e.currentTarget.style.borderColor = '#CC0000';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#FF0000';
-                            e.currentTarget.style.borderColor = '#FF0000';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          }}
-                        >
-                          ✎ EDIT CASE STUDY
-                        </button>
-                      </>
+                      <textarea
+                        value={project.description || ''}
+                        onChange={(e) => handleProjectChange(index, 'description', e.target.value)}
+                        placeholder="Project description..."
+                        rows={4}
+                        style={{
+                          fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                          fontSize: '18px',
+                          fontWeight: 400,
+                          lineHeight: 1.5,
+                          color: '#000000',
+                          backgroundColor: 'transparent',
+                          border: '1px dashed #CCCCCC',
+                          padding: '16px',
+                          width: '100%',
+                          resize: 'vertical',
+                          marginBottom: '20px'
+                        }}
+                      />
                     ) : (
                       <p style={{
                         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -485,11 +445,66 @@ const EchelonWork = ({
                         lineHeight: 1.5,
                         color: '#000000',
                         margin: 0,
+                        marginBottom: '24px',
                         maxWidth: '400px'
                       }}>
                         {project.description}
                       </p>
                     )}
+                    
+                    {/* Case Study Button - Always show when editing or when there's content to view */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        
+                        // Get portfolio ID from URL as fallback
+                        const pathParts = window.location.pathname.split('/');
+                        const portfolioIdFromUrl = pathParts.includes('portfolio-builder') 
+                          ? pathParts[pathParts.indexOf('portfolio-builder') + 1]
+                          : portfolioId;
+                        
+                        if (isEditing) {
+                          // Edit mode: Navigate to case study editor
+                          window.location.href = `/portfolio-builder/${portfolioIdFromUrl}/case-study/${project.id}`;
+                        } else if (portfolioIdFromUrl) {
+                          // Preview mode in builder: Navigate to case study view
+                          window.location.href = `/portfolio/${portfolioIdFromUrl}/project/${project.id}`;
+                        } else if (project.caseStudyUrl) {
+                          // Public template preview: Use caseStudyUrl
+                          window.location.href = project.caseStudyUrl;
+                        } else {
+                          console.log('No navigation target found', { portfolioId, portfolioIdFromUrl, project });
+                        }
+                      }}
+                      style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          fontFamily: '"IBM Plex Mono", monospace',
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          color: '#FFFFFF',
+                          backgroundColor: '#FF0000',
+                          border: '2px solid #FF0000',
+                          padding: '14px 28px',
+                          cursor: 'pointer',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.1em',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#CC0000';
+                          e.currentTarget.style.borderColor = '#CC0000';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FF0000';
+                          e.currentTarget.style.borderColor = '#FF0000';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {isEditing ? '✎ EDIT CASE STUDY' : 'VIEW CASE STUDY →'}
+                      </button>
                   </div>
                 </div>
               </div>

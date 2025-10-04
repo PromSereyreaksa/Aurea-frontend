@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import usePortfolioStore from '../../stores/portfolioStore';
+import FloatingActionButtons from '../../components/PortfolioBuilder/FloatingActionButtons';
 
 const CaseStudyEditorPage = () => {
   const { portfolioId, projectId } = useParams();
   const navigate = useNavigate();
+  const { updatePortfolio, portfolios } = usePortfolioStore();
+  
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   // Case study content state - matching the static template structure
   const [caseStudy, setCaseStudy] = useState({
@@ -12,6 +21,7 @@ const CaseStudyEditorPage = () => {
     year: '2025',
     intro: 'In this article I will share my logo design process from start to finish, that I have built in 8 years as a graphic designer.',
     heroImage: '',
+    heroImageCaption: 'Figure 01 — Design Process Framework',
     steps: [
       { num: '01', title: 'RESEARCH', desc: 'Understanding the brand and market' },
       { num: '02', title: 'SKETCH', desc: 'Exploring concepts on paper' },
@@ -29,7 +39,8 @@ const CaseStudyEditorPage = () => {
             title: 'QUESTIONNAIRE',
             content: 'After receiving an email and discussing terms and price with the client, getting paid with 50% payment I send them a Google Form Questionnaire that gets completed with the relevant info about their brand, vision and needs.\n\nThis is a crucial part of the research process because it eliminates a lot of guesses and it helps you better understand, what is it that the client wants and what should you do about it.',
             image: '',
-            imageCaption: 'Figure 02 — Keyword Analysis'
+            imageCaption: 'Figure 02 — Keyword Analysis',
+            additionalContext: 'Additional context about this image can be added here...'
           },
           {
             id: 12,
@@ -85,21 +96,81 @@ const CaseStudyEditorPage = () => {
   });
 
   useEffect(() => {
-    // TODO: Load existing case study data from portfolio
-    // For now, initialize with template structure
-  }, [portfolioId, projectId]);
+    // Load existing case study data from portfolio
+    const portfolio = portfolios.find(p => p.id === portfolioId);
+    if (portfolio && portfolio.caseStudies && portfolio.caseStudies[projectId]) {
+      setCaseStudy(portfolio.caseStudies[projectId]);
+    }
+    // If no existing case study, keep the default template structure
+  }, [portfolioId, projectId, portfolios]);
 
-  const handleSave = () => {
-    // TODO: Save case study data to portfolio
-    console.log('Saving case study:', caseStudy);
+  // Keyboard shortcut for save (Ctrl+S)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [caseStudy]);
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      
+      // Get current portfolio
+      const portfolio = portfolios.find(p => p.id === portfolioId);
+      if (!portfolio) {
+        toast.error('Portfolio not found');
+        setIsSaving(false);
+        return;
+      }
+
+      // Update portfolio with case study data
+      // Case studies are stored in portfolio.caseStudies as an object keyed by projectId
+      const updatedPortfolio = {
+        ...portfolio,
+        caseStudies: {
+          ...(portfolio.caseStudies || {}),
+          [projectId]: caseStudy
+        }
+      };
+
+      // Save to store
+      await updatePortfolio(portfolioId, updatedPortfolio);
+      
+      setHasUnsavedChanges(false);
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 2000);
+      
+      toast.success('Case study saved successfully!');
+      console.log('Case study saved:', caseStudy);
+    } catch (error) {
+      console.error('Error saving case study:', error);
+      toast.error('Failed to save case study');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleBack = () => {
     navigate(`/portfolio-builder/${portfolioId}`);
   };
 
+  const handlePreview = () => {
+    setIsPreviewMode(true);
+  };
+
+  const handleBackToEdit = () => {
+    setIsPreviewMode(false);
+  };
+
   const updateBasicInfo = (field, value) => {
     setCaseStudy(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   const updateSubsection = (sectionIndex, subsectionIndex, field, value) => {
@@ -114,6 +185,7 @@ const CaseStudyEditorPage = () => {
         } : section
       )
     }));
+    setHasUnsavedChanges(true);
   };
 
   const addSubsection = (sectionIndex) => {
@@ -129,12 +201,14 @@ const CaseStudyEditorPage = () => {
               title: 'NEW SUBSECTION',
               content: '',
               image: '',
-              imageCaption: ''
+              imageCaption: '',
+              additionalContext: 'Additional context about this image can be added here...'
             }
           ]
         } : section
       )
     }));
+    setHasUnsavedChanges(true);
   };
 
   const removeSubsection = (sectionIndex, subsectionIndex) => {
@@ -146,6 +220,41 @@ const CaseStudyEditorPage = () => {
           subsections: section.subsections.filter((_, j) => j !== subsectionIndex)
         } : section
       )
+    }));
+  };
+
+  const updateStep = (stepIndex, field, value) => {
+    setCaseStudy(prev => ({
+      ...prev,
+      steps: prev.steps.map((step, i) =>
+        i === stepIndex ? { ...step, [field]: value } : step
+      )
+    }));
+    setHasUnsavedChanges(true);
+  };
+
+  const addStep = () => {
+    setCaseStudy(prev => ({
+      ...prev,
+      steps: [
+        ...prev.steps,
+        {
+          num: String(prev.steps.length + 1).padStart(2, '0'),
+          title: 'NEW STEP',
+          desc: 'Description of this step'
+        }
+      ]
+    }));
+  };
+
+  const removeStep = (stepIndex) => {
+    if (caseStudy.steps.length <= 3) {
+      alert('You must have at least 3 steps');
+      return;
+    }
+    setCaseStudy(prev => ({
+      ...prev,
+      steps: prev.steps.filter((_, i) => i !== stepIndex)
     }));
   };
 
@@ -218,17 +327,23 @@ const CaseStudyEditorPage = () => {
           textTransform: 'uppercase',
           letterSpacing: '0.15em'
         }}>
-          CASE STUDY EDITOR
+          {isPreviewMode ? 'PREVIEW MODE' : 'CASE STUDY EDITOR'}
         </div>
         
         <button
-          onClick={handleSave}
+          onClick={() => {
+            if (isPreviewMode) {
+              navigate(`/portfolio/${portfolioId}/project/${projectId}`);
+            } else {
+              handleSave();
+            }
+          }}
           style={{
             fontFamily: '"IBM Plex Mono", monospace',
             fontSize: '13px',
-            color: '#FFFFFF',
-            backgroundColor: '#FF0000',
-            border: '2px solid #FF0000',
+            color: isPreviewMode ? '#000000' : '#FFFFFF',
+            backgroundColor: isPreviewMode ? '#FFFFFF' : '#FF0000',
+            border: isPreviewMode ? '2px solid #FFFFFF' : '2px solid #FF0000',
             padding: '12px 32px',
             cursor: 'pointer',
             textTransform: 'uppercase',
@@ -237,20 +352,30 @@ const CaseStudyEditorPage = () => {
             transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#CC0000';
-            e.target.style.borderColor = '#CC0000';
+            if (isPreviewMode) {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = '#FFFFFF';
+            } else {
+              e.target.style.backgroundColor = '#CC0000';
+              e.target.style.borderColor = '#CC0000';
+            }
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#FF0000';
-            e.target.style.borderColor = '#FF0000';
+            if (isPreviewMode) {
+              e.target.style.backgroundColor = '#FFFFFF';
+              e.target.style.color = '#000000';
+            } else {
+              e.target.style.backgroundColor = '#FF0000';
+              e.target.style.borderColor = '#FF0000';
+            }
           }}
         >
-          SAVE
+          {isPreviewMode ? 'VIEW CASE STUDY →' : 'SAVE'}
         </button>
       </header>
 
       {/* Main Content */}
-      <main style={{ paddingTop: '120px', paddingBottom: '120px' }}>
+      <main style={{ paddingTop: isPreviewMode ? '60px' : '120px', paddingBottom: '120px' }}>
         {/* Hero Section */}
         <section style={{
           maxWidth: '1400px',
@@ -259,26 +384,41 @@ const CaseStudyEditorPage = () => {
           marginBottom: '180px'
         }}>
           {/* Category */}
-          <input
-            type="text"
-            value={caseStudy.category}
-            onChange={(e) => updateBasicInfo('category', e.target.value)}
-            placeholder="BRANDING / IDENTITY"
-            style={{
-              fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
-              color: '#FF0000',
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-              marginBottom: '20px',
-              border: 'none',
-              borderBottom: '2px dashed #FF0000',
-              padding: '8px 0',
-              backgroundColor: 'transparent',
-              width: '400px',
-              outline: 'none'
-            }}
-          />
+          {isPreviewMode ? (
+            <div
+              style={{
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '14px',
+                color: '#FF0000',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                marginBottom: '20px'
+              }}
+            >
+              {caseStudy.category}
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={caseStudy.category}
+              onChange={(e) => updateBasicInfo('category', e.target.value)}
+              placeholder="BRANDING / IDENTITY"
+              style={{
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '14px',
+                color: '#FF0000',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                marginBottom: '20px',
+                border: 'none',
+                borderBottom: '2px dashed #FF0000',
+                padding: '8px 0',
+                backgroundColor: 'transparent',
+                width: '400px',
+                outline: 'none'
+              }}
+            />
+          )}
           
           <div style={{
             fontFamily: '"IBM Plex Mono", monospace',
@@ -287,32 +427,33 @@ const CaseStudyEditorPage = () => {
             marginBottom: '40px'
           }}>
             — 
-            <input
-              type="text"
-              value={caseStudy.year}
-              onChange={(e) => updateBasicInfo('year', e.target.value)}
-              placeholder="2025"
-              style={{
-                fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '14px',
-                color: '#666666',
-                border: 'none',
-                borderBottom: '1px dashed #CCCCCC',
-                padding: '4px 8px',
-                backgroundColor: 'transparent',
-                width: '80px',
-                marginLeft: '8px',
-                outline: 'none'
-              }}
-            />
+            {isPreviewMode ? (
+              caseStudy.year
+            ) : (
+              <input
+                type="text"
+                value={caseStudy.year}
+                onChange={(e) => updateBasicInfo('year', e.target.value)}
+                placeholder="2025"
+                style={{
+                  fontFamily: '"IBM Plex Mono", monospace',
+                  fontSize: '14px',
+                  color: '#666666',
+                  border: 'none',
+                  borderBottom: '1px dashed #CCCCCC',
+                  padding: '4px 8px',
+                  backgroundColor: 'transparent',
+                  width: '80px',
+                  marginLeft: '8px',
+                  outline: 'none'
+                }}
+              />
+            )}
           </div>
 
           {/* Main Title */}
-          <textarea
-            value={caseStudy.title}
-            onChange={(e) => updateBasicInfo('title', e.target.value)}
-            rows={2}
-            style={{
+          {isPreviewMode ? (
+            <h1 style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: 'clamp(60px, 10vw, 140px)',
               fontWeight: 900,
@@ -320,36 +461,65 @@ const CaseStudyEditorPage = () => {
               textTransform: 'uppercase',
               letterSpacing: '-0.03em',
               margin: 0,
-              marginBottom: '60px',
-              border: 'none',
-              borderBottom: '3px dashed #000000',
-              backgroundColor: 'transparent',
-              width: '100%',
-              resize: 'none',
-              outline: 'none',
-              padding: '20px 0'
-            }}
-          />
+              marginBottom: '60px'
+            }}>
+              {caseStudy.title}
+            </h1>
+          ) : (
+            <textarea
+              value={caseStudy.title}
+              onChange={(e) => updateBasicInfo('title', e.target.value)}
+              rows={2}
+              style={{
+                fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                fontSize: 'clamp(60px, 10vw, 140px)',
+                fontWeight: 900,
+                lineHeight: 0.9,
+                textTransform: 'uppercase',
+                letterSpacing: '-0.03em',
+                margin: 0,
+                marginBottom: '60px',
+                border: 'none',
+                borderBottom: '3px dashed #000000',
+                backgroundColor: 'transparent',
+                width: '100%',
+                resize: 'none',
+                outline: 'none',
+                padding: '20px 0'
+              }}
+            />
+          )}
 
           {/* Intro Text */}
-          <textarea
-            value={caseStudy.intro}
-            onChange={(e) => updateBasicInfo('intro', e.target.value)}
-            rows={3}
-            style={{
+          {isPreviewMode ? (
+            <p style={{
               maxWidth: '900px',
               fontSize: '24px',
               lineHeight: 1.6,
-              marginBottom: '80px',
-              border: 'none',
-              borderBottom: '2px dashed #CCCCCC',
-              backgroundColor: 'transparent',
-              width: '100%',
-              resize: 'none',
-              outline: 'none',
-              padding: '20px 0'
-            }}
-          />
+              marginBottom: '80px'
+            }}>
+              {caseStudy.intro}
+            </p>
+          ) : (
+            <textarea
+              value={caseStudy.intro}
+              onChange={(e) => updateBasicInfo('intro', e.target.value)}
+              rows={3}
+              style={{
+                maxWidth: '900px',
+                fontSize: '24px',
+                lineHeight: 1.6,
+                marginBottom: '80px',
+                border: 'none',
+                borderBottom: '2px dashed #CCCCCC',
+                backgroundColor: 'transparent',
+                width: '100%',
+                resize: 'none',
+                outline: 'none',
+                padding: '20px 0'
+              }}
+            />
+          )}
 
           {/* Hero Image */}
           <div
@@ -398,16 +568,42 @@ const CaseStudyEditorPage = () => {
             style={{ display: 'none' }}
           />
 
-          <div style={{
-            fontFamily: '"IBM Plex Mono", monospace',
-            fontSize: '14px',
-            color: '#666666',
-            textAlign: 'center',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em'
-          }}>
-            Figure 01 — Design Process Framework
-          </div>
+          {/* Hero Image Caption */}
+          {isPreviewMode ? (
+            <div style={{
+              fontFamily: '"IBM Plex Mono", monospace',
+              fontSize: '14px',
+              color: '#666666',
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginTop: '16px'
+            }}>
+              {caseStudy.heroImageCaption || 'Figure 01 — Image caption'}
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={caseStudy.heroImageCaption || ''}
+              onChange={(e) => updateBasicInfo('heroImageCaption', e.target.value)}
+              placeholder="Figure 01 — Image caption"
+              style={{
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '14px',
+                color: '#666666',
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                marginTop: '16px',
+                border: 'none',
+                borderBottom: '1px dashed #CCCCCC',
+                backgroundColor: 'transparent',
+                width: '100%',
+                outline: 'none',
+                padding: '8px 0'
+              }}
+            />
+          )}
         </section>
 
         {/* Steps Overview */}
@@ -437,34 +633,173 @@ const CaseStudyEditorPage = () => {
                 border: '2px solid #000000',
                 padding: '40px',
                 backgroundColor: i === 0 ? '#FF0000' : 'transparent',
-                color: i === 0 ? '#FFFFFF' : '#000000'
+                color: i === 0 ? '#FFFFFF' : '#000000',
+                position: 'relative'
               }}>
-                <div style={{
-                  fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '48px',
-                  fontWeight: 900,
-                  marginBottom: '20px'
-                }}>
-                  {step.num}
-                </div>
-                <div style={{
-                  fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '24px',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  marginBottom: '12px'
-                }}>
-                  {step.title}
-                </div>
-                <div style={{
-                  fontSize: '16px',
-                  opacity: 0.8
-                }}>
-                  {step.desc}
-                </div>
+                {/* Remove button - Only in edit mode */}
+                {!isPreviewMode && caseStudy.steps.length > 3 && (
+                  <button
+                    onClick={() => removeStep(i)}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: 'transparent',
+                      border: 'none',
+                      color: i === 0 ? '#FFFFFF' : '#FF0000',
+                      fontSize: '20px',
+                      cursor: 'pointer',
+                      width: '30px',
+                      height: '30px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold'
+                    }}
+                    title="Remove step"
+                  >
+                    ×
+                  </button>
+                )}
+                
+                {/* Step Number */}
+                {isPreviewMode ? (
+                  <div style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '48px',
+                    fontWeight: 900,
+                    marginBottom: '20px',
+                    color: i === 0 ? '#FFFFFF' : '#000000'
+                  }}>
+                    {step.num}
+                  </div>
+                ) : (
+                  <input
+                  type="text"
+                  value={step.num}
+                  onChange={(e) => updateStep(i, 'num', e.target.value)}
+                  maxLength={2}
+                  placeholder="01"
+                  style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '48px',
+                    fontWeight: 900,
+                    marginBottom: '20px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: `2px dashed ${i === 0 ? '#FFFFFF' : '#000000'}`,
+                    color: i === 0 ? '#FFFFFF' : '#000000',
+                    width: '80px',
+                    outline: 'none',
+                    padding: '4px 0'
+                  }}
+                  title="Step number (e.g., 01, 02)"
+                />
+                )}
+                
+                {/* Step Title */}
+                {isPreviewMode ? (
+                  <div style={{
+                    fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontSize: '24px',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    marginBottom: '12px',
+                    color: i === 0 ? '#FFFFFF' : '#000000'
+                  }}>
+                    {step.title}
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={step.title}
+                    onChange={(e) => updateStep(i, 'title', e.target.value.toUpperCase())}
+                    maxLength={50}
+                    placeholder="STEP TITLE"
+                    style={{
+                      fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      fontSize: '24px',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      marginBottom: '12px',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: `2px dashed ${i === 0 ? '#FFFFFF' : '#000000'}`,
+                      color: i === 0 ? '#FFFFFF' : '#000000',
+                      width: '100%',
+                      outline: 'none',
+                      padding: '4px 0'
+                    }}
+                    title="Step title (max 50 characters)"
+                  />
+                )}
+                
+                {/* Step Description */}
+                {isPreviewMode ? (
+                  <div style={{
+                    fontSize: '16px',
+                    opacity: 0.8,
+                    color: i === 0 ? '#FFFFFF' : '#000000',
+                    fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif'
+                  }}>
+                    {step.desc}
+                  </div>
+                ) : (
+                  <textarea
+                    value={step.desc}
+                    onChange={(e) => updateStep(i, 'desc', e.target.value)}
+                    maxLength={100}
+                    rows={2}
+                    placeholder="Brief description..."
+                    style={{
+                      fontSize: '16px',
+                      opacity: 0.8,
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: `1px dashed ${i === 0 ? '#FFFFFF' : '#CCCCCC'}`,
+                      color: i === 0 ? '#FFFFFF' : '#000000',
+                      width: '100%',
+                      outline: 'none',
+                      padding: '4px 0',
+                      resize: 'vertical',
+                      fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif'
+                    }}
+                    title="Step description (max 100 characters)"
+                  />
+                )}
               </div>
             ))}
           </div>
+          
+          {/* Add Step Button - Only in edit mode */}
+          {!isPreviewMode && caseStudy.steps.length < 6 && (
+            <button
+              onClick={addStep}
+              style={{
+                marginTop: '30px',
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '13px',
+                color: '#000000',
+                backgroundColor: 'transparent',
+                border: '2px solid #000000',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#000000';
+                e.target.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#000000';
+              }}
+            >
+              + ADD STEP
+            </button>
+          )}
         </section>
 
         {/* Detailed Sections */}
@@ -485,206 +820,382 @@ const CaseStudyEditorPage = () => {
               gap: '40px',
               marginBottom: '80px'
             }}>
-              <div style={{
-                fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '100px',
-                fontWeight: 900,
-                color: '#FF0000',
-                lineHeight: 1
-              }}>
-                {section.number}
-              </div>
-              <div>
-                <h2 style={{
-                  fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '72px',
+              {/* Section Number */}
+              {isPreviewMode ? (
+                <div style={{
+                  fontFamily: '"IBM Plex Mono", monospace',
+                  fontSize: '100px',
                   fontWeight: 900,
-                  textTransform: 'uppercase',
-                  margin: 0,
-                  lineHeight: 0.9
+                  color: '#FF0000',
+                  lineHeight: 1
                 }}>
-                  {section.title}
-                </h2>
+                  {section.number}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={section.number}
+                  onChange={(e) => {
+                    setCaseStudy(prev => ({
+                      ...prev,
+                      sections: prev.sections.map((s, i) =>
+                        i === sectionIndex ? { ...s, number: e.target.value } : s
+                      )
+                    }));
+                  }}
+                  maxLength={2}
+                  placeholder="01"
+                  style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '100px',
+                    fontWeight: 900,
+                    color: '#FF0000',
+                    lineHeight: 1,
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '3px dashed #FF0000',
+                    width: '150px',
+                    outline: 'none',
+                    padding: '10px 0',
+                    textAlign: 'center'
+                  }}
+                  title="Section number (e.g., 01, 02)"
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                {/* Section Title */}
+                {isPreviewMode ? (
+                  <h2 style={{
+                    fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontSize: '72px',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    margin: 0,
+                    lineHeight: 0.9
+                  }}>
+                    {section.title}
+                  </h2>
+                ) : (
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) => {
+                      setCaseStudy(prev => ({
+                        ...prev,
+                        sections: prev.sections.map((s, i) =>
+                          i === sectionIndex ? { ...s, title: e.target.value.toUpperCase() } : s
+                        )
+                      }));
+                    }}
+                    maxLength={50}
+                    placeholder="SECTION TITLE"
+                    style={{
+                      fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      fontSize: '72px',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      margin: 0,
+                      lineHeight: 0.9,
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: '3px dashed #000000',
+                      width: '100%',
+                      outline: 'none',
+                      padding: '10px 0'
+                    }}
+                    title="Section title (max 50 characters)"
+                  />
+                )}
               </div>
             </div>
 
             {/* Subsections */}
             {section.subsections.map((subsection, subsectionIndex) => (
               <div key={subsection.id} style={{ marginBottom: '80px', position: 'relative' }}>
-                {/* Delete button */}
-                <button
-                  onClick={() => removeSubsection(sectionIndex, subsectionIndex)}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    backgroundColor: '#FF0000',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '8px 16px',
-                    cursor: 'pointer',
-                    fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '11px',
-                    textTransform: 'uppercase',
-                    zIndex: 10
-                  }}
-                >
-                  DELETE
-                </button>
+                {/* Delete button - Only in edit mode */}
+                {!isPreviewMode && (
+                  <button
+                    onClick={() => removeSubsection(sectionIndex, subsectionIndex)}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      backgroundColor: '#FF0000',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '8px 16px',
+                      cursor: 'pointer',
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      zIndex: 10
+                    }}
+                  >
+                    DELETE
+                  </button>
+                )}
 
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: subsection.image ? '1fr 1fr' : '1fr',
+                  gridTemplateColumns: '1fr 1fr',
                   gap: '60px'
                 }}>
                   <div>
-                    <input
-                      type="text"
-                      value={subsection.title}
-                      onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'title', e.target.value)}
-                      style={{
+                    {isPreviewMode ? (
+                      <h3 style={{
                         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                         fontSize: '32px',
                         fontWeight: 900,
                         textTransform: 'uppercase',
-                        marginBottom: '30px',
-                        border: 'none',
-                        borderBottom: '2px dashed #000000',
-                        backgroundColor: 'transparent',
-                        width: '100%',
-                        outline: 'none',
-                        padding: '10px 0'
-                      }}
-                    />
-                    <textarea
-                      value={subsection.content}
-                      onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'content', e.target.value)}
-                      rows={8}
-                      style={{
+                        marginBottom: '30px'
+                      }}>
+                        {subsection.title}
+                      </h3>
+                    ) : (
+                      <input
+                        type="text"
+                        value={subsection.title}
+                        onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'title', e.target.value)}
+                        style={{
+                          fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+                          fontSize: '32px',
+                          fontWeight: 900,
+                          textTransform: 'uppercase',
+                          marginBottom: '30px',
+                          border: 'none',
+                          borderBottom: '2px dashed #000000',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          outline: 'none',
+                          padding: '10px 0'
+                        }}
+                      />
+                    )}
+                    {isPreviewMode ? (
+                      <p style={{
                         fontSize: '18px',
                         lineHeight: 1.8,
-                        marginBottom: '20px',
-                        border: '1px solid #CCCCCC',
-                        backgroundColor: 'transparent',
-                        width: '100%',
-                        outline: 'none',
-                        padding: '16px',
-                        resize: 'vertical'
-                      }}
-                    />
+                        marginBottom: '20px'
+                      }}>
+                        {subsection.content}
+                      </p>
+                    ) : (
+                      <textarea
+                        value={subsection.content}
+                        onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'content', e.target.value)}
+                        rows={8}
+                        style={{
+                          fontSize: '18px',
+                          lineHeight: 1.8,
+                          marginBottom: '20px',
+                          border: '1px solid #CCCCCC',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          outline: 'none',
+                          padding: '16px',
+                          resize: 'vertical'
+                        }}
+                      />
+                    )}
                   </div>
 
                   <div>
-                    <div
-                      onClick={() => document.getElementById(`subsection-image-${sectionIndex}-${subsectionIndex}`).click()}
-                      style={{
+                    {/* Image Display - Always show in preview, show after upload in edit */}
+                    {(subsection.image || isPreviewMode) && (
+                      <div style={{
                         aspectRatio: '4/3',
                         backgroundColor: '#F5F5F5',
                         overflow: 'hidden',
-                        cursor: 'pointer',
-                        border: '2px dashed #CCCCCC',
+                        marginBottom: '16px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: '16px'
-                      }}
-                    >
-                      {subsection.image ? (
-                        <img 
-                          src={subsection.image} 
-                          alt={subsection.title}
+                        justifyContent: 'center'
+                      }}>
+                        {subsection.image ? (
+                          <img 
+                            src={subsection.image} 
+                            alt={subsection.title}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            fontFamily: '"IBM Plex Mono", monospace',
+                            fontSize: '12px',
+                            color: '#CCCCCC',
+                            textTransform: 'uppercase',
+                            textAlign: 'center'
+                          }}>
+                            IMAGE PLACEHOLDER<br/>
+                            <span style={{ fontSize: '11px', opacity: 0.6 }}>4:3 ratio</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Upload Controls - Only in edit mode */}
+                    {!isPreviewMode && (
+                      <>
+                        {/* Clickable upload area when no image */}
+                        {!subsection.image && (
+                          <div
+                            onClick={() => document.getElementById(`subsection-image-${sectionIndex}-${subsectionIndex}`).click()}
+                            style={{
+                              aspectRatio: '4/3',
+                              backgroundColor: '#F5F5F5',
+                              overflow: 'hidden',
+                              cursor: 'pointer',
+                              border: '2px dashed #CCCCCC',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginBottom: '16px'
+                            }}
+                          >
+                            <div style={{
+                              fontFamily: '"IBM Plex Mono", monospace',
+                              fontSize: '12px',
+                              color: '#666666',
+                              textTransform: 'uppercase',
+                              textAlign: 'center'
+                            }}>
+                              CLICK TO ADD IMAGE<br/>
+                              <span style={{ fontSize: '11px', opacity: 0.6 }}>4:3 ratio recommended</span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <input
+                          id={`subsection-image-${sectionIndex}-${subsectionIndex}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e.target.files[0], 'subsection', sectionIndex, subsectionIndex)}
+                          style={{ display: 'none' }}
+                        />
+                        
+                        {/* Caption Input */}
+                        <input
+                          type="text"
+                          value={subsection.imageCaption || ''}
+                          onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'imageCaption', e.target.value)}
+                          placeholder="Image caption (e.g., Figure 02 — Title)"
                           style={{
+                            fontFamily: '"IBM Plex Mono", monospace',
+                            fontSize: '12px',
+                            color: '#666666',
+                            textTransform: 'uppercase',
+                            border: 'none',
+                            borderBottom: '1px dashed #CCCCCC',
+                            backgroundColor: 'transparent',
                             width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
+                            outline: 'none',
+                            padding: '8px 0'
                           }}
                         />
-                      ) : (
-                        <div style={{
-                          fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '12px',
-                          color: '#666666',
-                          textTransform: 'uppercase',
-                          textAlign: 'center'
-                        }}>
-                          CLICK TO ADD IMAGE<br/>
-                          <span style={{ fontSize: '11px', opacity: 0.6 }}>4:3 ratio recommended</span>
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      id={`subsection-image-${sectionIndex}-${subsectionIndex}`}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files[0], 'subsection', sectionIndex, subsectionIndex)}
-                      style={{ display: 'none' }}
-                    />
+                      </>
+                    )}
                     
-                    <input
-                      type="text"
-                      value={subsection.imageCaption || ''}
-                      onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'imageCaption', e.target.value)}
-                      placeholder="Image caption (e.g., Figure 02 — Title)"
-                      style={{
+                    {/* Caption Display - In preview mode */}
+                    {isPreviewMode && (
+                      <div style={{
                         fontFamily: '"IBM Plex Mono", monospace',
                         fontSize: '12px',
                         color: '#666666',
                         textTransform: 'uppercase',
-                        border: 'none',
-                        borderBottom: '1px dashed #CCCCCC',
-                        backgroundColor: 'transparent',
-                        width: '100%',
-                        outline: 'none',
-                        padding: '8px 0'
-                      }}
-                    />
+                        marginTop: '12px'
+                      }}>
+                        {subsection.imageCaption || 'Figure 0X — Image caption'}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {subsection.image && subsection.imageCaption && (
+                {/* Additional Context Section - Gray Box */}
+                {(subsection.image || !isPreviewMode) && (
                   <div style={{
                     backgroundColor: '#F5F5F5',
                     padding: '40px',
                     marginTop: '40px'
                   }}>
-                    <p style={{ fontSize: '18px', lineHeight: 1.8 }}>
-                      Additional context about this image can be added here...
-                    </p>
+                    {isPreviewMode ? (
+                      <p style={{ fontSize: '18px', lineHeight: 1.8, margin: 0 }}>
+                        {subsection.additionalContext || 'Additional context about this image can be added here...'}
+                      </p>
+                    ) : (
+                      <textarea
+                        value={subsection.additionalContext || ''}
+                        onChange={(e) => updateSubsection(sectionIndex, subsectionIndex, 'additionalContext', e.target.value)}
+                        placeholder="Additional context about this image can be added here..."
+                        rows={3}
+                        style={{
+                          fontSize: '18px',
+                          lineHeight: 1.8,
+                          margin: 0,
+                          border: '1px solid #CCCCCC',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          outline: 'none',
+                          padding: '16px',
+                          resize: 'vertical',
+                          fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif'
+                        }}
+                      />
+                    )}
                   </div>
                 )}
               </div>
             ))}
 
-            {/* Add Subsection Button */}
-            <button
-              onClick={() => addSubsection(sectionIndex)}
-              style={{
-                width: '100%',
-                padding: '30px',
-                border: '2px dashed #CCCCCC',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '13px',
-                textTransform: 'uppercase',
-                color: '#666666',
-                marginTop: '40px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = '#FF0000';
-                e.target.style.color = '#FF0000';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = '#CCCCCC';
-                e.target.style.color = '#666666';
-              }}
-            >
-              + ADD SUBSECTION TO {section.title}
-            </button>
+            {/* Add Subsection Button - Only in edit mode */}
+            {!isPreviewMode && (
+              <button
+                onClick={() => addSubsection(sectionIndex)}
+                style={{
+                  width: '100%',
+                  padding: '30px',
+                  border: '2px dashed #CCCCCC',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  fontFamily: '"IBM Plex Mono", monospace',
+                  fontSize: '13px',
+                  textTransform: 'uppercase',
+                  color: '#666666',
+                  marginTop: '40px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = '#FF0000';
+                  e.target.style.color = '#FF0000';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = '#CCCCCC';
+                  e.target.style.color = '#666666';
+                }}
+              >
+                + ADD SUBSECTION TO {section.title}
+              </button>
+            )}
           </section>
         ))}
       </main>
+
+      {/* Floating Action Buttons */}
+      <FloatingActionButtons
+        step={isPreviewMode ? 'preview' : 'customize'}
+        isSaving={isSaving}
+        showSaveSuccess={showSaveSuccess}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onPreview={handlePreview}
+        onBackToEdit={handleBackToEdit}
+        onSave={handleSave}
+        onChangeTemplate={() => navigate(`/portfolio-builder/${portfolioId}`)}
+        onPublish={() => toast.info('Publishing coming soon!')}
+        onExportPDF={() => toast.info('PDF export coming soon!')}
+        onToggleSettings={() => toast.info('Settings coming soon!')}
+      />
     </div>
   );
 };

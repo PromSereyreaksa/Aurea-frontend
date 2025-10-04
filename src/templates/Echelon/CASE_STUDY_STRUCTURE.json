@@ -1,0 +1,460 @@
+{
+  "_meta": {
+    "template": "Echelon",
+    "version": "2.0.0",
+    "description": "Dynamic case study structure for Echelon template. Fully editable and responsive design system.",
+    "author": "Aurea Team",
+    "lastUpdated": "2025-10-04",
+    "responsive": true,
+    "editable": true
+  },
+
+  "philosophy": "Swiss/International Typographic Style — precise, grid-based case study presentation with full editing capabilities and responsive design",
+  
+  "layout": {
+    "type": "case-study",
+    "responsive": {
+      "mobile": { "breakpoint": "640px", "columns": 1, "margin": "20px" },
+      "tablet": { "breakpoint": "768px", "columns": 2, "margin": "40px" },
+      "desktop": { "breakpoint": "1024px", "columns": 12, "margin": "80px" },
+      "wide": { "breakpoint": "1280px", "columns": 12, "margin": "120px" }
+    },
+    "grid": {
+      "columns": 12,
+      "gutter": 24,
+      "baseline": 8
+    }
+  },
+
+  "fields": {
+    "title": {
+      "type": "string",
+      "label": "Case Study Title",
+      "editable": true,
+      "required": true,
+      "maxLength": 100,
+      "transform": "uppercase",
+      "default": "LOGO DESIGN PROCESS",
+      "typography": {
+        "fontSize": { "mobile": "32px", "tablet": "48px", "desktop": "72px" },
+        "lineHeight": 1.1,
+        "fontWeight": 700,
+        "fontFamily": "Neue Haas Grotesk"
+      }
+    },
+    "category": {
+      "type": "string",
+      "label": "Category",
+      "editable": true,
+      "required": true,
+      "maxLength": 50,
+      "transform": "uppercase",
+      "default": "BRANDING / IDENTITY",
+      "typography": {
+        "fontSize": { "mobile": "12px", "tablet": "14px", "desktop": "14px" },
+        "fontFamily": "IBM Plex Mono",
+        "fontWeight": 400
+      }
+    },
+    "year": {
+      "type": "string",
+      "label": "Year",
+      "editable": true,
+      "required": true,
+      "pattern": "^\\d{4}$",
+      "default": "2025",
+      "typography": {
+        "fontSize": { "mobile": "12px", "tablet": "14px", "desktop": "14px" },
+        "fontFamily": "IBM Plex Mono",
+        "fontWeight": 400
+      }
+    },
+    "intro": {
+      "type": "richtext",
+      "label": "Introduction",
+      "editable": true,
+      "required": true,
+      "maxLength": 500,
+      "default": "In this article I will share my logo design process from start to finish, that I have built in 8 years as a graphic designer.",
+      "typography": {
+        "fontSize": { "mobile": "16px", "tablet": "18px", "desktop": "18px" },
+        "lineHeight": 1.6,
+        "fontFamily": "Neue Haas Grotesk",
+        "fontWeight": 400
+      }
+    },
+    "heroImage": {
+      "type": "image",
+      "label": "Hero Image",
+      "editable": true,
+      "required": false,
+      "default": "",
+      "responsive": {
+        "mobile": { "width": "100%", "maxWidth": "640px" },
+        "tablet": { "width": "100%", "maxWidth": "768px" },
+        "desktop": { "width": "100%", "maxWidth": "1920px" }
+      },
+      "aspectRatio": "16:9"
+    },
+    "steps": {
+      "type": "array",
+      "label": "Process Overview Steps",
+      "editable": true,
+      "required": true,
+      "minItems": 3,
+      "maxItems": 6,
+      "tooltip": "Add 3-6 steps showing your process overview. These appear in a grid at the top of your case study.",
+      "helpText": "Click on any step to edit. Steps show in a horizontal grid.",
+      "itemFields": {
+        "num": {
+          "type": "string",
+          "label": "Step Number",
+          "editable": true,
+          "required": true,
+          "pattern": "^\\d{2}$",
+          "default": "01",
+          "placeholder": "01",
+          "tooltip": "Two-digit step number (01, 02, 03, etc.)",
+          "helpText": "Use format: 01, 02, 03...",
+          "typography": {
+            "fontSize": { "mobile": "48px", "tablet": "64px", "desktop": "72px" },
+            "fontFamily": "IBM Plex Mono",
+            "fontWeight": 400,
+            "color": "#666666"
+          }
+        },
+        "title": {
+          "type": "string",
+          "label": "Step Title",
+          "editable": true,
+          "required": true,
+          "maxLength": 50,
+          "transform": "uppercase",
+          "default": "RESEARCH",
+          "placeholder": "RESEARCH",
+          "tooltip": "Main title for this step (e.g., RESEARCH, DESIGN, DELIVER)",
+          "helpText": "Short, clear title for this phase. Will be shown in uppercase.",
+          "typography": {
+            "fontSize": { "mobile": "18px", "tablet": "24px", "desktop": "24px" },
+            "fontFamily": "Neue Haas Grotesk",
+            "fontWeight": 700
+          }
+        },
+        "desc": {
+          "type": "string",
+          "label": "Step Description",
+          "editable": true,
+          "required": true,
+          "maxLength": 100,
+          "default": "Understanding the brand and market",
+          "placeholder": "Brief description of this step...",
+          "tooltip": "Brief description of what happens in this step",
+          "helpText": "Keep it short and descriptive (max 100 characters)",
+          "typography": {
+            "fontSize": { "mobile": "14px", "tablet": "16px", "desktop": "16px" },
+            "fontFamily": "Neue Haas Grotesk",
+            "fontWeight": 400,
+            "color": "#666666"
+          }
+        }
+      },
+      "actions": {
+        "add": {
+          "enabled": true,
+          "label": "Add Step",
+          "icon": "plus",
+          "tooltip": "Add a new step to your process"
+        },
+        "remove": {
+          "enabled": true,
+          "label": "Remove Step",
+          "icon": "trash",
+          "tooltip": "Remove this step",
+          "confirmMessage": "Remove this step from your process?"
+        },
+        "reorder": {
+          "enabled": true,
+          "tooltip": "Drag to reorder steps"
+        }
+      },
+      "layout": {
+        "type": "grid",
+        "responsive": {
+          "mobile": { "columns": 1, "gap": "40px" },
+          "tablet": { "columns": 2, "gap": "24px" },
+          "desktop": { "columns": 4, "gap": "24px" }
+        }
+      },
+      "default": [
+        { "num": "01", "title": "RESEARCH", "desc": "Understanding the brand and market" },
+        { "num": "02", "title": "SKETCH", "desc": "Exploring concepts on paper" },
+        { "num": "03", "title": "DIGITAL", "desc": "Refining and digitizing" },
+        { "num": "04", "title": "SOURCE FILES", "desc": "Delivering final assets" }
+      ]
+    },
+    "sections": {
+      "type": "array",
+      "label": "Main Content Sections",
+      "editable": true,
+      "required": true,
+      "minItems": 1,
+      "maxItems": 10,
+      "itemFields": {
+        "id": {
+          "type": "number",
+          "label": "Section ID",
+          "editable": false,
+          "required": true,
+          "autoGenerate": true
+        },
+        "number": {
+          "type": "string",
+          "label": "Section Number",
+          "editable": true,
+          "required": true,
+          "pattern": "^\\d{2}$",
+          "default": "01",
+          "typography": {
+            "fontSize": { "mobile": "48px", "tablet": "64px", "desktop": "72px" },
+            "fontFamily": "IBM Plex Mono",
+            "fontWeight": 400,
+            "color": "#FF0000"
+          }
+        },
+        "title": {
+          "type": "string",
+          "label": "Section Title",
+          "editable": true,
+          "required": true,
+          "maxLength": 50,
+          "transform": "uppercase",
+          "default": "RESEARCH",
+          "typography": {
+            "fontSize": { "mobile": "24px", "tablet": "32px", "desktop": "48px" },
+            "fontFamily": "Neue Haas Grotesk",
+            "fontWeight": 700
+          }
+        },
+        "subsections": {
+          "type": "array",
+          "label": "Subsections",
+          "editable": true,
+          "required": true,
+          "minItems": 1,
+          "itemFields": {
+            "id": {
+              "type": "number",
+              "label": "Subsection ID",
+              "editable": false,
+              "required": true,
+              "autoGenerate": true
+            },
+            "title": {
+              "type": "string",
+              "label": "Subsection Title",
+              "editable": true,
+              "required": true,
+              "maxLength": 100,
+              "transform": "uppercase",
+              "default": "QUESTIONNAIRE",
+              "typography": {
+                "fontSize": { "mobile": "18px", "tablet": "24px", "desktop": "32px" },
+                "fontFamily": "Neue Haas Grotesk",
+                "fontWeight": 700
+              }
+            },
+            "content": {
+              "type": "richtext",
+              "label": "Content",
+              "editable": true,
+              "required": true,
+              "maxLength": 2000,
+              "default": "Content text goes here...",
+              "typography": {
+                "fontSize": { "mobile": "16px", "tablet": "18px", "desktop": "18px" },
+                "lineHeight": 1.6,
+                "fontFamily": "Neue Haas Grotesk",
+                "fontWeight": 400
+              }
+            },
+            "image": {
+              "type": "image",
+              "label": "Section Image",
+              "editable": true,
+              "required": false,
+              "default": "",
+              "responsive": {
+                "mobile": { "width": "100%", "maxWidth": "640px" },
+                "tablet": { "width": "100%", "maxWidth": "768px" },
+                "desktop": { "width": "100%", "maxWidth": "1200px" }
+              }
+            },
+            "imageCaption": {
+              "type": "string",
+              "label": "Image Caption",
+              "editable": true,
+              "required": false,
+              "maxLength": 200,
+              "default": "",
+              "typography": {
+                "fontSize": { "mobile": "12px", "tablet": "14px", "desktop": "14px" },
+                "fontFamily": "IBM Plex Mono",
+                "fontWeight": 400,
+                "color": "#666666"
+              }
+            }
+          }
+        }
+      },
+      "layout": {
+        "type": "stacked",
+        "spacing": { "mobile": "60px", "tablet": "80px", "desktop": "120px" }
+      },
+      "default": [
+        {
+          "id": 1,
+          "number": "01",
+          "title": "RESEARCH",
+          "subsections": [
+            {
+              "id": 11,
+              "title": "QUESTIONNAIRE",
+              "content": "After receiving an email and discussing terms and price with the client, getting paid with 50% payment I send them a Google Form Questionnaire that gets completed with the relevant info about their brand, vision and needs.\n\nThis is a crucial part of the research process because it eliminates a lot of guesses and it helps you better understand, what is it that the client wants and what should you do about it.",
+              "image": "",
+              "imageCaption": "Figure 02 — Keyword Analysis"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "number": "02",
+          "title": "SKETCH",
+          "subsections": [
+            {
+              "id": 21,
+              "title": "ITERATE",
+              "content": "After the research phase, I start sketching out ideas on paper. This is where the magic happens - multiple iterations, exploring different directions, and refining concepts.",
+              "image": "",
+              "imageCaption": "Figure 03 — Sketch Process"
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "assembly": {
+    "order": ["hero", "steps", "sections"],
+    "finalPage": true
+  },
+
+  "styles": {
+    "global": {
+      "background": "#FFFFFF",
+      "textColor": "#000000",
+      "accentColor": "#FF0000"
+    },
+    "container": {
+      "maxWidth": { "mobile": "100%", "tablet": "768px", "desktop": "1400px" },
+      "padding": { "mobile": "20px", "tablet": "40px", "desktop": "80px" }
+    }
+  },
+
+  "_exampleData": {
+    "title": "LOGO DESIGN PROCESS",
+    "category": "BRANDING / IDENTITY",
+    "year": "2025",
+    "intro": "In this article I will share my logo design process from start to finish, that I have built in 8 years as a graphic designer.",
+    "heroImage": "https://example.com/hero.jpg",
+    "steps": [
+      { "num": "01", "title": "RESEARCH", "desc": "Understanding the brand and market" },
+      { "num": "02", "title": "SKETCH", "desc": "Exploring concepts on paper" },
+      { "num": "03", "title": "DIGITAL", "desc": "Refining and digitizing" },
+      { "num": "04", "title": "SOURCE FILES", "desc": "Delivering final assets" }
+    ],
+    "sections": [
+      {
+        "id": 1,
+        "number": "01",
+        "title": "RESEARCH",
+        "subsections": [
+          {
+            "id": 11,
+            "title": "QUESTIONNAIRE",
+            "content": "Content goes here...",
+            "image": "https://example.com/img1.jpg",
+            "imageCaption": "Figure 02 — Description"
+          }
+        ]
+      }
+    ]
+  },
+
+  "_backendIntegration": {
+    "apiEndpoints": {
+      "savePortfolio": "PUT /api/portfolios/:portfolioId",
+      "getCaseStudy": "GET /api/portfolios/:portfolioId/case-studies/:projectId"
+    },
+    "storageLocation": "portfolio.caseStudies[projectId]",
+    "storageStructure": {
+      "description": "Case studies are stored in the portfolio object under 'caseStudies' key",
+      "example": {
+        "portfolio": {
+          "id": "portfolio_123",
+          "content": { "hero": {}, "about": {}, "work": {} },
+          "caseStudies": {
+            "project_001": { "title": "...", "steps": [], "sections": [] },
+            "project_002": { "title": "...", "steps": [], "sections": [] }
+          }
+        }
+      },
+      "notes": [
+        "caseStudies is an object keyed by projectId",
+        "Each project can have one case study",
+        "Reference from content.work.projects[].hasCaseStudy = true",
+        "Backward compatible - caseStudies can be empty object {}"
+      ]
+    },
+    "compilation": {
+      "framework": "React SSR or Static Site Generation",
+      "cssFramework": "Tailwind CSS",
+      "responsiveUtilities": ["responsive classes", "container queries", "viewport units"],
+      "routes": [
+        "/:subdomain/ → Portfolio home",
+        "/:subdomain/case-study/:projectId → Case study page"
+      ]
+    }
+  },
+
+  "_validation": {
+    "required": ["title", "category", "year", "intro", "steps", "sections"],
+    "optional": ["heroImage"],
+    "constraints": {
+      "title": { "type": "string", "maxLength": 100, "required": true },
+      "category": { "type": "string", "maxLength": 50, "required": true },
+      "year": { "type": "string", "pattern": "^\\d{4}$", "required": true },
+      "intro": { "type": "string", "maxLength": 500, "required": true },
+      "steps": { "type": "array", "minItems": 3, "maxItems": 6, "required": true },
+      "sections": { "type": "array", "minItems": 1, "maxItems": 10, "required": true }
+    }
+  },
+
+  "_responsiveImplementation": {
+    "breakpoints": {
+      "mobile": "max-width: 640px",
+      "tablet": "641px to 1024px",
+      "desktop": "1025px+"
+    },
+    "tailwindClasses": {
+      "container": "container mx-auto px-5 md:px-10 lg:px-20",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8",
+      "typography": {
+        "h1": "text-3xl md:text-5xl lg:text-7xl",
+        "h2": "text-2xl md:text-3xl lg:text-5xl",
+        "h3": "text-lg md:text-2xl lg:text-3xl",
+        "body": "text-base md:text-lg",
+        "caption": "text-xs md:text-sm"
+      }
+    }
+  }
+}

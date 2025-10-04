@@ -24,11 +24,12 @@ import { getTemplate, createPortfolioFromTemplate } from '../templates';
 
 // Components
 import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
-import TemplateSetupForm from '../components/PortfolioBuilder/TemplateSetupForm';
+import DynamicTemplateSetup from '../components/PortfolioBuilder/DynamicTemplateSetup';
 import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
 import FloatingActionButtons from '../components/PortfolioBuilder/FloatingActionButtons';
 import StepIndicator from '../components/PortfolioBuilder/StepIndicator';
 import MaintenanceModal from '../components/PortfolioBuilder/MaintenanceModal';
+import PublishModal from '../components/PortfolioBuilder/PublishModal';
 import { SettingsPanel, HelpTooltip, AutoSaveStatus } from '../components/PortfolioBuilder/PortfolioBuilderUI';
 
 // Custom hooks
@@ -75,13 +76,14 @@ const PortfolioBuilderPage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  // UI state
+    // UI State
   const [showPDFExport, setShowPDFExport] = useState(false);
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
-  // Dirty state tracking - track if there are unsaved changes
+  // Track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const lastSavedDataRef = useRef(null);
   const isNavigatingAwayRef = useRef(false); // Prevent saves during navigation
@@ -175,18 +177,57 @@ const PortfolioBuilderPage = () => {
     }
   };
 
-  const handlePublish = async () => {
-    const result = await publish(
-      portfolioData,
-      selectedTemplate,
-      title,
-      description,
-      cleanupPlaceholderData,
-      convertContentToSections
-    );
+  const handlePublishClick = () => {
+    // Save first if there are unsaved changes
+    if (hasUnsavedChanges) {
+      handleSave();
+    }
+    setShowPublishModal(true);
+  };
 
-    if (result.success && id === 'new' && result.result?.portfolio?._id) {
-      navigate(`/portfolio-builder/${result.result.portfolio._id}`);
+  const handlePublish = async (slug) => {
+    console.log('Publishing with slug:', slug);
+    
+    try {
+      const portfolioToPublish = {
+        ...portfolioData,
+        slug: slug,
+        isPublished: true,
+        publishedAt: new Date().toISOString()
+      };
+
+      const result = await publish(
+        portfolioToPublish,
+        selectedTemplate,
+        title,
+        description,
+        cleanupPlaceholderData,
+        convertContentToSections
+      );
+
+      if (result.success) {
+        toast.success('Portfolio published successfully!');
+        
+        // Update local state
+        setPortfolioData(prev => ({
+          ...prev,
+          slug: slug,
+          isPublished: true
+        }));
+
+        // Navigate if new portfolio
+        if (id === 'new' && result.result?.portfolio?._id) {
+          navigate(`/portfolio-builder/${result.result.portfolio._id}`);
+        }
+
+        return result;
+      } else {
+        throw new Error(result.error || 'Failed to publish');
+      }
+    } catch (error) {
+      console.error('Publish error:', error);
+      toast.error(error.message || 'Failed to publish portfolio');
+      throw error;
     }
   };
 
@@ -472,71 +513,93 @@ const PortfolioBuilderPage = () => {
 
   // Setup completion
   const handleSetupComplete = (setupData) => {
-    const { personalInfo, skillsArray, styling } = setupData;
+    console.log('Setup completed with data:', setupData);
+    
+    // Check if this is data from the new DynamicTemplateSetup or old TemplateSetupForm
+    const isNewFormat = !setupData.personalInfo && !setupData.skillsArray;
+    
+    let contentData;
+    let newTitle;
+    let newDescription;
+    
+    if (isNewFormat) {
+      // New format from DynamicTemplateSetup - content is already in template format
+      contentData = setupData;
+      
+      // Extract title from basic info if available
+      const basicInfo = setupData.basic || {};
+      newTitle = basicInfo.title || `${selectedTemplate.name} Portfolio`;
+      newDescription = basicInfo.description || `Portfolio created with ${selectedTemplate.name} template`;
+    } else {
+      // Old format from TemplateSetupForm
+      const { personalInfo, skillsArray, styling } = setupData;
 
-    // Create content from setup data, preserving template defaults for work and gallery
-    const contentData = {
-      hero: {
-        name: personalInfo.name,
-        title: personalInfo.title,
-        description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
-        image: '',
-      },
-      about: {
-        heading: 'About Me',
-        content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work.`,
-        image: '',
-        skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
-      },
-      // Preserve work section from template defaults
-      work: selectedTemplate.defaultContent?.work || {
-        heading: 'SELECTED WORK',
-        projects: [
-          {
-            id: 1,
-            title: 'PROJECT TITLE',
-            description: 'Brief description of your project and what it accomplishes.',
-            image: '',
-            meta: '2025 — Category',
-            category: 'design'
-          }
-        ]
-      },
-      // Preserve gallery section from template defaults
-      gallery: selectedTemplate.defaultContent?.gallery || {
-        heading: 'VISUAL GALLERY',
-        images: [
-          { src: '', caption: 'Visual exploration 01', meta: '01' },
-          { src: '', caption: 'Visual exploration 02', meta: '02' },
-          { src: '', caption: 'Visual exploration 03', meta: '03' },
-          { src: '', caption: 'Visual exploration 04', meta: '04' },
-          { src: '', caption: 'Visual exploration 05', meta: '05' },
-          { src: '', caption: 'Visual exploration 06', meta: '06' }
-        ]
-      },
-      contact: {
-        heading: "Let's Work Together",
-        description: "I'm always interested in new projects and opportunities.",
-        form_fields: ['name', 'email', 'message'],
-        social_links: [
-          { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
-          ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
-          ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
-        ].filter((link) => link.url && !link.url.includes('example.com')),
-      },
-    };
+      // Create content from setup data, preserving template defaults for work and gallery
+      contentData = {
+        hero: {
+          name: personalInfo.name,
+          title: personalInfo.title,
+          description: personalInfo.description || `Passionate ${personalInfo.title.toLowerCase()} with expertise in creating exceptional experiences.`,
+          image: '',
+        },
+        about: {
+          heading: 'About Me',
+          content: personalInfo.bio || `I'm a ${personalInfo.title.toLowerCase()} with a passion for creating meaningful work.`,
+          image: '',
+          skills: skillsArray.length > 0 ? skillsArray : ['Professional Skills', 'Creative Thinking', 'Problem Solving'],
+        },
+        // Preserve work section from template defaults
+        work: selectedTemplate.defaultContent?.work || {
+          heading: 'SELECTED WORK',
+          projects: [
+            {
+              id: 1,
+              title: 'PROJECT TITLE',
+              description: 'Brief description of your project and what it accomplishes.',
+              image: '',
+              meta: '2025 — Category',
+              category: 'design'
+            }
+          ]
+        },
+        // Preserve gallery section from template defaults
+        gallery: selectedTemplate.defaultContent?.gallery || {
+          heading: 'VISUAL GALLERY',
+          images: [
+            { src: '', caption: 'Visual exploration 01', meta: '01' },
+            { src: '', caption: 'Visual exploration 02', meta: '02' },
+            { src: '', caption: 'Visual exploration 03', meta: '03' },
+            { src: '', caption: 'Visual exploration 04', meta: '04' },
+            { src: '', caption: 'Visual exploration 05', meta: '05' },
+            { src: '', caption: 'Visual exploration 06', meta: '06' }
+          ]
+        },
+        contact: {
+          heading: "Let's Work Together",
+          description: "I'm always interested in new projects and opportunities.",
+          form_fields: ['name', 'email', 'message'],
+          social_links: [
+            { platform: 'Email', url: personalInfo.email || 'your.email@example.com' },
+            ...(personalInfo.phone ? [{ platform: 'Phone', url: `tel:${personalInfo.phone}` }] : []),
+            ...(personalInfo.website ? [{ platform: 'Website', url: personalInfo.website }] : []),
+          ].filter((link) => link.url && !link.url.includes('example.com')),
+        },
+      };
+      
+      newTitle = personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`;
+      newDescription = `Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`;
+    }
 
     const newPortfolioData = createPortfolioFromTemplate(selectedTemplate.id, contentData);
     
-    // Apply styling
-    newPortfolioData.styling = {
-      ...newPortfolioData.styling,
-      colors: { ...selectedTemplate.styling?.colors, ...styling.colors },
-      fonts: { ...selectedTemplate.styling?.fonts, ...styling.fonts },
-    };
-
-    const newTitle = personalInfo.name ? `${personalInfo.name}'s Portfolio` : `${selectedTemplate.name} Portfolio`;
-    const newDescription = `Portfolio showcasing the work of ${personalInfo.name || 'a talented professional'} - ${personalInfo.title || 'Creative Professional'}`;
+    // Apply styling if available (from old format)
+    if (setupData.styling) {
+      newPortfolioData.styling = {
+        ...newPortfolioData.styling,
+        colors: { ...selectedTemplate.styling?.colors, ...setupData.styling.colors },
+        fonts: { ...selectedTemplate.styling?.fonts, ...setupData.styling.fonts },
+      };
+    }
     
     setTitle(newTitle);
     setDescription(newDescription);
@@ -714,8 +777,9 @@ const PortfolioBuilderPage = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
             >
-              <TemplateSetupForm
+              <DynamicTemplateSetup
                 template={selectedTemplate}
+                initialData={portfolioData?.content || {}}
                 onComplete={handleSetupComplete}
                 onBack={handleBackToTemplates}
               />
@@ -743,7 +807,7 @@ const PortfolioBuilderPage = () => {
                 onExportPDF={() => setShowMaintenancePopup(true)}
                 onToggleSettings={() => setShowSettings(!showSettings)}
                 onSave={handleSave}
-                onPublish={handlePublish}
+                onPublish={handlePublishClick}
                 onBackToEdit={handleBackToEdit}
               />
 
@@ -791,6 +855,16 @@ const PortfolioBuilderPage = () => {
         isOpen={showMaintenancePopup}
         onClose={() => setShowMaintenancePopup(false)}
         onContinue={() => setShowPDFExport(true)}
+      />
+
+      {/* Publish Modal */}
+      <PublishModal
+        isOpen={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        onPublish={handlePublish}
+        currentSlug={portfolioData?.slug || ''}
+        portfolioTitle={title}
+        isPublished={portfolioData?.isPublished || false}
       />
     </div>
   );
