@@ -1,8 +1,22 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import usePortfolioStore from '../../stores/portfolioStore';
 
 const CaseStudyPage = () => {
   const navigate = useNavigate();
+  const { portfolioId, projectId } = useParams();
+  const { portfolios } = usePortfolioStore();
+  const [caseStudy, setCaseStudy] = useState(null);
+  
+  // Load case study data if portfolioId and projectId are provided
+  useEffect(() => {
+    if (portfolioId && projectId) {
+      const portfolio = portfolios.find(p => p.id === portfolioId);
+      if (portfolio?.caseStudies?.[projectId]) {
+        setCaseStudy(portfolio.caseStudies[projectId]);
+      }
+    }
+  }, [portfolioId, projectId, portfolios]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -63,8 +77,37 @@ const CaseStudyPage = () => {
           textTransform: 'uppercase',
           letterSpacing: '0.15em'
         }}>
-          CASE STUDY
+          VIEW CASE STUDY
         </div>
+        
+        {portfolioId && projectId && (
+          <button
+            onClick={() => navigate(`/portfolio-builder/${portfolioId}/case-study/${projectId}`)}
+            style={{
+              fontFamily: '"IBM Plex Mono", monospace',
+              fontSize: '13px',
+              color: '#000000',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #FFFFFF',
+              padding: '12px 32px',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 700,
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#FFFFFF';
+              e.target.style.color = '#000000';
+            }}
+          >
+            EDIT CASE STUDY →
+          </button>
+        )}
       </header>
 
       {/* Main Content */}

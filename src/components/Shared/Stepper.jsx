@@ -52,11 +52,11 @@ export default function Stepper({
 
   return (
     <div
-      className="flex min-h-full flex-1 flex-col items-center justify-center p-4 sm:aspect-[4/3] md:aspect-[2/1]"
+      className="flex min-h-full flex-1 flex-col items-center justify-center p-4"
       {...rest}
     >
       <div
-        className={`mx-auto w-full max-w-md rounded-4xl shadow-xl ${stepCircleContainerClassName}`}
+        className={`mx-auto w-full max-w-5xl rounded-4xl shadow-xl ${stepCircleContainerClassName}`}
         style={{ border: '1px solid #222' }}
       >
         <div className={`${stepContainerClassName} flex w-full items-center p-8`}>
@@ -99,8 +99,8 @@ export default function Stepper({
           {stepsArray[currentStep - 1]}
         </StepContentWrapper>
         {!isCompleted && (
-          <div className={`px-8 pb-8 ${footerClassName}`}>
-            <div className={`mt-10 flex ${currentStep !== 1 ? 'justify-between' : 'justify-end'}`}>
+          <div className={`px-8 pb-8 pt-8 ${footerClassName}`}>
+            <div className={`flex ${currentStep !== 1 ? 'justify-between' : 'justify-end'}`}>
               {currentStep !== 1 && (
                 <button
                   onClick={handleBack}
@@ -116,7 +116,10 @@ export default function Stepper({
               )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-full bg-green-500 py-1.5 px-3.5 font-medium tracking-tight text-white transition hover:bg-green-600 active:bg-green-700"
+                className="duration-350 flex items-center justify-center rounded-full py-1.5 px-3.5 font-medium tracking-tight text-white transition"
+                style={{ backgroundColor: '#FF6B2C' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#E55A1F'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#FF6B2C'}
                 {...nextButtonProps}
               >
                 {isLastStep ? 'Complete' : nextButtonText}
@@ -208,17 +211,17 @@ function StepIndicator({ step, currentStep, onClickStep, disableStepIndicators }
     >
       <motion.div
         variants={{
-          inactive: { scale: 1, backgroundColor: '#222', color: '#a3a3a3' },
-          active: { scale: 1, backgroundColor: '#5227FF', color: '#5227FF' },
-          complete: { scale: 1, backgroundColor: '#5227FF', color: '#3b82f6' }
+          inactive: { scale: 1, backgroundColor: '#e5e7eb', color: '#9ca3af' },
+          active: { scale: 1, backgroundColor: '#FF6B2C', color: '#FF6B2C' },
+          complete: { scale: 1, backgroundColor: '#FF6B2C', color: '#ffffff' }
         }}
         transition={{ duration: 0.3 }}
         className="flex h-8 w-8 items-center justify-center rounded-full font-semibold"
       >
         {status === 'complete' ? (
-          <CheckIcon className="h-4 w-4 text-black" />
+          <CheckIcon className="h-4 w-4 text-white" />
         ) : status === 'active' ? (
-          <div className="h-3 w-3 rounded-full bg-[#060010]" />
+          <div className="h-3 w-3 rounded-full bg-white" />
         ) : (
           <span className="text-sm">{step}</span>
         )}
@@ -230,11 +233,11 @@ function StepIndicator({ step, currentStep, onClickStep, disableStepIndicators }
 function StepConnector({ isComplete }) {
   const lineVariants = {
     incomplete: { width: 0, backgroundColor: 'transparent' },
-    complete: { width: '100%', backgroundColor: '#5227FF' }
+    complete: { width: '100%', backgroundColor: '#FF6B2C' }
   };
 
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
+    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-gray-300">
       <motion.div
         className="absolute left-0 top-0 h-full"
         variants={lineVariants}

@@ -105,6 +105,8 @@ const TemplatePreview = ({
         content={content}
         isEditing={isEditing}
         onContentChange={handleContentChange}
+        portfolioId={portfolioData?.id}
+        caseStudies={portfolioData?.caseStudies || {}}
       />
     </div>
   );

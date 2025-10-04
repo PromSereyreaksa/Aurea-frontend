@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import PortfolioBuilderPage from "./pages/PortfolioBuilderPage";
 import EchelonPreviewPage from "./pages/EchelonPreviewPage";
 import TemplatesShowcasePage from "./pages/TemplatesShowcasePage";
+import PublishedPortfolioPage from "./pages/PublishedPortfolioPage";
 import EchelonCaseStudyPage from "./templates/Echelon/EchelonCaseStudyPage";
 import EchelonCaseStudyEditorPage from "./templates/Echelon/EchelonCaseStudyEditorPage";
 
@@ -72,7 +73,15 @@ function App() {
             element={<TemplatesShowcasePage />} 
           />
           <Route 
+            path="/portfolio/:slug" 
+            element={<PublishedPortfolioPage />} 
+          />
+          <Route 
             path="/case-study/logo-design-process" 
+            element={<EchelonCaseStudyPage />} 
+          />
+          <Route 
+            path="/portfolio/:portfolioId/project/:projectId" 
             element={<EchelonCaseStudyPage />} 
           />
         </Routes>
