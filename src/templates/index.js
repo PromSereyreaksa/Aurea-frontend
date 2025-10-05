@@ -152,7 +152,26 @@ export const templates = {
 
 // Helper function to get template by ID
 export const getTemplate = (templateId) => {
-  return templates[templateId];
+  // Normalize template ID (handle old IDs)
+  const normalizedId = normalizeTemplateId(templateId);
+  
+  // Return template or null if not found
+  return templates[normalizedId] || null;
+};
+
+// Normalize template IDs to handle legacy/old IDs
+const normalizeTemplateId = (templateId) => {
+  if (!templateId) return 'echolon';
+  
+  // Map old template IDs to new ones
+  const legacyMap = {
+    'minimal-designer': 'echolon',
+    'minimal': 'echolon',
+    'designer': 'echolon',
+    'swiss': 'echolon'
+  };
+  
+  return legacyMap[templateId] || templateId;
 };
 
 // Helper function to get all templates
@@ -205,6 +224,8 @@ export const createPortfolioFromTemplate = (templateId, customizations = {}) => 
 
 // Get template component for rendering
 export const getTemplateComponent = (templateId) => {
-  const template = templates[templateId];
+  // Normalize template ID to handle legacy IDs
+  const normalizedId = normalizeTemplateId(templateId);
+  const template = templates[normalizedId];
   return template ? template.component : null;
 };

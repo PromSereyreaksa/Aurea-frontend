@@ -34,14 +34,29 @@ export function debounce(func, wait) {
  * Handles both new format (with templateId/content) and old format (with sections)
  */
 export const convertToTemplateFormat = (portfolio) => {
-  // If already in template format, return as-is
+  // Normalize template IDs (handle legacy IDs)
+  const normalizeTemplateId = (id) => {
+    if (!id) return 'echolon';
+    const legacyMap = {
+      'minimal-designer': 'echolon',
+      'minimal': 'echolon',
+      'designer': 'echolon',
+      'swiss': 'echolon'
+    };
+    return legacyMap[id] || id;
+  };
+
+  // If already in template format, normalize the templateId
   if (portfolio.templateId && portfolio.content) {
-    return portfolio;
+    return {
+      ...portfolio,
+      templateId: normalizeTemplateId(portfolio.templateId)
+    };
   }
 
   // Convert old sections-based format to new template format
   const templateData = {
-    templateId: portfolio.template || 'minimal-designer',
+    templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
     content: portfolio.sections?.reduce((acc, section) => {
       acc[section.type] = section.content;
       return acc;
@@ -248,8 +263,27 @@ export const clearLocalStorage = (portfolioId) => {
 export const isValidImageUrl = (value) => {
   if (!value || typeof value !== 'string') return false;
   
-  // Allow: http://, https://, data:image/, and relative paths
-  return value.match(/^(https?:\/\/|\/|data:image\/)/);
+  // Trim whitespace
+  const trimmedValue = value.trim();
+  
+  // Empty strings are valid (for placeholder images)
+  if (trimmedValue === '') return true;
+  
+  // Allow: http://, https://, data:image/, relative paths, and cloudinary/s3/etc URLs
+  const isValid = !!trimmedValue.match(/^(https?:\/\/|\/|data:image\/|\.\/)/);
+  
+  // Debug logging
+  if (!isValid) {
+    console.warn('❌ Invalid image URL detected:', {
+      value: trimmedValue,
+      length: trimmedValue.length,
+      startsWithHttp: trimmedValue.startsWith('http'),
+      startsWithHttps: trimmedValue.startsWith('https'),
+      regexTest: /^(https?:\/\/)/.test(trimmedValue)
+    });
+  }
+  
+  return isValid;
 };
 
 /**

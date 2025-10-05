@@ -53,7 +53,7 @@ const usePortfolioStore = create((set, get) => ({
     try {
       set({ isLoading: true });
       
-      const response = await api.get('/api/portfolios/me');
+      const response = await api.get('/api/portfolios/user/me');
       const portfolios = response.data.data.portfolios;
       
       set({
