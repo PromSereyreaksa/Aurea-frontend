@@ -1192,9 +1192,9 @@ const CaseStudyEditorPage = () => {
         onBackToEdit={handleBackToEdit}
         onSave={handleSave}
         onChangeTemplate={() => navigate(`/portfolio-builder/${portfolioId}`)}
-        onPublish={() => toast.info('Publishing coming soon!')}
-        onExportPDF={() => toast.info('PDF export coming soon!')}
-        onToggleSettings={() => toast.info('Settings coming soon!')}
+        onPublish={() => toast('Publishing coming soon!', { icon: 'ℹ️' })}
+        onExportPDF={() => toast('PDF export coming soon!', { icon: 'ℹ️' })}
+        onToggleSettings={() => toast('Settings coming soon!', { icon: 'ℹ️' })}
       />
     </div>
   );

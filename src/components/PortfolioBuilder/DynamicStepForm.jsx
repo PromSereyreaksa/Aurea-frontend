@@ -19,13 +19,40 @@ const DynamicStepForm = ({ step, data, onChange, onSkip }) => {
   };
 
   const handleImageUpload = async (fieldKey, file) => {
-    // For now, convert to base64. In production, upload to cloud storage
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleFieldChange(fieldKey, reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Upload to backend API
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Image upload response:', result);
+
+      if (result.success && result.data?.url) {
+        // Use the URL from backend response
+        console.log('✅ Image URL received:', result.data.url);
+        handleFieldChange(fieldKey, result.data.url);
+      } else {
+        console.error('❌ Upload failed:', result);
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
     }
   };
 

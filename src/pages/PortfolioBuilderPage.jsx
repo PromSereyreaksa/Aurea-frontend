@@ -122,7 +122,7 @@ const PortfolioBuilderPage = () => {
     // Prevent saving if no changes
     if (!hasUnsavedChanges) {
       console.log('❌ No changes to save');
-      toast.info('No changes to save', { id: 'no-changes' });
+      toast('No changes to save', { id: 'no-changes', icon: 'ℹ️' });
       return;
     }
 
@@ -253,7 +253,14 @@ const PortfolioBuilderPage = () => {
             setDescription(result.portfolio.description || '');
 
             const templateData = convertToTemplateFormat(result.portfolio);
-            const template = getTemplate(templateData.templateId);
+            let template = getTemplate(templateData.templateId);
+
+            // If template not found, use echolon as default
+            if (!template) {
+              console.warn(`Template "${templateData.templateId}" not found, using echolon as fallback`);
+              template = getTemplate('echolon');
+              templateData.templateId = 'echolon';
+            }
 
             if (template) {
               setSelectedTemplate(template);
@@ -638,9 +645,29 @@ const PortfolioBuilderPage = () => {
     }
 
     // Validate image fields
-    if (isImageField(fieldId, value) && value && !isValidImageUrl(value)) {
-      toast.error('Please use a valid image URL');
-      return;
+    if (isImageField(fieldId, value) && value) {
+      // Handle array of images (like gallery)
+      if (Array.isArray(value)) {
+        // Validate each image object's src property
+        const hasInvalidImage = value.some(img => {
+          if (img && img.src && !isValidImageUrl(img.src)) {
+            console.error('❌ Invalid image in array:', img);
+            return true;
+          }
+          return false;
+        });
+        
+        if (hasInvalidImage) {
+          toast.error('Please use valid image URLs');
+          return;
+        }
+      } 
+      // Handle single image URL string
+      else if (typeof value === 'string' && !isValidImageUrl(value)) {
+        console.error('❌ Image validation failed:', { fieldId, value });
+        toast.error('Please use a valid image URL');
+        return;
+      }
     }
 
     // Update content

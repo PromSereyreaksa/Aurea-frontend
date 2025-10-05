@@ -29,7 +29,7 @@ export const portfolioApi = {
           }
         }
         
-        const response = await api.get('/api/portfolios/me');
+        const response = await api.get('/api/portfolios/user/me');
         
         // Cache the result
         localStorage.setItem(cacheKey, JSON.stringify({
