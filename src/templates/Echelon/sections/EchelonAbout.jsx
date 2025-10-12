@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
 import { SwissGrid as SwissGridDecoration } from '../components/SwissDecorations';
 import { SwissHeading, SwissBody } from '../components/SwissTypography';
@@ -8,6 +8,8 @@ const EchelonAbout = ({
   isEditing = false,
   onContentChange 
 }) => {
+  const [isUploading, setIsUploading] = useState(false);
+  
   const { 
     name = 'DESIGNER NAME',
     role = 'CREATIVE DIRECTOR / DESIGNER',
@@ -36,6 +38,56 @@ const EchelonAbout = ({
   const handleImageChange = (newImage) => {
     if (onContentChange) {
       onContentChange('about', 'image', newImage);
+    }
+  };
+
+  // Upload image to backend/Cloudinary
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        handleImageChange(result.data.url);
+        console.log('Image uploaded successfully:', result.data.url);
+      } else {
+        throw new Error(result.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -234,14 +286,47 @@ const EchelonAbout = ({
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      handleImageChange(event.target.result);
-                    };
-                    reader.readAsDataURL(file);
+                    handleImageUpload(file);
                   }
                 }}
               />
+            )}
+
+            {/* Upload indicator */}
+            {isUploading && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid rgba(255, 255, 255, 0.3)',
+                    borderTop: '3px solid #FF0000',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto 16px'
+                  }}></div>
+                  <div style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.15em'
+                  }}>
+                    Uploading...
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </GridCol>
