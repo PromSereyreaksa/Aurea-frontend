@@ -83,7 +83,7 @@ api.interceptors.response.use(
         break;
         
       case 404:
-        toast.error('Resource not found');
+        // Removed toast to prevent false warnings during case study editing
         break;
         
       case 429:

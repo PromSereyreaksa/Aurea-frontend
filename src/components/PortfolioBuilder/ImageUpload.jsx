@@ -35,7 +35,7 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
         body: formData,
         headers: {
           // Don't set Content-Type - let browser set it with boundary for FormData
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
         }
       });
 

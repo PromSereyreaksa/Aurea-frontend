@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
 import { SwissSpiral } from '../components/SwissDecorations';
 
@@ -9,6 +9,8 @@ const EchelonWork = ({
   portfolioId = null,
   caseStudies = {}
 }) => {
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  
   const { 
     heading = 'SELECTED WORK',
     projects = []
@@ -31,13 +33,52 @@ const EchelonWork = ({
     }
   };
 
-  const handleImageUpload = (index, file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        handleProjectChange(index, 'image', event.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    setUploadingIndex(index);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        handleProjectChange(index, 'image', result.data.url);
+        console.log('Image uploaded successfully:', result.data.url);
+      } else {
+        throw new Error(result.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploadingIndex(null);
     }
   };
 
@@ -329,6 +370,43 @@ const EchelonWork = ({
                         style={{ display: 'none' }}
                         onChange={(e) => handleImageUpload(index, e.target.files[0])}
                       />
+                    )}
+
+                    {/* Upload indicator */}
+                    {uploadingIndex === index && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10
+                      }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            border: '3px solid rgba(0, 0, 0, 0.1)',
+                            borderTop: '3px solid #FF0000',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite',
+                            margin: '0 auto 16px'
+                          }}></div>
+                          <div style={{
+                            fontFamily: '"IBM Plex Mono", monospace',
+                            fontSize: '14px',
+                            color: '#000000',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.15em'
+                          }}>
+                            Uploading...
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
 
