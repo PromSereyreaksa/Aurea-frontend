@@ -185,9 +185,14 @@ const usePortfolioStore = create((set, get) => ({
     }
   },
 
-  publishPortfolio: async (id) => {
+  publishPortfolio: async (id, slug = null) => {
     try {
-      const response = await api.put(`/api/portfolios/${id}`, { published: true });
+      const payload = { published: true };
+      if (slug) {
+        payload.slug = slug;
+      }
+      
+      const response = await api.put(`/api/portfolios/${id}`, payload);
       const updatedPortfolio = response.data.data.portfolio;
       
       set((state) => ({
@@ -203,6 +208,7 @@ const usePortfolioStore = create((set, get) => ({
       return { success: true, portfolio: updatedPortfolio };
       
     } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to publish portfolio');
       return { 
         success: false, 
         error: error.response?.data?.message || 'Failed to publish portfolio' 

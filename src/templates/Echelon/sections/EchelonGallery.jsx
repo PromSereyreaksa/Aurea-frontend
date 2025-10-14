@@ -257,7 +257,7 @@ const EchelonGallery = ({
                       justifyContent: 'center',
                       height: '100%',
                       fontFamily: '"IBM Plex Mono", monospace',
-                      fontSize: '14px',
+                      fontSize: 'clamp(12px, 1.2vw, 14px)',
                       color: 'rgba(255, 255, 255, 0.3)',
                       textTransform: 'uppercase'
                     }}>
@@ -277,7 +277,7 @@ const EchelonGallery = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '20px',
+                    fontSize: 'clamp(16px, 2vw, 20px)',
                     fontWeight: 900,
                     color: '#000000',
                     zIndex: 2,
@@ -311,7 +311,7 @@ const EchelonGallery = ({
                           border: 'none',
                           padding: '12px 24px',
                           cursor: 'pointer',
-                          fontSize: '12px',
+                          fontSize: 'clamp(10px, 1vw, 12px)',
                           fontWeight: 700,
                           textTransform: 'uppercase',
                           zIndex: 3
@@ -348,7 +348,7 @@ const EchelonGallery = ({
                         }}></div>
                         <div style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#FFFFFF',
                           textTransform: 'uppercase',
                           letterSpacing: '0.15em'
@@ -374,7 +374,7 @@ const EchelonGallery = ({
                   border: '3px solid #FFFFFF',
                   padding: '16px 40px',
                   cursor: 'pointer',
-                  fontSize: '14px',
+                  fontSize: 'clamp(12px, 1.2vw, 14px)',
                   fontWeight: 700,
                   textTransform: 'uppercase',
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -436,7 +436,7 @@ const EchelonGallery = ({
               border: 'none',
               padding: '16px',
               cursor: 'pointer',
-              fontSize: '18px',
+              fontSize: 'clamp(16px, 1.8vw, 18px)',
               fontWeight: 700,
               width: '50px',
               height: '50px',

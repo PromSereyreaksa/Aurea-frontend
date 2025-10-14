@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-const DashboardSidebar = ({ activeSection, setActiveSection }) => {
+const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) => {
   const sidebarItems = [
     {
       id: "overview",
@@ -148,19 +148,50 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
   ];
 
   return (
-    <div className="w-48 lg:w-56 bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="w-64 lg:w-72 bg-gradient-to-b from-[#fb8500] to-[#ff9500] flex flex-col h-full shadow-xl relative">
+      {/* Mobile Close Button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 lg:hidden bg-white/20 text-white p-2 rounded-lg hover:bg-white/30 transition-all duration-300 z-10"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
+      {/* Logo Section */}
+      <div className="p-4 lg:p-6 border-b border-white/20">
+        <Link to="/" className="flex items-center gap-3 group">
+          <img
+            src="/AUREA - Logo.jpg"
+            alt="Aurea Logo"
+            className="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-cover transition-transform duration-300 group-hover:scale-105 ring-2 ring-white/30"
+          />
+          <div>
+            <h1 className="text-xl lg:text-2xl font-black text-white tracking-tight">
+              AUREA
+            </h1>
+            <p className="text-[10px] lg:text-xs text-white/80 font-bold uppercase tracking-wider">
+              Portfolio Builder
+            </p>
+          </div>
+        </Link>
+      </div>
+
       {/* Sidebar Header */}
-      <div className="p-4 lg:p-6 border-b border-gray-200">
-        <h2 className="text-lg lg:text-xl font-bold text-gray-900">
+      <div className="p-4 lg:p-6 border-b border-white/20">
+        <h2 className="text-lg lg:text-xl font-bold text-white">
           Dashboard
         </h2>
-        <p className="text-xs lg:text-sm text-gray-600 mt-1">
+        <p className="text-xs lg:text-sm text-white/80 mt-1">
           Manage your workspace
         </p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 space-y-1">
+      <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 space-y-2 overflow-y-auto">
         {sidebarItems.map((item) => {
           // If item is a link, render as Link component
           if (item.isLink) {
@@ -168,12 +199,25 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
               <Link
                 key={item.id}
                 to={item.link}
-                className="w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100"
+                className="w-full flex items-center justify-between px-3 py-3 text-left transition-all duration-300 text-white/90 hover:bg-white/10 rounded-lg group"
               >
-                <span className="mr-2 lg:mr-3 flex-shrink-0">{item.icon}</span>
-                <span className="font-medium text-sm lg:text-base truncate">
-                  {item.name}
-                </span>
+                <div className="flex items-center flex-1">
+                  <div className="w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all duration-300">
+                    {React.cloneElement(item.icon, { className: "w-6 h-6" })}
+                  </div>
+                  <span className="font-semibold text-sm truncate">
+                    {item.name}
+                  </span>
+                </div>
+                {/* Diagonal Arrow Indicator */}
+                <svg 
+                  className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors duration-300 flex-shrink-0 ml-2" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </Link>
             );
           }
@@ -183,20 +227,56 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center px-2 lg:px-3 py-2 lg:py-3 rounded-lg text-left transition-colors ${
+              className={`w-full flex items-center px-3 py-3 text-left transition-all duration-300 rounded-lg ${
                 activeSection === item.id
-                  ? "bg-[#fb8500] text-white"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "bg-white text-[#fb8500] shadow-lg"
+                  : "text-white/90 hover:bg-white/10"
               }`}
             >
-              <span className="mr-2 lg:mr-3 flex-shrink-0">{item.icon}</span>
-              <span className="font-medium text-sm lg:text-base truncate">
+              <div className={`w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 ${
+                activeSection === item.id
+                  ? "bg-[#fb8500] text-white"
+                  : "bg-white/10"
+              }`}>
+                {React.cloneElement(item.icon, { className: "w-6 h-6" })}
+              </div>
+              <span className="font-semibold text-sm truncate">
                 {item.name}
               </span>
             </button>
           );
         })}
       </nav>
+
+      {/* User Profile Section - Bottom */}
+      <div className="border-t border-white/20 p-4 lg:p-4 bg-[#ff9500]/30">
+        <Link
+          to="/profile"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+        >
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md">
+            <span className="text-[#fb8500] text-lg font-black">
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white truncate">
+              {user?.name || 'User'}
+            </p>
+            <p className="text-xs text-white/80 truncate">
+              View profile
+            </p>
+          </div>
+          <svg 
+            className="w-5 h-5 text-white/70 group-hover:text-white transition-colors duration-300" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 };

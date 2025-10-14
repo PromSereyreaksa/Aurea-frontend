@@ -197,7 +197,7 @@ const EchelonWork = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '32px',
+                    fontSize: 'clamp(24px, 3.5vw, 32px)',
                     fontWeight: 900,
                     color: '#FFFFFF',
                     transform: 'rotate(-5deg)'
@@ -261,7 +261,7 @@ const EchelonWork = ({
                   top: '-60px',
                   left: 0,
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '120px',
+                  fontSize: 'clamp(48px, 12vw, 120px)',
                   fontWeight: 900,
                   color: 'rgba(0, 0, 0, 0.03)',
                   lineHeight: 1,
@@ -276,7 +276,7 @@ const EchelonWork = ({
                   top: '-30px',
                   right: 0,
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '12px',
+                  fontSize: 'clamp(10px, 1vw, 12px)',
                   color: '#FF0000',
                   textTransform: 'uppercase',
                   letterSpacing: '0.15em',
@@ -298,7 +298,7 @@ const EchelonWork = ({
                       border: 'none',
                       padding: '10px 20px',
                       cursor: 'pointer',
-                      fontSize: '12px',
+                      fontSize: 'clamp(10px, 1vw, 12px)',
                       textTransform: 'uppercase',
                       fontWeight: 700,
                       zIndex: 3
@@ -352,7 +352,7 @@ const EchelonWork = ({
                       ) : (
                         <div style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#666666',
                           textAlign: 'center',
                           textTransform: 'uppercase'
@@ -398,7 +398,7 @@ const EchelonWork = ({
                           }}></div>
                           <div style={{
                             fontFamily: '"IBM Plex Mono", monospace',
-                            fontSize: '14px',
+                            fontSize: 'clamp(12px, 1.2vw, 14px)',
                             color: '#000000',
                             textTransform: 'uppercase',
                             letterSpacing: '0.15em'
@@ -421,7 +421,7 @@ const EchelonWork = ({
                         placeholder="2025 — Category"
                         style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#666666',
                           backgroundColor: 'transparent',
                           border: '1px dashed #CCCCCC',
@@ -434,7 +434,7 @@ const EchelonWork = ({
                     ) : (
                       <div style={{
                         fontFamily: '"IBM Plex Mono", monospace',
-                        fontSize: '14px',
+                        fontSize: 'clamp(12px, 1.2vw, 14px)',
                         color: '#666666',
                         marginBottom: '24px',
                         textTransform: 'uppercase',
@@ -503,7 +503,7 @@ const EchelonWork = ({
                         rows={4}
                         style={{
                           fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          fontSize: '18px',
+                          fontSize: 'clamp(16px, 1.8vw, 18px)',
                           fontWeight: 400,
                           lineHeight: 1.5,
                           color: '#000000',
@@ -518,7 +518,7 @@ const EchelonWork = ({
                     ) : (
                       <p style={{
                         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        fontSize: '18px',
+                        fontSize: 'clamp(16px, 1.8vw, 18px)',
                         fontWeight: 400,
                         lineHeight: 1.5,
                         color: '#000000',
@@ -559,7 +559,7 @@ const EchelonWork = ({
                           alignItems: 'center',
                           gap: '12px',
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           fontWeight: 700,
                           color: '#FFFFFF',
                           backgroundColor: '#FF0000',
@@ -606,7 +606,7 @@ const EchelonWork = ({
               <div
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '18px',
+                  fontSize: 'clamp(16px, 1.8vw, 18px)',
                   color: '#666666',
                   textTransform: 'uppercase'
                 }}

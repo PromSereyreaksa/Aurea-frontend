@@ -38,6 +38,20 @@
   line-clamp: 3;
 }
 
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 /* Fade in up animation */
 @keyframes fadeInUp {
   from {
@@ -83,4 +97,25 @@
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* Template Responsive Styles */
+@media (max-width: 768px) {
+  /* Hide decorative elements on mobile */
+  .template-decoration {
+    display: none !important;
+  }
+  
+  /* Ensure template sections have proper padding on mobile */
+  section {
+    padding-left: clamp(16px, 5vw, 24px) !important;
+    padding-right: clamp(16px, 5vw, 24px) !important;
+  }
+  
+  /* Adjust minHeight for mobile */
+  section[style*="minHeight: 100vh"] {
+    min-height: auto !important;
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+  }
 }
