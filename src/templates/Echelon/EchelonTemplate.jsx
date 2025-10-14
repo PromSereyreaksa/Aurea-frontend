@@ -49,14 +49,16 @@ const EchelonTemplate = ({
 
   return (
     <div 
-      className={className}
+      className={`${className} template-wrapper`}
       style={{
         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
         color: '#000000',
         backgroundColor: '#FFFFFF',
         lineHeight: 1.4,
         minHeight: '100vh',
-        position: 'relative'
+        position: 'relative',
+        overflowX: 'hidden',
+        width: '100%'
       }}
     >
       {/* Swiss Grid Overlay - Always visible but subtle */}

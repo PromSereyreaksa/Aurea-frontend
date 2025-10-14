@@ -248,7 +248,7 @@ const EchelonAbout = ({
               ) : (
                 <div style={{
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '16px',
+                  fontSize: 'clamp(14px, 1.5vw, 16px)',
                   color: 'rgba(255, 255, 255, 0.3)',
                   textAlign: 'center',
                   textTransform: 'uppercase',
@@ -262,7 +262,7 @@ const EchelonAbout = ({
             {/* Caption under image with grid */}
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
+              fontSize: 'clamp(12px, 1.2vw, 14px)',
               color: '#FFFFFF',
               textTransform: 'uppercase',
               letterSpacing: '0.15em',
@@ -318,7 +318,7 @@ const EchelonAbout = ({
                   }}></div>
                   <div style={{
                     fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '14px',
+                    fontSize: 'clamp(12px, 1.2vw, 14px)',
                     color: '#FFFFFF',
                     textTransform: 'uppercase',
                     letterSpacing: '0.15em'
@@ -343,7 +343,7 @@ const EchelonAbout = ({
             }}>
               <div style={{
                 fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '16px',
+                fontSize: 'clamp(14px, 1.5vw, 16px)',
                 fontWeight: 600,
                 color: '#FF0000',
                 textTransform: 'uppercase',
@@ -448,7 +448,7 @@ const EchelonAbout = ({
                 placeholder="PROFESSIONAL TITLE"
                 style={{
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '18px',
+                  fontSize: 'clamp(16px, 1.8vw, 18px)',
                   fontWeight: 600,
                   color: '#FF0000',
                   textTransform: 'uppercase',
@@ -465,7 +465,7 @@ const EchelonAbout = ({
               <div style={{
                 display: 'inline-block',
                 fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '13px',
+                fontSize: 'clamp(11px, 1.1vw, 13px)',
                 fontWeight: 700,
                 color: '#000000',
                 backgroundColor: '#FF0000',
@@ -493,7 +493,7 @@ const EchelonAbout = ({
                 rows={6}
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '24px',
+                  fontSize: 'clamp(18px, 2.5vw, 24px)',
                   fontWeight: 400,
                   lineHeight: 1.6,
                   color: '#FFFFFF',
@@ -508,7 +508,7 @@ const EchelonAbout = ({
             ) : (
               <p style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                fontSize: '24px',
+                fontSize: 'clamp(18px, 2.5vw, 24px)',
                 fontWeight: 400,
                 lineHeight: 1.6,
                 color: 'rgba(255, 255, 255, 0.85)',

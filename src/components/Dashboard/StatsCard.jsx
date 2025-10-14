@@ -9,66 +9,52 @@ const StatsCard = ({
   color = "blue",
 }) => {
   const colorClasses = {
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    green: "bg-green-50 text-green-600 border-green-100",
-    purple: "bg-purple-50 text-purple-600 border-purple-100",
-    orange: "bg-orange-50 text-orange-600 border-orange-100",
+    blue: "bg-blue-500",
+    green: "bg-green-500",
+    purple: "bg-purple-500",
+    orange: "bg-[#fb8500]",
   };
 
-  const changeColor =
-    changeType === "increase"
-      ? "text-green-600"
-      : changeType === "decrease"
-      ? "text-red-600"
-      : "text-gray-600";
+  const bgClasses = {
+    blue: "bg-blue-50",
+    green: "bg-green-50",
+    purple: "bg-purple-50",
+    orange: "bg-[#fb8500]/5",
+  };
 
   return (
-    <div
-      className={`p-6 rounded-xl border ${colorClasses[color]} bg-white hover:shadow-md transition-shadow`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
-          {change && (
-            <p
-              className={`text-sm font-medium ${changeColor} flex items-center mt-2`}
-            >
-              {changeType === "increase" && (
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
-              )}
-              {changeType === "decrease" && (
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-                  />
-                </svg>
-              )}
-              {change}
-            </p>
-          )}
+    <div className="relative h-full border-2 border-neutral-200 bg-white overflow-hidden group hover:border-[#fb8500] transition-all duration-300">
+      {/* Decorative elements */}
+      <div className={`absolute top-4 right-4 w-12 h-12 ${colorClasses[color]} opacity-5`}></div>
+      <div className={`absolute bottom-4 left-4 w-8 h-8 border-2 ${color === 'orange' ? 'border-[#fb8500]' : color === 'purple' ? 'border-purple-600' : 'border-blue-600'} opacity-20`}></div>
+      
+      <div className="relative p-8">
+        {/* Icon in colored square */}
+        <div className={`inline-flex items-center justify-center w-14 h-14 ${colorClasses[color]} mb-6 group-hover:scale-110 transition-transform duration-300`}>
+          <div className="text-white w-8 h-8">{icon}</div>
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
+
+        {/* Value */}
+        <div className="mb-2">
+          <div className="text-5xl font-black text-[#1a1a1a] leading-none">
+            {value}
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className={`text-sm font-bold uppercase tracking-wider ${color === 'orange' ? 'text-[#fb8500]' : color === 'purple' ? 'text-purple-600' : 'text-blue-600'} mb-4`}>
+          {title}
+        </div>
+
+        {/* Trend/Change */}
+        {change && (
+          <div className="text-sm text-neutral-600 font-medium">
+            {change}
+          </div>
+        )}
+
+        {/* Growing bottom line */}
+        <div className={`absolute bottom-0 left-0 h-1 w-0 ${colorClasses[color]} group-hover:w-full transition-all duration-500`}></div>
       </div>
     </div>
   );

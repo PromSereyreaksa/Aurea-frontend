@@ -12,79 +12,107 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          {selectedTemplateId ? 'Switch Template' : 'Choose Your Template'}
-        </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-3">
+    <div className="w-full max-w-7xl mx-auto px-6 py-12">
+      {/* Bold Header with Geometric Elements */}
+      <div className="mb-16 relative">
+        {/* Decorative gradient blobs */}
+        <div className="absolute -right-20 -top-20 w-96 h-96 bg-gradient-to-br from-[#fb8500]/10 via-purple-500/10 to-transparent blur-3xl rounded-full"></div>
+        <div className="absolute -left-20 top-40 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-transparent blur-3xl rounded-full"></div>
+        
+        {/* Geometric decorations */}
+        <div className="absolute -left-4 top-0 w-24 h-24 border-4 border-[#fb8500]/20"></div>
+        <div className="absolute -right-8 top-32 w-16 h-16 bg-[#fb8500]/10"></div>
+        
+        <div className="relative inline-block px-4 py-2 bg-[#fb8500] text-white text-sm font-mono mb-6 uppercase tracking-wider">
+          <div className="absolute -right-2 -bottom-2 w-full h-full bg-[#fb8500]/30 -z-10"></div>
+          {selectedTemplateId ? 'Switch Template' : 'Choose Template'}
+        </div>
+        <h1 className="relative text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#1a1a1a] mb-6 max-w-4xl">
           {selectedTemplateId 
-            ? 'You can switch to a different template, but note that your current customizations will be reset.'
-            : 'Start with a professionally designed template and customize it to match your style. You can modify colors, content, layout, and more.'
+            ? 'Switch to a Different Template'
+            : <>
+                Choose Your <span className="bg-gradient-to-r from-[#fb8500] to-[#ff9500] bg-clip-text text-transparent">Perfect</span> Template
+              </>
+          }
+        </h1>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-24 h-1 bg-[#fb8500]"></div>
+          <div className="w-16 h-1 bg-[#fb8500] opacity-50"></div>
+          <div className="w-8 h-1 bg-[#fb8500] opacity-25"></div>
+        </div>
+        <p className="text-xl text-neutral-600 max-w-3xl leading-relaxed relative">
+          {selectedTemplateId 
+            ? '⚠️ Warning: Switching templates will reset your current customizations. Your content will be preserved but layout changes will be lost.'
+            : 'Start with a professionally designed template. Fully customizable—change colors, fonts, layouts, and content to match your unique style.'
           }
         </p>
         {!selectedTemplateId && (
-          <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-800 px-4 py-2 rounded-lg text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mt-6 relative inline-flex items-center gap-2 bg-[#fb8500]/10 border-2 border-[#fb8500] text-[#fb8500] px-6 py-3 font-semibold group hover:bg-[#fb8500] hover:text-white transition-all">
+            <svg className="w-5 h-5 relative z-10 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Selecting a template will create your portfolio
+            <span className="relative z-10">Selecting a template will create your portfolio</span>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {templates.map((template) => (
           <motion.div
             key={template.id}
-            className={`relative bg-white rounded-xl shadow-lg overflow-hidden border-2 transition-all duration-300 ${
+            className={`group relative bg-white border-2 overflow-hidden transition-all duration-300 hover:shadow-2xl ${
               selectedTemplateId === template.id 
-                ? 'border-[#FF6B35] shadow-xl' 
-                : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
+                ? 'border-[#fb8500]' 
+                : 'border-neutral-200 hover:border-[#fb8500]'
             }`}
+            whileHover={{ y: -4 }}
           >
-            {/* Selected/In Progress Badge */}
+            {/* Selected Badge */}
             {selectedTemplateId === template.id && (
-              <div className="absolute top-3 right-3 z-10">
-                <div className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+              <div className="absolute top-4 right-4 z-10">
+                <div className="bg-[#fb8500] text-white px-3 py-1.5 text-xs font-bold flex items-center space-x-1">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span>In Progress</span>
+                  <span>SELECTED</span>
                 </div>
               </div>
             )}
-            {/* Template Preview */}
-            <div className="aspect-[4/5] bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+            {/* Template Preview with Dynamic Gradients */}
+            <div className="aspect-[4/5] bg-gradient-to-br from-[#fb8500]/10 via-purple-500/10 to-blue-500/10 relative overflow-hidden group-hover:from-[#fb8500]/20 group-hover:via-purple-500/20 group-hover:to-blue-500/20 transition-all">
+              {/* Geometric decorations */}
+              <div className="absolute top-4 left-4 w-16 h-16 border-2 border-[#fb8500]/30"></div>
+              <div className="absolute bottom-4 right-4 w-12 h-12 bg-[#fb8500]/20"></div>
+              
               {/* Mock preview of the template */}
               <div className="absolute inset-0 p-4">
-                {/* Hero section preview */}
-                <div className="bg-white rounded-lg mb-3 p-3 shadow-sm">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto mb-2"></div>
-                  <div className="h-2 bg-gray-300 rounded w-3/4 mx-auto mb-1"></div>
-                  <div className="h-1.5 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                {/* Hero section preview with gradient */}
+                <div className="bg-gradient-to-br from-white to-gray-50 mb-3 p-3 shadow-lg border border-neutral-200 group-hover:shadow-xl transition-shadow">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#fb8500] to-[#ff9500] rounded-full mx-auto mb-2"></div>
+                  <div className="h-2 bg-gradient-to-r from-[#fb8500] to-[#ff9500] rounded w-3/4 mx-auto mb-1"></div>
+                  <div className="h-1.5 bg-neutral-300 rounded w-1/2 mx-auto"></div>
                 </div>
                 
-                {/* Content sections preview */}
+                {/* Content sections preview with colors */}
                 <div className="space-y-2">
-                  <div className="bg-white rounded-lg p-2 shadow-sm">
-                    <div className="h-1.5 bg-gray-300 rounded w-1/4 mb-1"></div>
+                  <div className="bg-white p-2 shadow-md border border-neutral-200">
+                    <div className="h-1.5 bg-[#fb8500] rounded w-1/4 mb-1"></div>
                     <div className="grid grid-cols-2 gap-1">
-                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gradient-to-br from-[#fb8500]/20 to-purple-500/20 rounded"></div>
                       <div className="space-y-1">
-                        <div className="h-1 bg-gray-200 rounded"></div>
-                        <div className="h-1 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-1 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-1 bg-neutral-300 rounded"></div>
+                        <div className="h-1 bg-neutral-300 rounded w-3/4"></div>
+                        <div className="h-1 bg-neutral-300 rounded w-1/2"></div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-lg p-2 shadow-sm">
-                    <div className="h-1.5 bg-gray-300 rounded w-1/3 mb-1"></div>
+                  <div className="bg-white p-2 shadow-md border border-neutral-200">
+                    <div className="h-1.5 bg-purple-500 rounded w-1/3 mb-1"></div>
                     <div className="grid grid-cols-3 gap-1">
-                      <div className="h-6 bg-gray-200 rounded"></div>
-                      <div className="h-6 bg-gray-200 rounded"></div>
-                      <div className="h-6 bg-gray-200 rounded"></div>
+                      <div className="h-6 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded"></div>
+                      <div className="h-6 bg-gradient-to-br from-blue-500/20 to-[#fb8500]/20 rounded"></div>
+                      <div className="h-6 bg-gradient-to-br from-[#fb8500]/20 to-purple-500/20 rounded"></div>
                     </div>
                   </div>
                 </div>
@@ -101,46 +129,34 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
             </div>
 
             {/* Template Info */}
-            <div className="p-4">
-              <h3 className="font-bold text-lg text-gray-900 mb-2">
+            <div className="p-6">
+              <h3 className="font-bold text-xl text-[#1a1a1a] mb-2 group-hover:text-[#fb8500] transition-colors">
                 {template.name}
               </h3>
-              <p className="text-gray-600 text-sm mb-3">
+              <p className="text-neutral-600 text-sm mb-4 leading-relaxed">
                 {template.description}
               </p>
               
               {/* Template features */}
-              <div className="flex flex-wrap gap-1 mb-3">
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="px-3 py-1 bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider">
                   {template.category}
                 </span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                <span className="px-3 py-1 bg-[#fb8500]/10 text-[#fb8500] text-xs font-semibold uppercase tracking-wider">
                   Responsive
                 </span>
-                <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full">
+                <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold uppercase tracking-wider">
                   Customizable
                 </span>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                {template.previewUrl && (
-                  <motion.button
-                    className="flex-1 py-2 px-3 rounded-lg font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
-                    whileTap={{ scale: 0.98 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(template.previewUrl, '_blank');
-                    }}
-                  >
-                    Preview
-                  </motion.button>
-                )}
+              {/* Action Buttons - Consistent with dashboard style */}
+              <div className="flex flex-col gap-3">
                 <motion.button
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-colors text-sm ${
+                  className={`w-full py-3 px-4 font-bold uppercase tracking-wider transition-all duration-300 border-2 ${
                     selectedTemplateId === template.id
-                      ? 'bg-[#FF6B35] text-white hover:bg-[#E55A2B]'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                      ? 'bg-[#fb8500] text-white border-[#fb8500]'
+                      : 'bg-white text-[#1a1a1a] border-[#1a1a1a] hover:bg-[#fb8500] hover:text-white hover:border-[#fb8500]'
                   }`}
                   whileTap={{ scale: 0.98 }}
                   onClick={(e) => {
@@ -148,26 +164,55 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
                     handleTemplateSelect(template);
                   }}
                 >
-                  {selectedTemplateId === template.id ? 'Selected' : 'Use This'}
+                  {selectedTemplateId === template.id ? 'SELECTED' : 'SELECT TEMPLATE'}
                 </motion.button>
+                
+                {template.previewUrl && (
+                  <motion.button
+                    className="w-full py-2 px-4 text-sm font-bold uppercase tracking-wider transition-all duration-300 border-2 bg-white text-neutral-600 border-neutral-300 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(template.previewUrl, '_blank');
+                    }}
+                  >
+                    PREVIEW
+                  </motion.button>
+                )}
               </div>
+
+              {/* Bottom accent line */}
+              <div className={`mt-4 h-1 bg-[#fb8500] transition-all duration-500 ${
+                selectedTemplateId === template.id ? 'w-full' : 'w-0 group-hover:w-full'
+              }`}></div>
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Coming Soon Section */}
-      <div className="mt-12 text-center">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">More Templates Coming Soon</h3>
-        <p className="text-gray-600 mb-6">
-          We're working on more amazing templates for different industries and styles.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-          {['Corporate', 'Photography', 'Developer'].map((type, index) => (
-            <div key={type} className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-300">
-              <div className="w-16 h-16 bg-gray-200 rounded-lg mx-auto mb-4"></div>
-              <h4 className="font-semibold text-gray-500 mb-2">{type}</h4>
-              <p className="text-sm text-gray-400">Coming Soon</p>
+      <div className="mt-20 border-t-2 border-neutral-200 pt-16">
+        <div className="text-center mb-12">
+          <div className="inline-block px-4 py-2 bg-neutral-100 text-neutral-600 text-sm font-mono mb-4 uppercase tracking-wider">
+            Coming Soon
+          </div>
+          <h3 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-4">
+            More Templates in Development
+          </h3>
+          <p className="text-neutral-600 text-lg max-w-2xl mx-auto">
+            We're crafting more beautiful templates for different industries and creative styles.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {['Corporate', 'Photography', 'Developer'].map((type) => (
+            <div key={type} className="bg-white border-2 border-dashed border-neutral-300 p-8 text-center hover:border-[#fb8500] transition-colors group">
+              <div className="w-20 h-20 bg-neutral-100 mx-auto mb-4 flex items-center justify-center group-hover:bg-[#fb8500]/10 transition-colors">
+                <svg className="w-10 h-10 text-neutral-400 group-hover:text-[#fb8500] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <h4 className="font-bold text-lg text-neutral-700 mb-2">{type}</h4>
+              <p className="text-sm text-neutral-400 font-medium">COMING SOON</p>
             </div>
           ))}
         </div>

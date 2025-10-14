@@ -16,10 +16,10 @@ export const SwissGrid = ({
       style={{
         maxWidth,
         margin: '0 auto',
-        padding: `0 ${margin}`,
+        padding: `0 clamp(20px, 5vw, ${margin})`,
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gap: gutter,
+        gap: `clamp(12px, 2vw, ${gutter})`,
         alignItems: 'start'
       }}
     >

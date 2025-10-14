@@ -205,17 +205,14 @@ const PublishModal = ({
 
               {/* Slug Input */}
               <div className="space-y-3">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-500">
-                      /portfolio/
-                    </div>
                     <input
                       type="text"
                       value={slug}
                       onChange={handleSlugChange}
                       placeholder="your-portfolio-name"
-                      className={`w-full pl-28 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full px-4 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition-all bg-white text-gray-900 font-medium placeholder:text-gray-400 ${
                         error 
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
                           : isAvailable 
@@ -238,13 +235,13 @@ const PublishModal = ({
                   </div>
                   <button
                     onClick={generateRandomSlug}
-                    className="px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700"
+                    className="w-full sm:w-auto px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium text-gray-700"
                     title="Generate random slug"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Generate
+                    Generate Random Slug
                   </button>
                 </div>
 
