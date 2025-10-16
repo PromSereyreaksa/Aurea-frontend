@@ -34,7 +34,7 @@ const DashboardPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="app-page min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center">
@@ -123,7 +123,9 @@ const DashboardPage = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
                 Analytics Dashboard
               </h2>
-              <p className="text-orange-100 text-center text-base md:text-lg">Coming Soon</p>
+              <p className="text-orange-100 text-center text-base md:text-lg">
+                Coming Soon
+              </p>
             </div>
 
             {/* Content */}
@@ -468,7 +470,9 @@ const DashboardPage = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
                 Business Hub
               </h2>
-              <p className="text-orange-100 text-center text-base md:text-lg">Coming Soon</p>
+              <p className="text-orange-100 text-center text-base md:text-lg">
+                Coming Soon
+              </p>
             </div>
 
             {/* Content */}
@@ -686,15 +690,25 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="app-page min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
       {/* Mobile Hamburger Button - Only show when sidebar is closed */}
       {!isSidebarOpen && (
         <button
           onClick={() => setIsSidebarOpen(true)}
           className="fixed top-4 right-4 z-50 lg:hidden bg-[#fb8500] text-white p-2.5 rounded-lg shadow-lg hover:bg-[#ff9500] transition-all duration-300"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       )}
@@ -709,9 +723,11 @@ const DashboardPage = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className={`fixed left-0 top-0 h-screen z-40 transition-transform duration-300 lg:translate-x-0 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
+        <div
+          className={`fixed left-0 top-0 h-screen z-40 transition-transform duration-300 lg:translate-x-0 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <DashboardSidebar
             activeSection={activeSection}
             setActiveSection={(section) => {

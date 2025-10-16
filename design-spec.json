@@ -1,0 +1,391 @@
+{
+  "brand": {
+    "primaryColor": "#fb8500",
+    "secondaryColor": "#1a1a1a",
+    "accentColor": "#ff9500",
+    "textColor": "#1a1a1a",
+    "backgroundColor": "#ffffff",
+    "neutralLight": "#f8f9fa",
+    "neutralDark": "#2d2d2d"
+  },
+  "layout": {
+    "sections": [
+      {
+        "name": "hero",
+        "elements": [
+          { "type": "eyebrow", "text": "FOR DESIGNERS · BY DESIGNERS" },
+          {
+            "type": "heading",
+            "text": "Build your portfolio in minutes, not weeks"
+          },
+          {
+            "type": "paragraph",
+            "text": "The fastest way for designers to showcase their work. No coding required."
+          },
+          {
+            "type": "buttonGroup",
+            "buttons": [
+              { "text": "Get Started Free", "variant": "primary" },
+              { "text": "See How It Works", "variant": "secondary" }
+            ]
+          },
+          {
+            "type": "heroVisual",
+            "content": "Dashboard preview / animated mockup"
+          }
+        ],
+        "styles": {
+          "padding": "120px 24px 80px",
+          "backgroundColor": "backgroundColor",
+          "maxWidth": "1200px",
+          "textAlign": "center"
+        }
+      },
+      {
+        "name": "trustBanner",
+        "elements": [
+          { "type": "text", "text": "Trusted by designers at" },
+          {
+            "type": "logoRow",
+            "logos": [
+              "Company 1",
+              "Company 2",
+              "Company 3",
+              "Company 4",
+              "Company 5"
+            ]
+          }
+        ],
+        "styles": {
+          "padding": "40px 24px",
+          "backgroundColor": "neutralLight"
+        }
+      },
+      {
+        "name": "features",
+        "repeatable": true,
+        "elements": [
+          { "type": "icon", "iconName": "zap" },
+          { "type": "heading", "text": "Lightning Fast" },
+          {
+            "type": "paragraph",
+            "text": "Go from design to published portfolio in under 10 minutes"
+          }
+        ],
+        "items": [
+          {
+            "icon": "⚡",
+            "title": "Lightning Fast",
+            "description": "Go from design to published portfolio in under 10 minutes"
+          },
+          {
+            "icon": "🎨",
+            "title": "Design Freedom",
+            "description": "No templates. Build something that truly represents your style"
+          },
+          {
+            "icon": "📱",
+            "title": "Mobile Perfect",
+            "description": "Looks stunning on every device, automatically"
+          },
+          {
+            "icon": "🚀",
+            "title": "One-Click Deploy",
+            "description": "Custom domain, SSL, and hosting included"
+          },
+          {
+            "icon": "🔧",
+            "title": "Zero Code",
+            "description": "Drag, drop, done. No technical knowledge needed"
+          },
+          {
+            "icon": "♾️",
+            "title": "Unlimited Projects",
+            "description": "Create as many portfolios as you need"
+          }
+        ],
+        "styles": {
+          "grid": { "columns": 3, "gap": "48px" },
+          "padding": "100px 24px",
+          "backgroundColor": "backgroundColor"
+        }
+      },
+      {
+        "name": "showcase",
+        "elements": [
+          { "type": "eyebrow", "text": "HOW IT WORKS" },
+          {
+            "type": "heading",
+            "text": "Three steps to your perfect portfolio"
+          },
+          {
+            "type": "stepList",
+            "steps": [
+              {
+                "number": "01",
+                "title": "Upload Your Work",
+                "description": "Drag and drop your design files"
+              },
+              {
+                "number": "02",
+                "title": "Customize Layout",
+                "description": "Arrange with our intuitive grid system"
+              },
+              {
+                "number": "03",
+                "title": "Publish & Share",
+                "description": "Go live with one click"
+              }
+            ]
+          }
+        ],
+        "styles": {
+          "padding": "100px 24px",
+          "backgroundColor": "neutralLight"
+        }
+      },
+      {
+        "name": "useCases",
+        "elements": [
+          { "type": "heading", "text": "Built for every creative" },
+          {
+            "type": "categoryGrid",
+            "categories": [
+              { "title": "UI/UX Designers", "icon": "🎯" },
+              { "title": "Product Designers", "icon": "💼" },
+              { "title": "Graphic Designers", "icon": "✨" },
+              { "title": "Illustrators", "icon": "🎨" },
+              { "title": "Motion Designers", "icon": "🎬" },
+              { "title": "Art Directors", "icon": "👁️" }
+            ]
+          }
+        ],
+        "styles": {
+          "padding": "100px 24px",
+          "backgroundColor": "backgroundColor"
+        }
+      },
+      {
+        "name": "stats",
+        "elements": [
+          {
+            "type": "statGrid",
+            "stats": [
+              { "value": "10min", "label": "Average Setup Time" },
+              { "value": "5000+", "label": "Designers" },
+              { "value": "99.9%", "label": "Uptime" },
+              { "value": "24/7", "label": "Support" }
+            ]
+          }
+        ],
+        "styles": {
+          "padding": "80px 24px",
+          "backgroundColor": "secondaryColor",
+          "textColor": "#ffffff"
+        }
+      },
+      {
+        "name": "testimonials",
+        "elements": [
+          { "type": "eyebrow", "text": "TESTIMONIALS" },
+          { "type": "heading", "text": "Loved by designers" },
+          {
+            "type": "testimonialGrid",
+            "testimonials": [
+              {
+                "quote": "AUREA saved me weeks of development time. I went from Figma to live portfolio in 8 minutes.",
+                "author": "Sarah Chen",
+                "role": "Product Designer",
+                "company": "Tech Co"
+              },
+              {
+                "quote": "Finally, a portfolio builder that doesn't force me into boring templates. Love the flexibility.",
+                "author": "Marcus Rodriguez",
+                "role": "UI Designer",
+                "company": "Design Studio"
+              },
+              {
+                "quote": "The best investment I made for my freelance career. Clients are impressed every time.",
+                "author": "Emily Watson",
+                "role": "Freelance Designer",
+                "company": "Independent"
+              }
+            ]
+          }
+        ],
+        "styles": {
+          "padding": "100px 24px",
+          "backgroundColor": "neutralLight"
+        }
+      },
+      {
+        "name": "cta",
+        "elements": [
+          { "type": "heading", "text": "Ready to showcase your work?" },
+          {
+            "type": "paragraph",
+            "text": "Join thousands of designers who chose to build instead of code"
+          },
+          {
+            "type": "button",
+            "text": "Start Building Free",
+            "variant": "primary"
+          }
+        ],
+        "styles": {
+          "padding": "120px 24px",
+          "backgroundColor": "backgroundColor",
+          "textAlign": "center"
+        }
+      },
+      {
+        "name": "footer",
+        "elements": [
+          { "type": "logo", "text": "AUREA" },
+          {
+            "type": "linkColumns",
+            "columns": [
+              {
+                "title": "Product",
+                "links": ["Features", "Pricing", "Templates", "Showcase"]
+              },
+              {
+                "title": "Resources",
+                "links": ["Documentation", "Blog", "Support", "Community"]
+              },
+              {
+                "title": "Company",
+                "links": ["About", "Careers", "Contact", "Press Kit"]
+              },
+              {
+                "title": "Legal",
+                "links": ["Privacy", "Terms", "Security", "Cookies"]
+              }
+            ]
+          },
+          {
+            "type": "socialIcons",
+            "icons": ["twitter", "linkedin", "github", "instagram"]
+          },
+          { "type": "copyright", "text": "© 2025 AUREA. All rights reserved." }
+        ],
+        "styles": {
+          "padding": "80px 24px 40px",
+          "backgroundColor": "secondaryColor",
+          "textColor": "#ffffff"
+        }
+      }
+    ],
+    "globalStyles": {
+      "fontFamily": "Monda, system-ui, -apple-system, sans-serif",
+      "headingSizes": {
+        "h1": "clamp(2.5rem, 5vw, 4.5rem)",
+        "h2": "clamp(2rem, 4vw, 3.5rem)",
+        "h3": "clamp(1.5rem, 3vw, 2rem)",
+        "h4": "1.25rem"
+      },
+      "bodyFontSize": "1rem",
+      "lineHeight": 1.6,
+      "spacing": {
+        "xs": "0.5rem",
+        "sm": "1rem",
+        "md": "1.5rem",
+        "lg": "2rem",
+        "xl": "3rem",
+        "2xl": "4rem",
+        "3xl": "6rem"
+      },
+      "borderRadius": {
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px",
+        "xl": "16px"
+      },
+      "shadows": {
+        "sm": "0 1px 2px rgba(0,0,0,0.05)",
+        "md": "0 4px 6px rgba(0,0,0,0.07)",
+        "lg": "0 10px 15px rgba(0,0,0,0.1)",
+        "xl": "0 20px 25px rgba(0,0,0,0.15)"
+      },
+      "colorMap": {
+        "primary": "brand.primaryColor",
+        "secondary": "brand.secondaryColor",
+        "accent": "brand.accentColor",
+        "text": "brand.textColor",
+        "background": "brand.backgroundColor",
+        "neutralLight": "brand.neutralLight",
+        "neutralDark": "brand.neutralDark"
+      }
+    }
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "backgroundColor": "primaryColor",
+        "color": "#ffffff",
+        "padding": "14px 32px",
+        "fontSize": "1rem",
+        "fontWeight": "600",
+        "borderRadius": "md",
+        "hover": {
+          "backgroundColor": "accentColor",
+          "transform": "translateY(-2px)",
+          "shadow": "lg"
+        }
+      },
+      "secondary": {
+        "backgroundColor": "transparent",
+        "color": "primaryColor",
+        "border": "2px solid primaryColor",
+        "padding": "14px 32px",
+        "fontSize": "1rem",
+        "fontWeight": "600",
+        "borderRadius": "md",
+        "hover": {
+          "backgroundColor": "primaryColor",
+          "color": "#ffffff"
+        }
+      }
+    },
+    "card": {
+      "backgroundColor": "#ffffff",
+      "padding": "32px",
+      "borderRadius": "lg",
+      "border": "1px solid #e5e7eb",
+      "hover": {
+        "shadow": "xl",
+        "transform": "translateY(-4px)",
+        "borderColor": "primaryColor"
+      }
+    },
+    "eyebrow": {
+      "fontSize": "0.875rem",
+      "fontWeight": "700",
+      "letterSpacing": "0.1em",
+      "color": "primaryColor",
+      "textTransform": "uppercase"
+    }
+  },
+  "instructions": {
+    "styleReference": "eraser.io",
+    "goals": [
+      "minimal aesthetic with generous whitespace",
+      "clean typographic hierarchy using Monda font",
+      "consistent use of AUREA brand orange (#fb8500)",
+      "responsive design (mobile-first approach)",
+      "smooth animations and micro-interactions",
+      "focus on readability and scannability",
+      "strong visual hierarchy with clear CTAs",
+      "professional, tech-forward appearance"
+    ],
+    "designPrinciples": [
+      "Less is more - remove unnecessary elements",
+      "Breathing room - use whitespace strategically",
+      "Visual rhythm - consistent spacing between sections",
+      "Clear hierarchy - guide user's eye through content",
+      "Purposeful color - orange for actions and emphasis only",
+      "Fast loading - optimize images and animations",
+      "Accessibility - ensure WCAG 2.1 AA compliance"
+    ]
+  }
+}

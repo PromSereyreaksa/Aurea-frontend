@@ -1,281 +1,439 @@
-import React, { useState } from 'react';
-import useAuthStore from '../stores/authStore';
-import { User, Edit3, Settings, Camera, Mail, Calendar, MapPin, X, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import useAuthStore from "../stores/authStore";
+import usePortfolioStore from "../stores/portfolioStore";
+import {
+  User,
+  Upload,
+  Camera,
+  Calendar,
+  FileText,
+  Eye,
+  EyeOff,
+  HardDrive,
+  AlertCircle,
+  ArrowLeft,
+  Save,
+} from "lucide-react";
 
 const ProfilePage = () => {
-  const { user } = useAuthStore();
-  const [showComingSoon, setShowComingSoon] = useState(false);
-
-  const handleCustomizationClick = () => {
-    setShowComingSoon(true);
-  };
-
-  const closeComingSoon = () => {
-    setShowComingSoon(false);
-  };
+  const { user, updateProfile } = useAuthStore();
+  const { portfolios, fetchUserPortfolios, isLoading } = usePortfolioStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    username: user?.username || user?.name || "",
+    email: user?.email || "",
+  });
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(
+    user?.profilePicture || null
+  );
 
   const handleBackClick = () => {
     window.history.back();
   };
 
-  // Get user initials for avatar fallback
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map(part => part.charAt(0).toUpperCase())
-      .join('');
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return 'Not specified';
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Prepare user data to update
+      const updateData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+      };
+
+      // Update profile
+      await updateProfile(updateData);
+
+      // Handle avatar upload if there's a new file
+      if (avatarFile) {
+        // TODO: Implement avatar upload to backend
+        console.log("Avatar file to upload:", avatarFile);
+      }
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      username: user?.username || user?.name || "",
+      email: user?.email || "",
+    });
+    setAvatarPreview(user?.profilePicture || null);
+    setAvatarFile(null);
+    setIsEditing(false);
+  };
+
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    const name =
+      user?.name || `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((part) => part.charAt(0).toUpperCase())
+      .join("")
+      .slice(0, 2);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not available";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "Not available";
+    }
+  };
+
+  const formatStorageSize = (bytes) => {
+    if (!bytes) return "0 MB";
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  };
+
+  // Fetch portfolios on component mount
+  useEffect(() => {
+    fetchUserPortfolios();
+  }, [fetchUserPortfolios]);
+
+  // Update form data when user data changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        username: user.username || user.name || "",
+        email: user.email || "",
+      });
+      setAvatarPreview(user.profilePicture || null);
+    }
+  }, [user]);
+
+  // Calculate portfolio statistics
+  const totalProjects = portfolios?.length || 0;
+  const publishedProjects = portfolios?.filter((p) => p.published)?.length || 0;
+  const unpublishedProjects = totalProjects - publishedProjects;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="app-page min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <button
           onClick={handleBackClick}
-          className="flex items-center gap-2 text-gray-600 hover:text-[#fb8500] transition-colors mb-4 sm:mb-6 group"
+          className="flex items-center gap-2 text-gray-600 hover:text-[#fb8500] transition-colors mb-8 group"
         >
-          <ArrowLeft size={20} className="group-hover:transform group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span className="font-medium">Back</span>
         </button>
 
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="relative px-4 sm:px-6 py-4 sm:py-6">
-            {/* Profile Picture */}
-            <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4">
-              <div className="relative">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-gray-100">
-                  {user?.profilePicture ? (
-                    <img
-                      src={user.profilePicture}
-                      alt="Profile"
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[#fb8500]/10 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-[#fb8500]">
-                        {getInitials(user?.name || user?.firstName + ' ' + user?.lastName)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={handleCustomizationClick}
-                  className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-[#fb8500] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#fb8500]/90 transition-colors"
-                >
-                  <Camera size={14} className="sm:w-4 sm:h-4" />
-                </button>
+        <div className="space-y-6">
+          {/* Avatar Upload Section */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-[#1a1a1a] mb-6">
+              Profile Picture
+            </h2>
+            <div className="flex items-center gap-6">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl font-bold text-[#fb8500]">
+                    {getInitials()}
+                  </span>
+                )}
               </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">
-                  {user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  {user?.email || 'No email provided'}
+              <div className="flex-1">
+                <h3 className="font-medium text-[#1a1a1a] mb-1">
+                  Upload new picture
+                </h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  JPG, PNG or GIF. Max size 2MB.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-2 mt-3">
-                  <button
-                    onClick={handleCustomizationClick}
-                    className="px-4 py-2 bg-[#fb8500] text-white rounded-lg text-sm sm:text-base font-medium hover:bg-[#fb8500]/90 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Edit3 size={16} />
-                    Edit Profile
-                  </button>
-                  <button
-                    onClick={handleCustomizationClick}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Settings size={16} />
-                    Settings
-                  </button>
-                </div>
+                <label
+                  htmlFor="avatar-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm font-medium"
+                >
+                  <Upload size={16} />
+                  Choose File
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Profile Information */}
-        <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Personal Information */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-[#1a1a1a] mb-4 sm:mb-6 flex items-center gap-2">
-                <User size={18} className="sm:w-5 sm:h-5" />
-                Personal Information
+          {/* Account Info Section */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-[#1a1a1a]">
+                Account Information
               </h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <p className="text-[#1a1a1a] font-medium">
-                      {user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Not specified'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <p className="text-[#1a1a1a] font-medium flex items-center gap-2">
-                      <Mail size={16} className="text-gray-500" />
-                      {user?.email || 'Not specified'}
-                    </p>
-                  </div>
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-sm font-medium text-[#fb8500] hover:text-[#ff9500] transition-colors"
+                >
+                  Edit
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCancel}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fb8500] text-white rounded-lg hover:bg-[#ff9500] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Save size={14} />
+                    {isSaving ? "Saving..." : "Save"}
+                  </button>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <p className="text-[#1a1a1a] font-medium">
-                      {user?.phone || 'Not specified'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location
-                    </label>
-                    <p className="text-[#1a1a1a] font-medium flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-500" />
-                      {user?.location || 'Not specified'}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Bio
-                  </label>
-                  <p className="text-[#1a1a1a]">
-                    {user?.bio || 'No bio added yet. Tell us about yourself!'}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Member Since
-                  </label>
-                  <p className="text-[#1a1a1a] font-medium flex items-center gap-2">
-                    <Calendar size={16} className="text-gray-500" />
-                    {formatDate(user?.createdAt)}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
-            
-            {/* Development Disclaimer */}
-            <div className="mt-4 sm:mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
-              <p className="text-xs sm:text-sm text-yellow-800">
-                <strong>Note:</strong> This profile page is still under development. Some of your information may not be displayed correctly or may be missing. We're working to improve this experience.
-              </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  First Name
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fb8500] focus:border-transparent outline-none transition-all"
+                    placeholder="Enter first name"
+                  />
+                ) : (
+                  <p className="text-[#1a1a1a] py-2">
+                    {formData.firstName || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Last Name
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fb8500] focus:border-transparent outline-none transition-all"
+                    placeholder="Enter last name"
+                  />
+                ) : (
+                  <p className="text-[#1a1a1a] py-2">
+                    {formData.lastName || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Username
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fb8500] focus:border-transparent outline-none transition-all"
+                    placeholder="Enter username"
+                  />
+                ) : (
+                  <p className="text-[#1a1a1a] py-2">
+                    {formData.username || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email
+                </label>
+                {isEditing ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fb8500] focus:border-transparent outline-none transition-all"
+                    placeholder="Enter email"
+                  />
+                ) : (
+                  <p className="text-[#1a1a1a] py-2">
+                    {formData.email || "Not set"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Quick Stats & Actions */}
-          <div className="space-y-4 sm:space-y-6">
-            {/* Account Status */}
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-[#1a1a1a] mb-3 sm:mb-4">Account Status</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Account Type</span>
-                  <span className="font-medium text-[#fb8500]">
-                    {user?.accountType || 'Free'}
-                  </span>
+          {/* Account Details Section */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-[#1a1a1a] mb-6">
+              Account Details
+            </h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Account created
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formatDate(user?.createdAt)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Status</span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Active
-                  </span>
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Total number of exports
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {user?.totalExports || 0}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Portfolios</span>
-                  <span className="font-medium text-[#1a1a1a]">
-                    {user?.portfolioCount || 0}
-                  </span>
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                    <EyeOff className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Non-showcased projects
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {unpublishedProjects}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Showcased projects
+                    </p>
+                    <p className="text-sm text-gray-500">{publishedProjects}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
+                    <HardDrive className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Storage used (Projects)
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formatStorageSize(user?.storageUsed)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <button
-                  onClick={handleCustomizationClick}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+          {/* Delete Account Section */}
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900 mb-1">
+                  Delete Account
+                </h3>
+                <p className="text-sm text-red-700 mb-4">
+                  If you wish to delete your account, please contact our support
+                  team. This action cannot be undone and all your data will be
+                  permanently removed.
+                </p>
+                <a
+                  href="mailto:support@aurea.com"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
                 >
-                  Update Profile Picture
-                </button>
-                <button
-                  onClick={handleCustomizationClick}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                >
-                  Change Password
-                </button>
-                <button
-                  onClick={handleCustomizationClick}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                >
-                  Privacy Settings
-                </button>
-                <button
-                  onClick={handleCustomizationClick}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                >
-                  Notification Preferences
-                </button>
+                  Contact Support
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Coming Soon Modal */}
-      {showComingSoon && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-2xl relative">
-            <button
-              onClick={closeComingSoon}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X size={20} className="text-gray-500" />
-            </button>
-            <div className="w-16 h-16 bg-[#fb8500]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Settings size={24} className="text-[#fb8500]" />
-            </div>
-            <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">
-              We're Working On It!
-            </h3>
-            <p className="text-gray-600 mb-6">
-              This feature is currently under development. Stay tuned for updates!
-            </p>
-            <button
-              onClick={closeComingSoon}
-              className="px-6 py-2 bg-[#fb8500] text-white rounded-lg font-medium hover:bg-[#fb8500]/90 transition-colors"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

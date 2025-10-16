@@ -107,7 +107,7 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
+    <div className="app-page min-h-screen bg-white text-black font-sans">
       <Navbar />
 
       {/* Hero Section */}
