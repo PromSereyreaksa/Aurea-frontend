@@ -1,3 +1,5 @@
+import { Zap } from "lucide-react";
+
 export default function CallToAction() {
   return (
     <section className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-12 lg:px-24 py-16 sm:py-20 md:py-24 bg-gradient-to-br from-[#1a1a1a] to-neutral-900 text-white">
@@ -78,7 +80,7 @@ export default function CallToAction() {
               <div className="absolute inset-0 border-2 sm:border-4 border-[#fb8500] rounded-lg"></div>
               <div className="absolute inset-6 sm:inset-8 border border-[#fb8500]/50 sm:border-2 rounded"></div>
               <div className="absolute inset-12 sm:inset-16 border border-[#fb8500]/25 flex items-center justify-center rounded">
-                <div className="text-4xl sm:text-5xl md:text-6xl">⚡</div>
+                <Zap className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-[#fb8500]" />
               </div>
             </div>
           </div>

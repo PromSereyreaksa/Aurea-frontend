@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Type, Palette, Eye, RotateCcw } from "lucide-react";
+import { Upload, Type, Palette, Eye, RotateCcw, Lightbulb } from "lucide-react";
 
 export default function Playground() {
   const [previewData, setPreviewData] = useState({
@@ -176,10 +176,13 @@ export default function Playground() {
 
             {/* Info */}
             <div className="bg-neutral-50 p-3 sm:p-4 rounded border-l-4 border-[#fb8500]">
-              <p className="text-xs sm:text-sm text-neutral-600">
-                <span className="font-bold text-[#fb8500]">💡 Tip:</span> This
-                is just a tiny preview. The actual builder has 50+ customization
-                options!
+              <p className="text-xs sm:text-sm text-neutral-600 flex items-start gap-2">
+                <Lightbulb className="w-4 h-4 text-[#fb8500] flex-shrink-0 mt-0.5" />
+                <span>
+                  <span className="font-bold text-[#fb8500]">Tip:</span> This is
+                  just a tiny preview. The actual builder has 50+ customization
+                  options!
+                </span>
               </p>
             </div>
           </div>
