@@ -15,6 +15,16 @@ export const prefersReducedMotion = () => {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 };
 
+// Detect mobile device
+export const isMobileDevice = () => {
+  if (typeof window === "undefined") return false;
+  return (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) || window.innerWidth < 768
+  );
+};
+
 // Detect weak device based on hardware concurrency and connection
 export const isWeakDevice = () => {
   if (typeof window === "undefined") return false;
@@ -28,8 +38,8 @@ export const isWeakDevice = () => {
     connection?.effectiveType === "2g" ||
     connection?.effectiveType === "slow-2g";
 
-  // Consider weak if less than 4 cores or slow connection
-  return cores < 4 || slowConnection;
+  // Consider weak if mobile, less than 4 cores, or slow connection
+  return isMobileDevice() || cores < 4 || slowConnection;
 };
 
 // Get appropriate animation configuration based on device capabilities
@@ -49,15 +59,15 @@ export const getAnimationConfig = () => {
 
   if (weak) {
     return {
-      duration: 0.3,
-      staggerDelay: 0.05,
+      duration: 0.2,
+      staggerDelay: 0,
       disabled: false,
     };
   }
 
   return {
-    duration: 0.6,
-    staggerDelay: 0.1,
+    duration: 0.4,
+    staggerDelay: 0.05,
     disabled: false,
   };
 };
@@ -70,99 +80,128 @@ export const fadeIn = config.disabled
   : {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
+      transition: { duration: config.duration },
     };
 
-export const fadeInUp = config.disabled
-  ? {}
-  : {
-      initial: { opacity: 0, y: 20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-    };
+export const fadeInUp =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: { opacity: 0, y: 15 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: config.duration },
+      };
 
-export const fadeInDown = config.disabled
-  ? {}
-  : {
-      initial: { opacity: 0, y: -20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-    };
+export const fadeInDown =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: { opacity: 0, y: -15 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: config.duration },
+      };
 
 // Slide animations (transform only - hardware accelerated)
-export const slideInLeft = config.disabled
-  ? {}
-  : {
-      initial: { opacity: 0, x: -30 },
-      animate: { opacity: 1, x: 0 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-    };
+export const slideInLeft =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: { opacity: 0, x: -20 },
+        animate: { opacity: 1, x: 0 },
+        transition: { duration: config.duration },
+      };
 
-export const slideInRight = config.disabled
-  ? {}
-  : {
-      initial: { opacity: 0, x: 30 },
-      animate: { opacity: 1, x: 0 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-    };
+export const slideInRight =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: { opacity: 0, x: 20 },
+        animate: { opacity: 1, x: 0 },
+        transition: { duration: config.duration },
+      };
 
 // Scale animations (transform only)
-export const scaleIn = config.disabled
-  ? {}
-  : {
-      initial: { opacity: 0, scale: 0.95 },
-      animate: { opacity: 1, scale: 1 },
-      transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-    };
+export const scaleIn =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: { opacity: 0, scale: 0.98 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { duration: config.duration },
+      };
 
-// Hover animations - only on non-weak devices
+// Hover animations - disabled on mobile/weak devices
 export const hoverScale =
   config.disabled || isWeakDevice()
     ? {}
     : {
-        whileHover: { scale: 1.05 },
-        whileTap: { scale: 0.95 },
-        transition: { duration: 0.2 },
+        whileHover: { scale: 1.02 },
+        transition: { duration: 0.15 },
       };
 
 export const hoverLift =
   config.disabled || isWeakDevice()
     ? {}
     : {
-        whileHover: { y: -5 },
-        transition: { duration: 0.2 },
+        whileHover: { y: -3 },
+        transition: { duration: 0.15 },
       };
 
-// Stagger container variants
-export const staggerContainer = config.disabled
-  ? {}
-  : {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: {
-          staggerChildren: config.staggerDelay,
-          delayChildren: 0.1,
+// Stagger container variants - disabled on mobile
+export const staggerContainer =
+  config.disabled || isWeakDevice()
+    ? {}
+    : {
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: {
+            staggerChildren: config.staggerDelay,
+          },
         },
-      },
-    };
+      };
 
-export const staggerItem = config.disabled
-  ? {}
-  : {
-      hidden: { opacity: 0, y: 20 },
-      show: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: config.duration, ease: [0.25, 0.1, 0.25, 1] },
-      },
-    };
+export const staggerItem =
+  config.disabled || isWeakDevice()
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        hidden: { opacity: 0, y: 10 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: config.duration },
+        },
+      };
 
 // Viewport settings for scroll animations
 export const viewportConfig = {
   once: true, // Animate only once when entering viewport
-  margin: "-50px", // Start animation slightly before element is visible
-  amount: 0.3, // Trigger when 30% of element is visible
+  margin: "0px", // Start animation when element is visible
+  amount: 0.2, // Trigger when 20% of element is visible
 };
 
 // Floating animations (only for powerful devices)

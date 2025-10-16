@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
 import aureaLogo from "../../assets/AUREA - Logo.png";
@@ -21,8 +20,8 @@ const ModernNavbar = () => {
     }
   };
 
-  // Determine nav items based on current page
-  const getNavItems = () => {
+  // Determine nav items based on current page - memoized to prevent recalculation
+  const navItems = useMemo(() => {
     if (location.pathname === "/") {
       return [
         { label: "Home", action: () => scrollToSection("home") },
@@ -52,19 +51,17 @@ const ModernNavbar = () => {
         { label: "Dashboard", link: "/dashboard" },
       ];
     }
-  };
+  }, [location.pathname]);
 
-  const navItems = getNavItems();
-
-  // Get user initials
-  const getUserInitials = () => {
+  // Get user initials - memoized
+  const userInitials = useMemo(() => {
     if (!user?.name) return "U";
     const names = user.name.split(" ");
     if (names.length === 1) return names[0].charAt(0).toUpperCase();
     return (
       names[0].charAt(0) + names[names.length - 1].charAt(0)
     ).toUpperCase();
-  };
+  }, [user?.name]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -81,74 +78,49 @@ const ModernNavbar = () => {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 py-3 px-4 sm:py-4 sm:px-6"
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 py-3 px-4 sm:py-4 sm:px-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <div className="transition-transform hover:scale-105">
           <Link
             to="/"
             className="flex items-center space-x-2 sm:space-x-3 group"
           >
-            <motion.img
+            <img
               src={aureaLogo}
               alt="AUREA Logo"
-              className="h-6 sm:h-8 w-auto transition-all duration-300 group-hover:brightness-110"
-              whileHover={{
-                rotate: [0, -5, 5, 0],
-                transition: { duration: 0.5 },
-              }}
+              className="h-6 sm:h-8 w-auto transition-all duration-200 group-hover:brightness-110"
             />
-            <span className="text-lg sm:text-2xl font-bold tracking-wide uppercase text-[#1a1a1a] group-hover:text-[#fb8500] transition-colors duration-300">
+            <span className="text-lg sm:text-2xl font-bold tracking-wide uppercase text-[#1a1a1a] group-hover:text-[#fb8500] transition-colors duration-200">
               AUREA
             </span>
           </Link>
-        </motion.div>
+        </div>
 
         <div className="hidden lg:flex items-center space-x-8">
           {navItems.map((item, index) => {
             if (item.link) {
               return (
-                <motion.div
-                  key={index}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <div key={index} className="relative group">
                   <Link
                     to={item.link}
-                    className="flex items-center gap-1.5 text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
+                    className="flex items-center gap-1.5 text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors duration-200"
                   >
                     {item.label}
                     <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-                    <motion.span
-                      className="absolute bottom-0 left-0 h-0.5 bg-[#fb8500]"
-                      initial={{ width: 0 }}
-                      whileHover={{ width: "100%" }}
-                      transition={{ duration: 0.3 }}
-                    ></motion.span>
                   </Link>
-                </motion.div>
+                  <span className="absolute bottom-0 left-0 h-0.5 bg-[#fb8500] w-0 group-hover:w-full transition-all duration-200"></span>
+                </div>
               );
             } else {
               return (
-                <motion.button
+                <button
                   key={index}
                   onClick={item.action}
-                  className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors duration-200 relative group"
                 >
                   {item.label}
-                  <motion.span
-                    className="absolute bottom-0 left-0 h-0.5 bg-[#fb8500]"
-                    initial={{ width: 0 }}
-                    whileHover={{ width: "100%" }}
-                    transition={{ duration: 0.3 }}
-                  ></motion.span>
-                </motion.button>
+                  <span className="absolute bottom-0 left-0 h-0.5 bg-[#fb8500] w-0 group-hover:w-full transition-all duration-200"></span>
+                </button>
               );
             }
           })}
@@ -159,24 +131,16 @@ const ModernNavbar = () => {
             <>
               {/* User Dropdown */}
               <div className="relative" ref={dropdownRef}>
-                <motion.button
+                <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[#fb8500] to-[#ff9500] text-white rounded-full font-semibold text-sm sm:text-base hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:ring-offset-2"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[#fb8500] to-[#ff9500] text-white rounded-full font-semibold text-sm sm:text-base hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:ring-offset-2"
                 >
-                  {getUserInitials()}
-                </motion.button>
+                  {userInitials}
+                </button>
 
                 {/* Dropdown Menu */}
                 {showDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
-                  >
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-fade-in-fast">
                     {/* User Info Header */}
                     <div className="px-4 py-3 bg-gradient-to-r from-[#fb8500]/10 to-[#ff9500]/10 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -188,17 +152,14 @@ const ModernNavbar = () => {
                     </div>
 
                     <div className="py-2">
-                      <motion.div
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
-                      >
+                      <div>
                         <Link
                           to="/profile"
                           onClick={() => setShowDropdown(false)}
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors group"
+                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors duration-200 group"
                         >
                           <svg
-                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500]"
+                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500] transition-colors"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -212,18 +173,15 @@ const ModernNavbar = () => {
                           </svg>
                           Profile
                         </Link>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
-                      >
+                      </div>
+                      <div>
                         <Link
                           to="/dashboard"
                           onClick={() => setShowDropdown(false)}
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors group"
+                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors duration-200 group"
                         >
                           <svg
-                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500]"
+                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500] transition-colors"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -237,21 +195,19 @@ const ModernNavbar = () => {
                           </svg>
                           Dashboard
                         </Link>
-                      </motion.div>
+                      </div>
                     </div>
 
                     <div className="border-t border-gray-100">
-                      <motion.button
+                      <button
                         onClick={() => {
                           logout();
                           setShowDropdown(false);
                         }}
-                        className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group"
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
+                        className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 group"
                       >
                         <svg
-                          className="w-4 h-4 mr-3 text-red-400 group-hover:text-red-500"
+                          className="w-4 h-4 mr-3 text-red-400 group-hover:text-red-500 transition-colors"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -264,50 +220,36 @@ const ModernNavbar = () => {
                           />
                         </svg>
                         Logout
-                      </motion.button>
+                      </button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             </>
           ) : (
             <>
-              {/* Public Navigation - Hide login text on mobile */}
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="hidden sm:block"
-              >
+              {/* Public Navigation */}
+              <div className="hidden sm:block">
                 <Link
                   to="/login"
                   className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-all duration-200 px-3 sm:px-4 py-2 rounded-lg hover:bg-[#fb8500]/10 text-sm sm:text-base"
                 >
                   Log In
                 </Link>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              </div>
+              <div>
                 <Link
                   to="/signup"
-                  className="bg-gradient-to-r from-[#fb8500] to-[#ff9500] text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg font-medium tracking-wide uppercase transition-all hover:shadow-lg relative overflow-hidden group text-xs sm:text-base"
+                  className="bg-gradient-to-r from-[#fb8500] to-[#ff9500] text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg font-medium tracking-wide uppercase transition-all duration-200 hover:shadow-lg hover:scale-105 text-xs sm:text-base"
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-[#1a1a1a]"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ originX: 0 }}
-                  />
-                  <span className="relative z-10">Sign Up</span>
+                  Sign Up
                 </Link>
-              </motion.div>
+              </div>
             </>
           )}
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 };
 

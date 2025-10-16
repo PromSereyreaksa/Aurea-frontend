@@ -186,6 +186,40 @@
   .rounded-3xl {
     border-radius: 1.5rem !important;
   }
+
+  /* Disable expensive animations on mobile */
+  * {
+    animation-duration: 0.2s !important;
+  }
+
+  /* Simplify backdrop blur on mobile */
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Reduce shadow complexity */
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Disable transform animations */
+  .will-change-transform {
+    will-change: auto !important;
+  }
+
+  /* Force hardware acceleration on mobile */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
 }
 
 /* Intersection observer optimization */
