@@ -1,5 +1,21 @@
-@import "./assets/poppins.css";
 @import "tailwindcss";
+
+/* Apply Monda font only to app pages - NOT templates */
+body:not(.template-page) {
+  font-family: "Monda", sans-serif;
+}
+
+/* Specifically target app pages */
+.app-page,
+.app-page * {
+  font-family: "Monda", sans-serif;
+}
+
+/* Ensure templates can override the font */
+.template-page,
+.template-page * {
+  font-family: inherit !important;
+}
 
 /* Custom animations for enhanced visual effects */
 @keyframes blob {
@@ -105,13 +121,13 @@
   .template-decoration {
     display: none !important;
   }
-  
+
   /* Ensure template sections have proper padding on mobile */
   section {
     padding-left: clamp(16px, 5vw, 24px) !important;
     padding-right: clamp(16px, 5vw, 24px) !important;
   }
-  
+
   /* Adjust minHeight for mobile */
   section[style*="minHeight: 100vh"] {
     min-height: auto !important;

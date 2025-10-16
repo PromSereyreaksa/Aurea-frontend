@@ -6,9 +6,10 @@ import {
   Linkedin,
   TrendingUp,
   DollarSign,
+  Sparkles,
 } from "lucide-react";
-import Navbar from "../components/Shared/Navbar";
-import Footer from "../components/Shared/Footer";
+import ModernNavbar from "../components/LandingPage/ModernNavbar";
+import ModernFooter from "../components/LandingPage/ModernFooter";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,13 +38,13 @@ const values = [
     title: "Prioritize designer growth",
     description:
       "We are committed to helping designers develop their skills, expand their portfolios, and advance their creative careers.",
-    icon: <TrendingUp size={32} />,
+    icon: <TrendingUp className="w-8 h-8" />,
   },
   {
     title: "Support fair pricing for designers",
     description:
       "We believe designers deserve to be compensated fairly for their creative work and expertise in the market.",
-    icon: <DollarSign size={32} />,
+    icon: <DollarSign className="w-8 h-8" />,
   },
 ];
 
@@ -94,8 +95,20 @@ const teamMembers = [
     ],
   },
   {
+    name: "Kosal Sophanith",
+    role: "Frontend Developer",
+    image: "/Sophanith.jpg",
+    description:
+      "Frontend engineer with an eye for detail and commitment to excellent UX.",
+    contacts: [
+      { platform: "email", url: "mailto:sophanithkosal9@gmail.com" },
+      { platform: "telegram", url: "https://t.me/nithkidd" },
+      { platform: "linkedin", url: "" },
+    ],
+  },
+  {
     name: "Huy Visa",
-    role: "Backend Developer",
+    role: "Business Analyst",
     image: "/Visa.jpg",
     description:
       "Focused on scalable backend systems and reliable data operations.",
@@ -110,7 +123,7 @@ const teamMembers = [
   },
   {
     name: "Chheang Sovanpanha",
-    role: "Backend Developer",
+    role: "Business Analyst",
     image: "/Sovanpanha.jpg",
     description:
       "Builds robust server-side logic and contributes to seamless data integration.",
@@ -121,18 +134,6 @@ const teamMembers = [
         platform: "linkedin",
         url: "https://www.linkedin.com/in/sovanpanha-chheang-17473b32a/",
       },
-    ],
-  },
-  {
-    name: "Kosal Sophanith",
-    role: "Frontend Developer",
-    image: "/Sophanith.jpg",
-    description:
-      "Frontend engineer with an eye for detail and commitment to excellent UX.",
-    contacts: [
-      { platform: "email", url: "mailto:sophanithkosal9@gmail.com" },
-      { platform: "telegram", url: "https://t.me/nithkidd" },
-      { platform: "linkedin", url: "" },
     ],
   },
 ];
@@ -156,57 +157,90 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      <Navbar />
+    <div className="app-page min-h-screen bg-white text-black">
+      <ModernNavbar />
 
-      {/* Hero Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-12">
-        <div className="text-center space-y-8 max-w-4xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="text-6xl md:text-8xl font-bold tracking-wider uppercase text-black leading-none"
-          >
-            About AUREA
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-            className="text-xl md:text-2xl font-medium text-black max-w-lg mx-auto"
-          >
-            Helping designers showcase their brilliance.
-          </motion.p>
+      {/* Hero Section - Modern Style */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-orange-50/20 to-white pointer-events-none" />
+
+        {/* Floating elements */}
+        <motion.div
+          className="absolute top-20 left-10 w-64 h-64 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          {/* Eyebrow */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
-            className="pt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-8"
           >
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We are AUREA, an all-in-one launchpad for emerging designers. Our
-              mission is to help designers confidently build their identity,
-              present their work professionally, and succeed in the global
-              creative market.
-            </p>
+            <Sparkles className="w-4 h-4 text-[#fb8500]" />
+            <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
+              About AUREA
+            </span>
           </motion.div>
+
+          {/* Main Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#1a1a1a] mb-6 leading-tight"
+          >
+            Empowering designers
+            <br />
+            <span className="text-[#fb8500]">to showcase brilliance</span>
+          </motion.h1>
+
+          {/* Subtext */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+          >
+            We are AUREA, an all-in-one launchpad for emerging designers. Our
+            mission is to help designers confidently build their identity,
+            present their work professionally, and succeed in the global
+            creative market.
+          </motion.p>
         </div>
       </section>
 
-      {/* Story Section */}
-      <section id="story" className="py-24 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
-          >
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 tracking-wide">
-                Our Story
+      {/* Story Section - Modern Style */}
+      <section id="story" className="py-24 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              {/* Eyebrow */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6">
+                <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
+                  Our Story
+                </span>
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-8">
+                Building tools that
+                <br />
+                <span className="text-[#fb8500]">designers deserve</span>
               </h2>
               <div className="space-y-6 text-gray-600 text-lg leading-relaxed">
                 <p>
@@ -228,59 +262,72 @@ const AboutPage = () => {
                   successful creative businesses.
                 </p>
               </div>
-            </div>
-            <div className="relative">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="bg-black h-96 w-full flex items-center justify-center"
-              >
-                <span className="text-white text-6xl font-bold tracking-wider">
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-[#fb8500] to-[#ff9500] h-96 w-full flex items-center justify-center rounded-2xl shadow-xl">
+                <span className="text-white text-6xl md:text-7xl font-bold tracking-wider">
                   AUREA
                 </span>
-              </motion.div>
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section id="values" className="py-24 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
+      {/* Values Section - Modern Style */}
+      <section
+        id="values"
+        className="py-24 px-6 bg-gradient-to-b from-white to-orange-50/30"
+      >
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
-              Our Values
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The principles that guide everything we build
-            </p>
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6"
+            >
+              <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
+                Our Values
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
+            >
+              Principles that
+              <br />
+              <span className="text-[#fb8500]">guide everything we build</span>
+            </motion.h2>
           </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {values.map((value, index) => (
               <motion.div
                 key={index}
-                variants={itemVariants}
-                className="text-center group cursor-pointer"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-[#fb8500] hover:shadow-xl transition-all duration-300"
               >
-                <div className="relative mb-8">
-                  <motion.div
-                    whileHover={{
-                      scale: 1.1,
-                      transition: { duration: 0.3 },
-                    }}
-                    className="w-16 h-16 bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200 transition-colors duration-300 rounded-lg"
-                  >
-                    {value.icon}
-                  </motion.div>
+                <div className="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-[#fb8500]">
+                  {value.icon}
                 </div>
-                <h3 className="text-2xl font-bold text-black mb-4 tracking-wide group-hover:text-orange-600 transition-colors">
+                <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
                   {value.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -288,22 +335,48 @@ const AboutPage = () => {
                 </p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Team Section */}
-      <section id="team" className="py-24 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 tracking-wide">
-              Meet Our Team
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+      {/* Team Section - Tree Structure */}
+      <section id="team" className="py-24 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6"
+            >
+              <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
+                Our Team
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
+            >
+              Meet our team
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-xl text-gray-600 max-w-2xl mx-auto"
+            >
               The passionate people behind AUREA
-            </p>
+            </motion.p>
           </div>
 
+          {/* Team Grid - Original Design */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -315,28 +388,21 @@ const AboutPage = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#fb8500] hover:shadow-xl transition-all duration-300"
               >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                  className="mb-6"
-                >
+                <div className="mb-6">
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-32 h-32 object-cover mx-auto rounded-full mb-4 transition-all duration-300"
+                    className="w-32 h-32 object-cover mx-auto rounded-full border-2 border-gray-200"
                   />
-                </motion.div>
+                </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-black mb-2 tracking-wide">
+                  <h3 className="text-xl font-bold text-[#1a1a1a] mb-2">
                     {member.name}
                   </h3>
-                  <p className="text-lg font-medium text-[#fb8500] mb-3">
+                  <p className="text-lg font-semibold text-[#fb8500] mb-4">
                     {member.role}
-                  </p>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    {member.description}
                   </p>
 
                   {/* Contact Links */}
@@ -349,7 +415,7 @@ const AboutPage = () => {
                             href={contact.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 bg-gray-100 hover:bg-[#fb8500] text-gray-600 hover:text-white rounded-full transition-all duration-300 transform hover:scale-110"
+                            className="p-2 bg-gray-100 hover:bg-[#fb8500] text-gray-600 hover:text-white rounded-full transition-all duration-300"
                           >
                             {getContactIcon(contact.platform)}
                           </a>
@@ -363,37 +429,57 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section id="mission" className="py-24 px-6 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Mission Section - Modern Style */}
+      <section
+        id="mission"
+        className="py-24 px-6 bg-gradient-to-br from-[#1a1a1a] via-[#1a1a1a] to-[#2a2a2a] text-white relative overflow-hidden"
+      >
+        {/* Decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-[#fb8500] rounded-full filter blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#ff9500] rounded-full filter blur-3xl" />
+        </div>
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-wide">
-              Our Mission
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full mb-8">
+              <Sparkles className="w-4 h-4 text-[#fb8500]" />
+              <span className="text-sm font-semibold text-white tracking-wide uppercase">
+                Our Mission
+              </span>
+            </div>
+
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight">
+              Empowering designers
+              <br />
+              <span className="text-[#fb8500]">
+                to build successful businesses
+              </span>
             </h2>
-            <p className="text-xl md:text-2xl leading-relaxed mb-8">
-              To empower every designer with tools that amplify their
+            <p className="text-xl md:text-2xl leading-relaxed mb-12 text-gray-300 max-w-3xl mx-auto">
+              To provide every designer with tools that amplify their
               creativity, streamline their workflow, and help them build
               successful creative businesses.
             </p>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-              className="inline-block border-2 border-white px-8 py-4"
+            <motion.a
+              href="/signup"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              className="inline-block px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-all duration-300 shadow-lg"
             >
-              <span className="text-lg font-medium tracking-wide">
-                JOIN US ON THIS JOURNEY
-              </span>
-            </motion.div>
+              JOIN US ON THIS JOURNEY
+            </motion.a>
           </motion.div>
         </div>
       </section>
 
-      <Footer />
+      <ModernFooter />
     </div>
   );
 };

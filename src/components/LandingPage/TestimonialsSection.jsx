@@ -1,93 +1,96 @@
-import React from "react";
 import { motion } from "framer-motion";
+import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "UI/UX Designer",
-    company: "Spotify",
-    quote: "AUREA transformed how I present my work to clients. The pitch templates are incredibly professional and saved me hours.",
-    avatar: "SC"
+    quote:
+      "AUREA transformed how I present my work. What used to take weeks now takes minutes. It's a game-changer for designers.",
+    author: "Sarah Chen",
+    role: "Product Designer",
+    company: "Figma",
   },
   {
-    name: "Marcus Rodriguez",
-    role: "Freelance Designer",
-    company: "Independent",
-    quote: "The pricing calculator helped me value my work properly. I've increased my rates by 40% and clients respect the transparency.",
-    avatar: "MR"
-  },
-  {
-    name: "Emily Watson",
-    role: "Creative Director",
+    quote:
+      "Finally, a portfolio builder that gets it. No templates, no restrictions. Just pure creative freedom with zero code.",
+    author: "Marcus Rodriguez",
+    role: "UX/UI Designer",
     company: "Adobe",
-    quote: "Building portfolios used to take weeks. With AUREA, I can create stunning showcases in minutes. Game changer.",
-    avatar: "EW"
-  }
+  },
+  {
+    quote:
+      "I've tried every portfolio platform out there. AUREA is the only one that feels like it was made by designers, for designers.",
+    author: "Emily Watson",
+    role: "Visual Designer",
+    company: "Dribbble",
+  },
 ];
 
-const containerVariants = {};
-
-const itemVariants = {};
-
-const TestimonialsSection = () => (
-  <section className="py-24 px-6 bg-white">
-    <div className="max-w-6xl mx-auto">
-      <motion.div 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-wide">
-          Loved by designers
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Join thousands of creatives who've elevated their practice with AUREA
-        </p>
-      </motion.div>
-      
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8"
-      >
-        {testimonials.map((testimonial, index) => (
-          <div 
-            key={index} 
-            className="border border-gray-200 p-8 bg-gray-50 hover:bg-white hover:shadow-lg transition-all duration-300 cursor-pointer group"
+export default function TestimonialsSection() {
+  return (
+    <section id="testimonials" className="py-24 px-6 bg-white">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6"
           >
-            <motion.div 
-              className="mb-6"
-              whileHover={{ scale: 1.02 }}
+            <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
+              Testimonials
+            </span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
+          >
+            Loved by designers
+            <br />
+            <span className="text-[#fb8500]">worldwide</span>
+          </motion.h2>
+        </div>
+
+        {/* Testimonials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="bg-gradient-to-br from-orange-50 to-white border border-gray-200 rounded-2xl p-8 hover:border-[#fb8500] hover:shadow-xl transition-all duration-300"
             >
-              <p className="text-lg text-[#1a1a1a] leading-relaxed italic group-hover:text-gray-700 transition-colors">
+              {/* Quote icon */}
+              <div className="w-12 h-12 bg-[#fb8500] rounded-lg flex items-center justify-center mb-6">
+                <Quote className="w-6 h-6 text-white" />
+              </div>
+
+              {/* Quote text */}
+              <p className="text-gray-700 leading-relaxed mb-6 text-lg">
                 "{testimonial.quote}"
               </p>
-            </motion.div>
-            <div className="flex items-center">
-              <motion.div 
-                whileHover={{ 
-                  scale: 1.1,
-                  rotate: 5,
-                  transition: { duration: 0.3 }
-                }}
-                className="w-12 h-12 bg-[#fb8500] text-white flex items-center justify-center font-bold mr-4 group-hover:bg-[#fb8500]/90 transition-colors"
-              >
-                {testimonial.avatar}
-              </motion.div>
-              <div>
-                <h4 className="font-bold text-[#1a1a1a] group-hover:text-gray-700 transition-colors">{testimonial.name}</h4>
-                <p className="text-gray-600 text-sm">{testimonial.role} at {testimonial.company}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
 
-export default TestimonialsSection;
+              {/* Author info */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="font-bold text-[#1a1a1a] text-lg">
+                  {testimonial.author}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {testimonial.role} at {testimonial.company}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
