@@ -4,6 +4,7 @@ import useAuthStore from "../stores/authStore";
 import usePortfolioStore from "../stores/portfolioStore";
 import Navbar from "../components/Shared/Navbar";
 import DashboardSidebar from "../components/Dashboard/DashboardSidebar";
+import DashboardBottomBar from "../components/Dashboard/DashboardBottomBar";
 import OverviewSection from "../components/Dashboard/OverviewSection";
 import PortfoliosSection from "../components/Dashboard/PortfoliosSection";
 import AnalyticsSection from "../components/Dashboard/AnalyticsSection";
@@ -690,50 +691,28 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="app-page min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-      {/* Mobile Hamburger Button - Only show when sidebar is closed */}
-      {!isSidebarOpen && (
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="fixed top-4 right-4 z-50 lg:hidden bg-[#fb8500] text-white p-2.5 rounded-lg shadow-lg hover:bg-[#ff9500] transition-all duration-300"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      )}
+    <div className="app-page min-h-screen bg-white overflow-x-hidden pb-24 md:pb-20 lg:pb-0">
+      {/* Top Logo Bar - Mobile/Tablet only */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 shadow-sm z-40 flex justify-center items-center gap-3 py-4">
+        <img
+          src="/AUREA - Logo.jpg"
+          alt="AUREA Logo"
+          className="h-12 w-auto object-contain"
+        />
+        <span className="text-2xl font-black text-[#fb8500] tracking-tight">
+          AUREA
+        </span>
+      </div>
 
-      {/* Mobile Overlay */}
-      {isSidebarOpen && (
+      <div className="flex pt-20 lg:pt-0">
+        {/* Desktop Sidebar ONLY - Hidden on mobile/tablet where bottom bar is used */}
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div
-          className={`fixed left-0 top-0 h-screen z-40 transition-transform duration-300 lg:translate-x-0 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className="hidden lg:block fixed left-0 top-0 h-screen w-72"
+          style={{ zIndex: 50, touchAction: "none" }}
         >
           <DashboardSidebar
             activeSection={activeSection}
-            setActiveSection={(section) => {
-              setActiveSection(section);
-              setIsSidebarOpen(false); // Close sidebar on mobile after selection
-            }}
+            setActiveSection={setActiveSection}
             user={user}
             onClose={() => setIsSidebarOpen(false)}
           />
@@ -741,11 +720,18 @@ const DashboardPage = () => {
 
         {/* Main Content */}
         <div className="flex-1 w-full lg:ml-72">
-          <div className="p-4 pt-20 lg:pt-8 lg:p-8 xl:p-10">
+          <div className="p-4 pt-8 lg:pt-8 lg:p-8 xl:p-10">
             <div className="max-w-7xl mx-auto">{renderActiveSection()}</div>
           </div>
         </div>
       </div>
+
+      {/* Bottom Navigation Bar - Mobile and Tablet only (hidden on desktop) */}
+      <DashboardBottomBar
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        user={user}
+      />
     </div>
   );
 };

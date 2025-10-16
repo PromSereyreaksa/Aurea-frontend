@@ -163,27 +163,31 @@ const Navbar = () => {
     location.pathname === "/events"
   ) {
     return (
-      <div className="fixed top-0 left-0 w-full h-screen pointer-events-none z-50">
-        <StaggeredMenu
-          position="right"
-          colors={["#fb8500", "#e07400"]}
-          items={getMenuItems()}
-          socialItems={socialItems}
-          displaySocials={true}
-          displayItemNumbering={true}
-          logoUrl={aureaLogo}
-          menuButtonColor="#1a1a1a"
-          openMenuButtonColor="#1a1a1a"
-          changeMenuColorOnOpen={false}
-          accentColor="#fb8500"
-          className="staggered-menu-container pointer-events-auto"
-          user={user}
-          isAuthenticated={isAuthenticated}
-          onLogout={() => {
-            logout();
-            navigate("/");
-          }}
-        />
+      <div
+        className="fixed top-0 left-0 w-full h-screen z-50"
+        style={{ pointerEvents: "none" }}
+      >
+        <div style={{ pointerEvents: "auto" }}>
+          <StaggeredMenu
+            position="right"
+            colors={["#fb8500", "#e07400"]}
+            items={getMenuItems()}
+            socialItems={socialItems}
+            displaySocials={true}
+            displayItemNumbering={true}
+            logoUrl={aureaLogo}
+            menuButtonColor="#fb8500"
+            openMenuButtonColor="#fb8500"
+            changeMenuColorOnOpen={false}
+            accentColor="#fb8500"
+            user={user}
+            isAuthenticated={isAuthenticated}
+            onLogout={() => {
+              logout();
+              navigate("/");
+            }}
+          />
+        </div>
       </div>
     );
   }

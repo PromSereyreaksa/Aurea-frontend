@@ -65,14 +65,14 @@ export default function FinalCTA() {
             Get Started Free
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </motion.a>
-          <motion.a
+          {/* <motion.a
             href="/contact"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-lg border-2 border-white/20 hover:bg-white/20 transition-all duration-300 backdrop-blur-sm"
           >
             Talk to Sales
-          </motion.a>
+          </motion.a> */}
         </motion.div>
 
         {/* Social proof */}
