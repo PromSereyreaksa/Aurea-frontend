@@ -2,7 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) => {
+const DashboardSidebar = ({
+  activeSection,
+  setActiveSection,
+  user,
+  onClose,
+}) => {
   const sidebarItems = [
     {
       id: "overview",
@@ -155,8 +160,18 @@ const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) =>
           onClick={onClose}
           className="absolute top-4 right-4 lg:hidden bg-white/20 text-white p-2 rounded-lg hover:bg-white/30 transition-all duration-300 z-10"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       )}
@@ -180,16 +195,6 @@ const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) =>
         </Link>
       </div>
 
-      {/* Sidebar Header */}
-      <div className="p-4 lg:p-6 border-b border-white/20">
-        <h2 className="text-lg lg:text-xl font-bold text-white">
-          Dashboard
-        </h2>
-        <p className="text-xs lg:text-sm text-white/80 mt-1">
-          Manage your workspace
-        </p>
-      </div>
-
       {/* Navigation */}
       <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 space-y-2 overflow-y-auto">
         {sidebarItems.map((item) => {
@@ -210,18 +215,23 @@ const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) =>
                   </span>
                 </div>
                 {/* Diagonal Arrow Indicator */}
-                <svg 
-                  className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors duration-300 flex-shrink-0 ml-2" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors duration-300 flex-shrink-0 ml-2"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
               </Link>
             );
           }
-          
+
           // Otherwise, render as button for section navigation
           return (
             <button
@@ -233,11 +243,13 @@ const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) =>
                   : "text-white/90 hover:bg-white/10"
               }`}
             >
-              <div className={`w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 ${
-                activeSection === item.id
-                  ? "bg-[#fb8500] text-white"
-                  : "bg-white/10"
-              }`}>
+              <div
+                className={`w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 ${
+                  activeSection === item.id
+                    ? "bg-[#fb8500] text-white"
+                    : "bg-white/10"
+                }`}
+              >
                 {React.cloneElement(item.icon, { className: "w-6 h-6" })}
               </div>
               <span className="font-semibold text-sm truncate">
@@ -256,24 +268,27 @@ const DashboardSidebar = ({ activeSection, setActiveSection, user, onClose }) =>
         >
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md">
             <span className="text-[#fb8500] text-lg font-black">
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate">
-              {user?.name || 'User'}
+              {user?.name || "User"}
             </p>
-            <p className="text-xs text-white/80 truncate">
-              View profile
-            </p>
+            <p className="text-xs text-white/80 truncate">View profile</p>
           </div>
-          <svg 
-            className="w-5 h-5 text-white/70 group-hover:text-white transition-colors duration-300" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-5 h-5 text-white/70 group-hover:text-white transition-colors duration-300"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </Link>
       </div>

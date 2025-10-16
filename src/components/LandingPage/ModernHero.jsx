@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Zap, Rocket } from "lucide-react";
+import { ArrowDown, Sparkles, Zap, Rocket } from "lucide-react";
 import animations from "../../utils/animationConfig";
 
 export default function ModernHero() {
@@ -65,7 +65,7 @@ export default function ModernHero() {
           presented.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,23 +73,29 @@ export default function ModernHero() {
             duration: animations.config.duration,
             delay: animations.getDelay(3),
           }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          className="mb-16 flex flex-col items-center gap-2"
         >
-          <motion.a
-            href="/signup"
-            {...animations.hoverScale}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-colors duration-200 shadow-lg hover:shadow-xl will-change-transform"
+          <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">
+            Scroll to Explore
+          </span>
+          <motion.button
+            onClick={() => {
+              const featuresSection = document.getElementById("features");
+              if (featuresSection) {
+                featuresSection.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            animate={{ y: [0, 8, 0] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="text-[#fb8500] hover:text-[#ff9500] transition-colors duration-300 cursor-pointer"
+            aria-label="Scroll to explore"
           >
-            Get Started Free
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-          </motion.a>
-          <motion.a
-            href="#features"
-            {...animations.hoverScale}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#fb8500] font-semibold rounded-lg border-2 border-[#fb8500] hover:bg-orange-50 transition-colors duration-200 will-change-transform"
-          >
-            See How It Works
-          </motion.a>
+            <ArrowDown className="w-6 h-6 md:w-8 md:h-8" />
+          </motion.button>
         </motion.div>
 
         {/* Hero Visual */}

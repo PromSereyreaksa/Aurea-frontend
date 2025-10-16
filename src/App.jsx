@@ -5,7 +5,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 // Eagerly load only critical components (landing page)
 import HomePage from "./pages/HomePage";
@@ -48,12 +48,14 @@ const PageLoader = () => (
   </div>
 );
 
-// Component to scroll to top on route change
+// Component to scroll to top on route change and dismiss toasts
 function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Dismiss all toasts when navigating to a new page
+    toast.dismiss();
   }, [pathname]);
 
   return null;
@@ -129,18 +131,20 @@ function App() {
         <Toaster
           position="top-right"
           toastOptions={{
-            duration: 4000,
+            duration: 2500,
             style: {
               background: "#363636",
               color: "#fff",
             },
             success: {
+              duration: 2000,
               iconTheme: {
                 primary: "#4ade80",
                 secondary: "#fff",
               },
             },
             error: {
+              duration: 3000,
               iconTheme: {
                 primary: "#f87171",
                 secondary: "#fff",

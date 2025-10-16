@@ -136,3 +136,29 @@ body:not(.template-page) {
     padding-bottom: 60px !important;
   }
 }
+
+/* Safe area for bottom navigation (iOS devices) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dashboard bottom bar - show on mobile/tablet, hide on desktop */
+.dashboard-bottom-bar {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-bottom-bar {
+    display: none !important;
+  }
+}
+
+/* Ensure fixed bottom elements stay on screen */
+@supports (position: sticky) or (position: -webkit-sticky) {
+  .fixed-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
