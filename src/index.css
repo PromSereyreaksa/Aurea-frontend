@@ -1,14 +1,15 @@
 @import "tailwindcss";
+@import "./styles/performance.css";
 
-/* Apply Monda font only to app pages - NOT templates */
+/* Apply Satoshi font only to app pages - NOT templates */
 body:not(.template-page) {
-  font-family: "Monda", sans-serif;
+  font-family: "Satoshi", Arial, sans-serif;
 }
 
 /* Specifically target app pages */
 .app-page,
 .app-page * {
-  font-family: "Monda", sans-serif;
+  font-family: "Satoshi", Arial, sans-serif;
 }
 
 /* Ensure templates can override the font */

@@ -152,7 +152,7 @@ export default function ModernFooter() {
               © {new Date().getFullYear()} AUREA. All rights reserved.
             </p>
             <p className="text-gray-500 text-sm">
-              Made with ❤️ for designers everywhere
+              Empowering creatives to showcase their best work
             </p>
           </div>
         </div>

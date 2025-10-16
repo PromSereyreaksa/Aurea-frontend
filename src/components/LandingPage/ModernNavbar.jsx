@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
 import aureaLogo from "../../assets/AUREA - Logo.png";
 
@@ -38,7 +39,6 @@ const ModernNavbar = () => {
       ];
     } else if (location.pathname === "/about") {
       return [
-        { label: "Home", link: "/" },
         { label: "Our Story", action: () => scrollToSection("story") },
         { label: "Our Values", action: () => scrollToSection("values") },
         { label: "Our Team", action: () => scrollToSection("team") },
@@ -119,9 +119,10 @@ const ModernNavbar = () => {
                 >
                   <Link
                     to={item.link}
-                    className="text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
+                    className="flex items-center gap-1.5 text-[#1a1a1a] hover:text-[#fb8500] font-medium transition-colors relative group"
                   >
                     {item.label}
+                    <ExternalLink className="w-3.5 h-3.5 opacity-60" />
                     <motion.span
                       className="absolute bottom-0 left-0 h-0.5 bg-[#fb8500]"
                       initial={{ width: 0 }}

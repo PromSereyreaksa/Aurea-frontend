@@ -1,5 +1,10 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/PortfolioBuilder/ProtectedRoute";
 import HomePage from "./pages/HomePage";
@@ -19,9 +24,21 @@ import PublishedPortfolioPage from "./pages/PublishedPortfolioPage";
 import EchelonCaseStudyPage from "./templates/Echelon/EchelonCaseStudyPage";
 import EchelonCaseStudyEditorPage from "./templates/Echelon/EchelonCaseStudyEditorPage";
 
+// Component to scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-white text-black font-sans">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -32,78 +49,72 @@ function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/profile" 
+          <Route
+            path="/profile"
             element={
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/portfolio-builder/:id" 
+          <Route
+            path="/portfolio-builder/:id"
             element={
               <ProtectedRoute>
                 <PortfolioBuilderPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/portfolio-builder/:portfolioId/case-study/:projectId" 
+          <Route
+            path="/portfolio-builder/:portfolioId/case-study/:projectId"
             element={
               <ProtectedRoute>
                 <EchelonCaseStudyEditorPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/template-preview/echelon" 
-            element={<EchelonPreviewPage />} 
+          <Route
+            path="/template-preview/echelon"
+            element={<EchelonPreviewPage />}
           />
-          <Route 
-            path="/templates" 
-            element={<TemplatesShowcasePage />} 
+          <Route path="/templates" element={<TemplatesShowcasePage />} />
+          <Route path="/portfolio/:slug" element={<PublishedPortfolioPage />} />
+          <Route
+            path="/case-study/logo-design-process"
+            element={<EchelonCaseStudyPage />}
           />
-          <Route 
-            path="/portfolio/:slug" 
-            element={<PublishedPortfolioPage />} 
-          />
-          <Route 
-            path="/case-study/logo-design-process" 
-            element={<EchelonCaseStudyPage />} 
-          />
-          <Route 
-            path="/portfolio/:portfolioId/project/:projectId" 
-            element={<EchelonCaseStudyPage />} 
+          <Route
+            path="/portfolio/:portfolioId/project/:projectId"
+            element={<EchelonCaseStudyPage />}
           />
         </Routes>
-        
+
         <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: "#363636",
+              color: "#fff",
             },
             success: {
               iconTheme: {
-                primary: '#4ade80',
-                secondary: '#fff',
+                primary: "#4ade80",
+                secondary: "#fff",
               },
             },
             error: {
               iconTheme: {
-                primary: '#f87171',
-                secondary: '#fff',
+                primary: "#f87171",
+                secondary: "#fff",
               },
             },
           }}

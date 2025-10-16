@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Palette } from "lucide-react";
 
 export default function FinalCTA() {
   return (
@@ -84,17 +84,17 @@ export default function FinalCTA() {
           className="mt-16 flex items-center justify-center gap-8 text-gray-400 text-sm"
         >
           <div className="flex items-center gap-2">
-            <span className="text-2xl">⚡</span>
+            <Zap className="w-5 h-5 text-[#fb8500]" />
             <span>10-minute setup</span>
           </div>
           <div className="hidden sm:block w-px h-6 bg-gray-600" />
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🎨</span>
+            <Palette className="w-5 h-5 text-[#fb8500]" />
             <span>No credit card</span>
           </div>
           <div className="hidden sm:block w-px h-6 bg-gray-600" />
           <div className="flex items-center gap-2">
-            <span className="text-2xl">✨</span>
+            <Sparkles className="w-5 h-5 text-[#fb8500]" />
             <span>Cancel anytime</span>
           </div>
         </motion.div>

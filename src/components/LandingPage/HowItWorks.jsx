@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Upload, Wand2, Share2 } from "lucide-react";
+import animations from "../../utils/animationConfig";
 
 const steps = [
   {
@@ -35,10 +36,8 @@ export default function HowItWorks() {
         {/* Section Header */}
         <div className="text-center mb-20">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            {...animations.fadeInUp}
+            viewport={animations.viewportConfig}
             className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6"
           >
             <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
@@ -49,8 +48,11 @@ export default function HowItWorks() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={animations.viewportConfig}
+            transition={{
+              duration: animations.config.duration,
+              delay: animations.getDelay(1),
+            }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
           >
             Three steps to
@@ -61,8 +63,11 @@ export default function HowItWorks() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={animations.viewportConfig}
+            transition={{
+              duration: animations.config.duration,
+              delay: animations.getDelay(2),
+            }}
             className="text-xl text-gray-600 max-w-2xl mx-auto"
           >
             Getting your portfolio online has never been easier. No technical
@@ -81,13 +86,16 @@ export default function HowItWorks() {
               return (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  viewport={animations.viewportConfig}
+                  transition={{
+                    duration: animations.config.duration,
+                    delay: animations.getDelay(index),
+                  }}
                   className="relative"
                 >
-                  <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#fb8500] hover:shadow-xl transition-all duration-300 h-full">
+                  <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#fb8500] hover:shadow-xl transition-all duration-200 h-full will-change-transform">
                     {/* Step number */}
                     <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#fb8500] text-white font-bold text-lg rounded-full flex items-center justify-center shadow-lg">
                       {step.number}
@@ -116,15 +124,17 @@ export default function HowItWorks() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          viewport={animations.viewportConfig}
+          transition={{
+            duration: animations.config.duration,
+            delay: animations.getDelay(4),
+          }}
           className="text-center mt-16"
         >
           <motion.a
             href="/signup"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-all duration-300 shadow-lg hover:shadow-xl"
+            {...animations.hoverScale}
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-colors duration-200 shadow-lg hover:shadow-xl will-change-transform"
           >
             Start Building Now
           </motion.a>
