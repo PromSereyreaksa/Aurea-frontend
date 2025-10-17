@@ -637,67 +637,6 @@ const DashboardPage = () => {
             </div>
           </div>
         );
-      case "settings":
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
-              Settings
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">
-                  Account Settings
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={user?.name || ""}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={user?.email || ""}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Privacy Settings
-                </h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-3" defaultChecked />
-                    <span className="text-gray-700">
-                      Make my profile public
-                    </span>
-                  </label>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-3" defaultChecked />
-                    <span className="text-gray-700">
-                      Allow others to view my portfolios
-                    </span>
-                  </label>
-                </div>
-              </div>
-              <div className="pt-6 border-t border-gray-200">
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        );
       default:
         return (
           <OverviewSection

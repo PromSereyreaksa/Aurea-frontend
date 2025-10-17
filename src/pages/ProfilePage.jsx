@@ -19,10 +19,10 @@ import {
 const ProfilePage = () => {
   const { user: rawUser, updateProfile, uploadAvatar } = useAuthStore();
   const { portfolios, fetchUserPortfolios } = usePortfolioStore();
-  
+
   // Handle nested user object structure
   const user = rawUser?.user || rawUser;
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,6 +32,14 @@ const ProfilePage = () => {
     username: user?.username || user?.name || "",
     email: user?.email || "",
   });
+  // Track original values to detect changes
+  const [originalData, setOriginalData] = useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    username: user?.username || user?.name || "",
+    email: user?.email || "",
+  });
+  const [modifiedFields, setModifiedFields] = useState(new Set());
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(
     user?.avatar || user?.profilePicture || null
@@ -51,6 +59,17 @@ const ProfilePage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Track modified fields
+    if (value !== originalData[name]) {
+      setModifiedFields(prev => new Set([...prev, name]));
+    } else {
+      setModifiedFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(name);
+        return newSet;
+      });
+    }
   };
 
   const handleAvatarChange = (e) => {
@@ -80,12 +99,12 @@ const ProfilePage = () => {
   const handleSave = async () => {
     setIsSaving(true);
     setErrors({});
-    
+
     try {
       // Handle avatar upload first if there's a new file
       if (avatarFile) {
         const avatarResult = await uploadAvatar(avatarFile);
-        
+
         if (!avatarResult.success) {
           toast.error(avatarResult.error || "Failed to upload avatar");
           setIsSaving(false);
@@ -93,32 +112,46 @@ const ProfilePage = () => {
         }
       }
 
-      // Prepare user data to update
-      const updateData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        username: formData.username,
-        email: formData.email,
-      };
+      // Only update fields that have been modified
+      if (modifiedFields.size > 0) {
+        const updateData = {};
+        modifiedFields.forEach(field => {
+          updateData[field] = formData[field];
+        });
 
-      // Update profile
-      const result = await updateProfile(updateData);
-      
-      if (result.success) {
+        console.log('Updating only modified fields:', updateData);
+
+        // Update profile with only changed fields
+        const result = await updateProfile(updateData);
+
+        if (result.success) {
+          // Update original data to new values
+          setOriginalData({ ...formData });
+          setModifiedFields(new Set());
+          setIsEditing(false);
+          setAvatarFile(null);
+          toast.success("Profile updated successfully!");
+        } else {
+          // Handle validation errors
+          if (result.details) {
+            setErrors(result.details);
+            // Show field-specific errors
+            Object.entries(result.details).forEach(([field, message]) => {
+              toast.error(`${field}: ${message}`);
+            });
+          } else {
+            toast.error(result.error || "Failed to update profile");
+          }
+        }
+      } else if (!avatarFile) {
+        // No changes made
+        toast.info("No changes to save");
+        setIsEditing(false);
+      } else {
+        // Only avatar was updated
         setIsEditing(false);
         setAvatarFile(null);
         toast.success("Profile updated successfully!");
-      } else {
-        // Handle validation errors
-        if (result.details) {
-          setErrors(result.details);
-          // Show field-specific errors
-          Object.entries(result.details).forEach(([field, message]) => {
-            toast.error(`${field}: ${message}`);
-          });
-        } else {
-          toast.error(result.error || "Failed to update profile");
-        }
       }
     } catch (error) {
       console.error("Failed to save profile:", error);
@@ -129,12 +162,8 @@ const ProfilePage = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      username: user?.username || user?.name || "",
-      email: user?.email || "",
-    });
+    setFormData({ ...originalData });
+    setModifiedFields(new Set());
     setAvatarPreview(user?.avatar || user?.profilePicture || null);
     setAvatarFile(null);
     setErrors({});
@@ -174,12 +203,15 @@ const ProfilePage = () => {
   // Update form data when user data changes
   useEffect(() => {
     if (user) {
-      setFormData({
+      const newData = {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         username: user.username || user.name || "",
         email: user.email || "",
-      });
+      };
+      setFormData(newData);
+      setOriginalData(newData);
+      setModifiedFields(new Set());
       setAvatarPreview(user.avatar || user.profilePicture || null);
     }
   }, [user]);
@@ -202,11 +234,11 @@ const ProfilePage = () => {
 
   return (
     <div className="app-page min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {/* Back Button */}
         <button
           onClick={handleBackClick}
-          className="flex items-center gap-2 text-gray-600 hover:text-[#fb8500] transition-colors mb-8 group"
+          className="flex items-center gap-2 text-gray-600 hover:text-[#fb8500] transition-colors mb-6 sm:mb-8 group"
         >
           <ArrowLeft
             size={20}
@@ -215,10 +247,11 @@ const ProfilePage = () => {
           <span className="font-medium">Back</span>
         </button>
 
-        {/* Profile Header */}
-        <div className="bg-gradient-to-r from-[#fb8500] to-[#ff9500] rounded-xl p-8 mb-6 text-white">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-white/20 flex items-center justify-center border-4 border-white/30">
+        {/* Profile Header - Responsive layout */}
+        <div className="bg-gradient-to-r from-[#fb8500] to-[#ff9500] rounded-xl p-6 sm:p-8 mb-6 text-white">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            {/* Avatar */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white/20 flex items-center justify-center border-4 border-white/30 flex-shrink-0">
               {avatarPreview ? (
                 <img
                   src={avatarPreview}
@@ -226,29 +259,37 @@ const ProfilePage = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-3xl font-bold text-white">
+                <span className="text-2xl sm:text-3xl font-bold text-white">
                   {getInitials()}
                 </span>
               )}
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-1">
-                {user?.firstName && user?.lastName 
+
+            {/* User Info */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl font-bold mb-1">
+                {user?.firstName && user?.lastName
                   ? `${user.firstName} ${user.lastName}`
                   : user?.name || user?.username || "User"}
               </h1>
-              <p className="text-white/90 text-sm mb-2">
+              <p className="text-white/90 text-sm mb-1 sm:mb-2">
                 @{user?.username || "username"}
               </p>
               <p className="text-white/80 text-sm">
                 {user?.email || "email@example.com"}
               </p>
-            </div>
-            <div className="text-right">
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 mb-2">
-                <p className="text-xs text-white/80 mb-1">Member since</p>
-                <p className="font-semibold">{formatDate(user?.createdAt)}</p>
+
+              {/* Member since - Mobile */}
+              <div className="sm:hidden mt-4">
+                <p className="text-xs text-white/90 mb-1">Member since</p>
+                <p className="font-semibold text-sm text-white">{formatDate(user?.createdAt)}</p>
               </div>
+            </div>
+
+            {/* Member since - Desktop */}
+            <div className="hidden sm:block">
+              <p className="text-xs text-white/90 mb-1">Member since</p>
+              <p className="font-semibold text-white">{formatDate(user?.createdAt)}</p>
             </div>
           </div>
         </div>
@@ -256,14 +297,14 @@ const ProfilePage = () => {
         <div className="space-y-6">
           {/* Avatar Upload Section - Only visible in edit mode */}
           {isEditing && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-[#1a1a1a] mb-6 flex items-center gap-2">
-                <Camera size={20} className="text-[#fb8500]" />
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-base sm:text-lg font-semibold text-[#1a1a1a] mb-4 sm:mb-6 flex items-center gap-2">
+                <Camera size={18} className="text-[#fb8500]" />
                 Update Profile Picture
               </h2>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200">
                     {avatarPreview ? (
                       <img
                         src={avatarPreview}
@@ -271,7 +312,7 @@ const ProfilePage = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-3xl font-bold text-[#fb8500]">
+                      <span className="text-2xl sm:text-3xl font-bold text-[#fb8500]">
                         {getInitials()}
                       </span>
                     )}
@@ -282,18 +323,18 @@ const ProfilePage = () => {
                     </div>
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left">
                   <h3 className="font-medium text-[#1a1a1a] mb-1">
                     Upload new picture
                   </h3>
-                  <p className="text-sm text-gray-500 mb-3">
+                  <p className="text-xs sm:text-sm text-gray-500 mb-3">
                     JPG, PNG, GIF or WebP. Max size 5MB.
                   </p>
                   <label
                     htmlFor="avatar-upload"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-xs sm:text-sm font-medium"
                   >
-                    <Upload size={16} />
+                    <Upload size={14} className="sm:w-4 sm:h-4" />
                     {avatarFile ? 'Change File' : 'Choose File'}
                     <input
                       id="avatar-upload"
@@ -304,7 +345,7 @@ const ProfilePage = () => {
                     />
                   </label>
                   {avatarFile && (
-                    <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-green-600 mt-2 flex items-center justify-center sm:justify-start gap-1">
                       <AlertCircle size={12} />
                       New image selected - click Save to upload
                     </p>
@@ -315,32 +356,32 @@ const ProfilePage = () => {
           )}
 
           {/* Account Info Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-[#1a1a1a]">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+              <h2 className="text-base sm:text-lg font-semibold text-[#1a1a1a]">
                 Account Information
               </h2>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-sm font-medium text-[#fb8500] hover:text-[#ff9500] transition-colors"
+                  className="text-sm font-medium text-[#fb8500] hover:text-[#ff9500] transition-colors self-start sm:self-auto"
                 >
                   Edit
                 </button>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-2 self-start sm:self-auto">
                   <button
                     onClick={handleCancel}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                    className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fb8500] text-white rounded-lg hover:bg-[#ff9500] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fb8500] text-white rounded-lg hover:bg-[#ff9500] transition-colors text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Save size={14} />
+                    <Save size={12} className="sm:w-3.5 sm:h-3.5" />
                     {isSaving ? "Saving..." : "Save"}
                   </button>
                 </div>
@@ -471,21 +512,21 @@ const ProfilePage = () => {
           </div>
 
           {/* Account Details Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-[#1a1a1a] mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-semibold text-[#1a1a1a] mb-4 sm:mb-6">
               Account Details
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700">
                       Account created
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {formatDate(user?.createdAt)}
                     </p>
                   </div>
@@ -493,15 +534,15 @@ const ProfilePage = () => {
               </div>
 
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Eye className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700">
                       Published
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {publishedProjects}
                     </p>
                   </div>
@@ -509,15 +550,15 @@ const ProfilePage = () => {
               </div>
 
               <div className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700">
                       Active Projects
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {totalProjects}
                     </p>
                   </div>
@@ -527,23 +568,23 @@ const ProfilePage = () => {
           </div>
 
           {/* Delete Account Section */}
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="w-5 h-5 text-red-600" />
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-red-900 mb-1">
+                <h3 className="text-sm sm:text-base font-semibold text-red-900 mb-1">
                   Delete Account
                 </h3>
-                <p className="text-sm text-red-700 mb-4">
+                <p className="text-xs sm:text-sm text-red-700 mb-3 sm:mb-4">
                   If you wish to delete your account, please contact our support
                   team. This action cannot be undone and all your data will be
                   permanently removed.
                 </p>
                 <a
                   href="mailto:support@aurea.com"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+                  className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-xs sm:text-sm font-medium"
                 >
                   Contact Support
                 </a>
