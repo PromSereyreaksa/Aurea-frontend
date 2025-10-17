@@ -1,6 +1,6 @@
 /**
  * Portfolio Builder Utility Functions
- * 
+ *
  * Helper functions for data manipulation, validation, and transformations
  * used in the portfolio builder.
  */
@@ -36,12 +36,25 @@ export function debounce(func, wait) {
 export const convertToTemplateFormat = (portfolio) => {
   // Normalize template IDs (handle legacy IDs)
   const normalizeTemplateId = (id) => {
+<<<<<<< Updated upstream
     if (!id) return 'echolon';
     const legacyMap = {
       'minimal-designer': 'echolon',
       'minimal': 'echolon',
       'designer': 'echolon',
       'swiss': 'echolon'
+=======
+    if (!id) return "echelon";
+    const legacyMap = {
+      echolon: "echelon", // Handle old misspelling
+      "minimal-designer": "echelon",
+      minimal: "echelon",
+      designer: "echelon",
+      swiss: "echelon",
+      botanical: "serene",
+      elegant: "serene",
+      blossom: "serene",
+>>>>>>> Stashed changes
     };
     return legacyMap[id] || id;
   };
@@ -50,17 +63,28 @@ export const convertToTemplateFormat = (portfolio) => {
   if (portfolio.templateId && portfolio.content) {
     return {
       ...portfolio,
-      templateId: normalizeTemplateId(portfolio.templateId)
+      templateId: normalizeTemplateId(portfolio.templateId),
     };
   }
 
   // Convert old sections-based format to new template format
   const templateData = {
+<<<<<<< Updated upstream
     templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
     content: portfolio.sections?.reduce((acc, section) => {
       acc[section.type] = section.content;
       return acc;
     }, {}) || {},
+=======
+    templateId: normalizeTemplateId(
+      portfolio.template || portfolio.templateId || "echelon"
+    ),
+    content:
+      portfolio.sections?.reduce((acc, section) => {
+        acc[section.type] = section.content;
+        return acc;
+      }, {}) || {},
+>>>>>>> Stashed changes
     styling: portfolio.styling || {},
     structure: portfolio.structure || {},
     metadata: portfolio.metadata || {},
@@ -79,10 +103,25 @@ export const convertContentToSections = (content) => {
   const sections = [];
   // Define which fields are actual content sections (not metadata/styling)
   const contentFields = [
+<<<<<<< Updated upstream
     'hero', 'about', 'projects', 'contact', 'experience', 
     'education', 'skills', 'testimonials', 'certifications', 'services'
+=======
+    "hero",
+    "about",
+    "projects",
+    "contact",
+    "experience",
+    "education",
+    "skills",
+    "testimonials",
+    "certifications",
+    "services",
+    "work",
+    "gallery", // Add Echelon sections
+>>>>>>> Stashed changes
   ];
-  
+
   Object.entries(content).forEach(([sectionType, sectionContent]) => {
     // Only include actual content sections
     if (contentFields.includes(sectionType) && sectionContent) {
@@ -92,7 +131,7 @@ export const convertContentToSections = (content) => {
       });
     }
   });
-  
+
   return sections;
 };
 
@@ -113,8 +152,12 @@ export const cleanupPlaceholderData = (portfolioData) => {
 
   // Helper to clean placeholder paths
   const cleanPlaceholderPath = (value) => {
-    if (typeof value === 'string' && value.includes('/placeholder') && !value.startsWith('http')) {
-      return ''; // Remove invalid placeholder paths
+    if (
+      typeof value === "string" &&
+      value.includes("/placeholder") &&
+      !value.startsWith("http")
+    ) {
+      return ""; // Remove invalid placeholder paths
     }
     return value;
   };
@@ -123,16 +166,17 @@ export const cleanupPlaceholderData = (portfolioData) => {
   Object.keys(cleanedContent).forEach((sectionKey) => {
     const section = cleanedContent[sectionKey];
 
-    if (typeof section === 'object' && section !== null) {
+    if (typeof section === "object" && section !== null) {
       Object.keys(section).forEach((fieldKey) => {
         const fieldValue = section[fieldKey];
 
         // Clean image fields
-        if (fieldKey === 'image') {
-          cleanedContent[sectionKey][fieldKey] = cleanPlaceholderPath(fieldValue);
-        } 
+        if (fieldKey === "image") {
+          cleanedContent[sectionKey][fieldKey] =
+            cleanPlaceholderPath(fieldValue);
+        }
         // Clean project images (array of projects)
-        else if (fieldKey === 'projects' && Array.isArray(fieldValue)) {
+        else if (fieldKey === "projects" && Array.isArray(fieldValue)) {
           cleanedContent[sectionKey][fieldKey] = fieldValue.map((project) => ({
             ...project,
             image: cleanPlaceholderPath(project.image),
@@ -154,8 +198,10 @@ export const cleanupPlaceholderData = (portfolioData) => {
 // ========================================
 
 // Default fallback images
-const DEFAULT_HERO_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Image';
-const DEFAULT_PROJECT_IMAGE = 'https://via.placeholder.co/400x300?text=Default+Project';
+const DEFAULT_HERO_IMAGE =
+  "https://via.placeholder.co/400x300?text=Default+Image";
+const DEFAULT_PROJECT_IMAGE =
+  "https://via.placeholder.co/400x300?text=Default+Project";
 
 /**
  * Ensures all image URLs are valid for rendering
@@ -171,7 +217,7 @@ export const ensureValidImageUrls = (portfolioData) => {
   // Ensure hero image (empty string for proper placeholder rendering)
   updatedContent.hero = {
     ...updatedContent.hero,
-    image: updatedContent.hero?.image || '',
+    image: updatedContent.hero?.image || "",
   };
 
   // Ensure project images
@@ -199,13 +245,19 @@ export const ensureValidImageUrls = (portfolioData) => {
  * Generates local storage key for portfolio drafts
  */
 export const getLocalStorageKey = (portfolioId) => {
-  return `portfolio-draft-${portfolioId || 'new'}`;
+  return `portfolio-draft-${portfolioId || "new"}`;
 };
 
 /**
  * Saves portfolio draft to local storage
  */
-export const saveToLocalStorage = (portfolioId, data, title, description, templateId) => {
+export const saveToLocalStorage = (
+  portfolioId,
+  data,
+  title,
+  description,
+  templateId
+) => {
   try {
     const key = getLocalStorageKey(portfolioId);
     const saveData = {
@@ -218,7 +270,7 @@ export const saveToLocalStorage = (portfolioId, data, title, description, templa
     localStorage.setItem(key, JSON.stringify(saveData));
     return true;
   } catch (error) {
-    console.error('Failed to save to localStorage:', error);
+    console.error("Failed to save to localStorage:", error);
     return false;
   }
 };
@@ -234,7 +286,7 @@ export const loadFromLocalStorage = (portfolioId) => {
       return JSON.parse(saved);
     }
   } catch (error) {
-    console.error('Failed to load from localStorage:', error);
+    console.error("Failed to load from localStorage:", error);
   }
   return null;
 };
@@ -248,7 +300,7 @@ export const clearLocalStorage = (portfolioId) => {
     localStorage.removeItem(key);
     return true;
   } catch (error) {
-    console.error('Failed to clear localStorage:', error);
+    console.error("Failed to clear localStorage:", error);
     return false;
   }
 };
@@ -261,28 +313,28 @@ export const clearLocalStorage = (portfolioId) => {
  * Validates if an image URL is valid
  */
 export const isValidImageUrl = (value) => {
-  if (!value || typeof value !== 'string') return false;
-  
+  if (!value || typeof value !== "string") return false;
+
   // Trim whitespace
   const trimmedValue = value.trim();
-  
+
   // Empty strings are valid (for placeholder images)
-  if (trimmedValue === '') return true;
-  
+  if (trimmedValue === "") return true;
+
   // Allow: http://, https://, data:image/, relative paths, and cloudinary/s3/etc URLs
   const isValid = !!trimmedValue.match(/^(https?:\/\/|\/|data:image\/|\.\/)/);
-  
+
   // Debug logging
   if (!isValid) {
-    console.warn('❌ Invalid image URL detected:', {
+    console.warn("❌ Invalid image URL detected:", {
       value: trimmedValue,
       length: trimmedValue.length,
-      startsWithHttp: trimmedValue.startsWith('http'),
-      startsWithHttps: trimmedValue.startsWith('https'),
-      regexTest: /^(https?:\/\/)/.test(trimmedValue)
+      startsWithHttp: trimmedValue.startsWith("http"),
+      startsWithHttps: trimmedValue.startsWith("https"),
+      regexTest: /^(https?:\/\/)/.test(trimmedValue),
     });
   }
-  
+
   return isValid;
 };
 
@@ -291,8 +343,8 @@ export const isValidImageUrl = (value) => {
  */
 export const isImageField = (fieldId, value) => {
   return (
-    fieldId === 'image' || 
-    fieldId.includes('image') || 
-    (typeof value === 'string' && value.startsWith('data:image/'))
+    fieldId === "image" ||
+    fieldId.includes("image") ||
+    (typeof value === "string" && value.startsWith("data:image/"))
   );
 };
