@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
 import aureaLogo from "../../assets/AUREA - Logo.png";
 
 const ModernNavbar = () => {
-  const { isAuthenticated, user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const location = useLocation();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -52,30 +49,6 @@ const ModernNavbar = () => {
       ];
     }
   }, [location.pathname]);
-
-  // Get user initials - memoized
-  const userInitials = useMemo(() => {
-    if (!user?.name) return "U";
-    const names = user.name.split(" ");
-    if (names.length === 1) return names[0].charAt(0).toUpperCase();
-    return (
-      names[0].charAt(0) + names[names.length - 1].charAt(0)
-    ).toUpperCase();
-  }, [user?.name]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 py-3 px-4 sm:py-4 sm:px-6">
@@ -129,102 +102,26 @@ const ModernNavbar = () => {
         <div className="flex items-center space-x-2 sm:space-x-4">
           {isAuthenticated ? (
             <>
-              {/* User Dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[#fb8500] to-[#ff9500] text-white rounded-full font-semibold text-sm sm:text-base hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:ring-offset-2"
+              {/* Dashboard Button */}
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 bg-gradient-to-r from-[#fb8500] to-[#ff9500] text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-lg hover:scale-105 text-sm sm:text-base"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {userInitials}
-                </button>
-
-                {/* Dropdown Menu */}
-                {showDropdown && (
-                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-fade-in-fast">
-                    {/* User Info Header */}
-                    <div className="px-4 py-3 bg-gradient-to-r from-[#fb8500]/10 to-[#ff9500]/10 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {user?.name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-
-                    <div className="py-2">
-                      <div>
-                        <Link
-                          to="/profile"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors duration-200 group"
-                        >
-                          <svg
-                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500] transition-colors"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
-                          Profile
-                        </Link>
-                      </div>
-                      <div>
-                        <Link
-                          to="/dashboard"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-[#fb8500]/10 hover:text-[#fb8500] transition-colors duration-200 group"
-                        >
-                          <svg
-                            className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#fb8500] transition-colors"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                            />
-                          </svg>
-                          Dashboard
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-gray-100">
-                      <button
-                        onClick={() => {
-                          logout();
-                          setShowDropdown(false);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 group"
-                      >
-                        <svg
-                          className="w-4 h-4 mr-3 text-red-400 group-hover:text-red-500 transition-colors"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
             </>
           ) : (
             <>

@@ -65,15 +65,48 @@ export const authApi = {
         const cachedData = cachedUser ? JSON.parse(cachedUser) : null;
         if (cachedData && cachedData.lastUpdated && 
             Date.now() - cachedData.lastUpdated < 5 * 60 * 1000) { // 5 minutes cache
-          return cachedData;
+          console.log("getCurrentUser - Using cached data:", cachedData);
+          // Check if cached data has nested user property and fix it
+          if (cachedData.user && !cachedData.firstName) {
+            // Cached data has wrong format, clear it and fetch fresh
+            localStorage.removeItem('aurea_user');
+          } else {
+            return cachedData;
+          }
         }
         
         // Fetch fresh user data
         const response = await api.get('/api/auth/me');
-        const userData = {
-          ...response.data,
-          lastUpdated: Date.now()
-        };
+        
+        console.log("getCurrentUser - Raw response:", response);
+        console.log("getCurrentUser - response.data:", response.data);
+        
+        // Handle different response structures
+        let userData;
+        if (response.data.success && response.data.data) {
+          // New backend format: { success: true, data: { user object } }
+          console.log("getCurrentUser - Using success.data format");
+          userData = {
+            ...response.data.data,
+            lastUpdated: Date.now()
+          };
+        } else if (response.data.user) {
+          // Format: { user: { user object } }
+          console.log("getCurrentUser - Using user format");
+          userData = {
+            ...response.data.user,
+            lastUpdated: Date.now()
+          };
+        } else {
+          // Direct user object
+          console.log("getCurrentUser - Using direct format");
+          userData = {
+            ...response.data,
+            lastUpdated: Date.now()
+          };
+        }
+        
+        console.log("getCurrentUser - Final userData:", userData);
         
         localStorage.setItem('aurea_user', JSON.stringify(userData));
         return userData;
@@ -86,20 +119,55 @@ export const authApi = {
   updateProfile: async (userData) => {
     return apiRequest(
       async () => {
-        const response = await api.put('/api/auth/me', userData);
+        const response = await api.patch('/api/users/profile', userData);
         
         // Update cached user data
-        if (response.data) {
+        if (response.data && response.data.success && response.data.data) {
           const updatedUser = {
-            ...response.data,
+            ...response.data.data,
             lastUpdated: Date.now()
           };
           localStorage.setItem('aurea_user', JSON.stringify(updatedUser));
+          return updatedUser;
         }
         
         return response.data;
       },
       'Failed to update profile'
+    );
+  },
+
+  // Upload avatar
+  uploadAvatar: async (file) => {
+    return apiRequest(
+      async () => {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        const response = await api.post('/api/users/avatar', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        
+        // Update cached user data with new avatar URL
+        if (response.data && response.data.success && response.data.data) {
+          const cachedUser = localStorage.getItem('aurea_user');
+          if (cachedUser) {
+            const userData = JSON.parse(cachedUser);
+            const updatedUser = {
+              ...userData,
+              avatar: response.data.data.avatar,
+              lastUpdated: Date.now()
+            };
+            localStorage.setItem('aurea_user', JSON.stringify(updatedUser));
+            return updatedUser;
+          }
+        }
+        
+        return response.data;
+      },
+      'Failed to upload avatar'
     );
   },
 
@@ -126,12 +194,11 @@ export const authApi = {
   // Check if user is authenticated and token is not expired
   isAuthenticated: () => {
     const token = localStorage.getItem('aurea_token');
-    const user = localStorage.getItem('aurea_user');
     
-    console.log('isAuthenticated check - token:', !!token, 'user:', !!user); // Debug log
+    console.log('isAuthenticated check - token:', !!token); // Debug log
     
-    if (!token || !user) {
-      console.log('No token or user found'); // Debug log
+    if (!token) {
+      console.log('No token found'); // Debug log
       return false;
     }
     
