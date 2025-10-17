@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../../stores/authStore";
 
 const DashboardSidebar = ({
   activeSection,
@@ -8,6 +9,18 @@ const DashboardSidebar = ({
   user,
   onClose,
 }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const sidebarItems = [
     {
       id: "overview",
@@ -237,6 +250,7 @@ const DashboardSidebar = ({
 
       {/* User Profile Section - Bottom */}
       <div className="border-t border-white/20 p-4 lg:p-4 bg-[#ff9500]/30">
+        {/* View Profile Button */}
         <Link
           to="/profile"
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-300 group"
@@ -266,6 +280,32 @@ const DashboardSidebar = ({
             />
           </svg>
         </Link>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-500/20 transition-all duration-300 group mt-2"
+        >
+          <div className="w-10 h-10 rounded-lg bg-white/10 group-hover:bg-red-500/30 flex items-center justify-center flex-shrink-0 transition-all duration-300">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-bold text-white">Logout</p>
+            <p className="text-xs text-white/80">Sign out of your account</p>
+          </div>
+        </button>
       </div>
     </div>
   );
