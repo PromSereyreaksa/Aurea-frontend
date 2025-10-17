@@ -2,18 +2,6 @@
 // Each template defines structure, default content, and styling
 
 // Import template components
-<<<<<<< Updated upstream
-import EchelonTemplate from './Echelon/EchelonTemplate';
-
-export const templates = {
-  'echolon': {
-    id: 'echolon',
-    name: 'Echelon',
-    description: 'Swiss/International Typographic Style - clean, precise, grid-driven design',
-    category: 'swiss',
-    preview: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    previewUrl: '/template-preview/echelon',
-=======
 import EchelonTemplate from "./Echelon/EchelonTemplate";
 import SereneTemplate from "./Serene/SereneTemplate";
 
@@ -27,7 +15,6 @@ export const templates = {
     preview:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     previewUrl: "/template-preview/echelon",
->>>>>>> Stashed changes
     component: EchelonTemplate,
 
     // Template structure defines sections and their layout
@@ -160,14 +147,6 @@ export const templates = {
 
     // Responsive breakpoints
     responsive: {
-<<<<<<< Updated upstream
-      mobile: '640px',
-      tablet: '768px',
-      desktop: '1024px',
-      wide: '1280px'
-    }
-  }
-=======
       mobile: "640px",
       tablet: "768px",
       desktop: "1024px",
@@ -438,7 +417,6 @@ export const templates = {
       wide: "1280px",
     },
   },
->>>>>>> Stashed changes
 };
 
 // Helper function to get template by ID
@@ -452,16 +430,6 @@ export const getTemplate = (templateId) => {
 
 // Normalize template IDs to handle legacy/old IDs
 const normalizeTemplateId = (templateId) => {
-<<<<<<< Updated upstream
-  if (!templateId) return 'echolon';
-  
-  // Map old template IDs to new ones
-  const legacyMap = {
-    'minimal-designer': 'echolon',
-    'minimal': 'echolon',
-    'designer': 'echolon',
-    'swiss': 'echolon'
-=======
   if (!templateId) return "echelon";
 
   // Map old template IDs to new ones
@@ -474,7 +442,6 @@ const normalizeTemplateId = (templateId) => {
     botanical: "serene",
     elegant: "serene",
     blossom: "serene",
->>>>>>> Stashed changes
   };
   
   return legacyMap[templateId] || templateId;

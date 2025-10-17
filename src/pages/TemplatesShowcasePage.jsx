@@ -130,15 +130,6 @@ const TemplatesShowcasePage = () => {
         >
           QUICK PREVIEW ACCESS
         </div>
-<<<<<<< Updated upstream
-        <div style={{
-          fontFamily: '"IBM Plex Mono", monospace',
-          fontSize: '14px',
-          color: '#999999',
-          marginBottom: '30px'
-        }}>
-          Jump directly to the full template preview
-=======
         <div
           style={{
             fontFamily: '"IBM Plex Mono", monospace',
@@ -219,7 +210,6 @@ const TemplatesShowcasePage = () => {
           >
             → SERENE PREVIEW
           </button>
->>>>>>> Stashed changes
         </div>
         <button
           onClick={() => navigate('/template-preview/echelon')}

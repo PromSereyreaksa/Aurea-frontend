@@ -36,14 +36,6 @@ export function debounce(func, wait) {
 export const convertToTemplateFormat = (portfolio) => {
   // Normalize template IDs (handle legacy IDs)
   const normalizeTemplateId = (id) => {
-<<<<<<< Updated upstream
-    if (!id) return 'echolon';
-    const legacyMap = {
-      'minimal-designer': 'echolon',
-      'minimal': 'echolon',
-      'designer': 'echolon',
-      'swiss': 'echolon'
-=======
     if (!id) return "echelon";
     const legacyMap = {
       echolon: "echelon", // Handle old misspelling
@@ -54,7 +46,6 @@ export const convertToTemplateFormat = (portfolio) => {
       botanical: "serene",
       elegant: "serene",
       blossom: "serene",
->>>>>>> Stashed changes
     };
     return legacyMap[id] || id;
   };
@@ -69,13 +60,6 @@ export const convertToTemplateFormat = (portfolio) => {
 
   // Convert old sections-based format to new template format
   const templateData = {
-<<<<<<< Updated upstream
-    templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
-    content: portfolio.sections?.reduce((acc, section) => {
-      acc[section.type] = section.content;
-      return acc;
-    }, {}) || {},
-=======
     templateId: normalizeTemplateId(
       portfolio.template || portfolio.templateId || "echelon"
     ),
@@ -84,7 +68,6 @@ export const convertToTemplateFormat = (portfolio) => {
         acc[section.type] = section.content;
         return acc;
       }, {}) || {},
->>>>>>> Stashed changes
     styling: portfolio.styling || {},
     structure: portfolio.structure || {},
     metadata: portfolio.metadata || {},
@@ -103,10 +86,6 @@ export const convertContentToSections = (content) => {
   const sections = [];
   // Define which fields are actual content sections (not metadata/styling)
   const contentFields = [
-<<<<<<< Updated upstream
-    'hero', 'about', 'projects', 'contact', 'experience', 
-    'education', 'skills', 'testimonials', 'certifications', 'services'
-=======
     "hero",
     "about",
     "projects",
@@ -119,7 +98,6 @@ export const convertContentToSections = (content) => {
     "services",
     "work",
     "gallery", // Add Echelon sections
->>>>>>> Stashed changes
   ];
 
   Object.entries(content).forEach(([sectionType, sectionContent]) => {

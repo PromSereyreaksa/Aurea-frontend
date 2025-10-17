@@ -248,8 +248,6 @@ const PortfolioBuilderPage = () => {
 
     const loadPortfolio = async () => {
       if (!isMounted) return;
-<<<<<<< Updated upstream
-=======
 
       console.log("🔄 loadPortfolio called with id:", id);
       console.log(
@@ -285,15 +283,11 @@ const PortfolioBuilderPage = () => {
         return;
       }
 
->>>>>>> Stashed changes
       setInitializing(true);
 
       if (id && id !== "new") {
         try {
-<<<<<<< Updated upstream
-=======
           console.log("📡 Fetching portfolio with ID:", id);
->>>>>>> Stashed changes
           const result = await portfolioStore.fetchPortfolioById(id);
 
           if (!isMounted) return; // Don't update if component unmounted
@@ -307,17 +301,11 @@ const PortfolioBuilderPage = () => {
 
             // If template not found, use echolon as default
             if (!template) {
-<<<<<<< Updated upstream
-              console.warn(`Template "${templateData.templateId}" not found, using echolon as fallback`);
-              template = getTemplate('echolon');
-              templateData.templateId = 'echolon';
-=======
               console.warn(
                 `Template "${templateData.templateId}" not found, using echelon as fallback`
               );
               template = getTemplate("echelon");
               templateData.templateId = "echelon";
->>>>>>> Stashed changes
             }
 
             if (template) {
@@ -351,14 +339,10 @@ const PortfolioBuilderPage = () => {
               const portfolioDataWithImages =
                 ensureValidImageUrls(mergedTemplateData);
               setPortfolioData(portfolioDataWithImages);
-<<<<<<< Updated upstream
-              
-=======
 
               // Mark this portfolio as loaded
               loadedPortfolioIdRef.current = id;
 
->>>>>>> Stashed changes
               // Initialize last saved data reference
               lastSavedDataRef.current = {
                 content: portfolioDataWithImages.content,
@@ -420,16 +404,10 @@ const PortfolioBuilderPage = () => {
         // New portfolio - start from template selection
         if (isMounted) {
           setPortfolioData(null);
-<<<<<<< Updated upstream
-          setTitle('');
-          setDescription('');
-          
-=======
           setTitle("");
           setDescription("");
           loadedPortfolioIdRef.current = null; // Clear loaded ID for new portfolios
 
->>>>>>> Stashed changes
           // Check if there's a template query parameter
           const templateParam = searchParams.get("template");
           if (templateParam) {
@@ -562,13 +540,10 @@ const PortfolioBuilderPage = () => {
 
   // Template selection
   const handleTemplateSelect = async (template) => {
-<<<<<<< Updated upstream
-=======
     console.log("🎨 Template selected:", template);
     console.log("Template ID:", template.id);
     console.log("Template Name:", template.name);
 
->>>>>>> Stashed changes
     if (portfolioData && portfolioData.templateId !== template.id) {
       const confirmSwitch = window.confirm(
         "Switching templates will reset your current customizations. Are you sure?"
@@ -586,21 +561,13 @@ const PortfolioBuilderPage = () => {
       );
 
       try {
-<<<<<<< Updated upstream
-=======
         // Create the portfolio data using the template system
         const templateData = createPortfolioFromTemplate(template.id);
 
->>>>>>> Stashed changes
         // Create a minimal portfolio with the template
         const initialPortfolioData = {
           title: `${template.name} Portfolio`,
           description: `Portfolio created with ${template.name} template`,
-<<<<<<< Updated upstream
-          template: template.id,
-          sections: [], // Empty sections for now
-          styling: template.styling || {},
-=======
           template: template.id, // This is the correct field name for backend
           sections: templateData.content
             ? Object.keys(templateData.content).map((key) => ({
@@ -611,7 +578,6 @@ const PortfolioBuilderPage = () => {
             : [],
           content: templateData.content || {},
           styling: templateData.styling || template.styling || {},
->>>>>>> Stashed changes
           published: false,
         };
 
@@ -625,16 +591,6 @@ const PortfolioBuilderPage = () => {
         console.log("📥 createPortfolio result:", result);
 
         if (result && result.success && result.portfolio?._id) {
-<<<<<<< Updated upstream
-          console.log('✅ Portfolio created with ID:', result.portfolio._id);
-          
-          // Navigate to the new portfolio ID with setup=true parameter
-          // This tells the page to show the setup form for this new portfolio
-          navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
-          
-          // The useEffect will reload the portfolio data and show setup
-          toast.success('Template selected! Setting up your portfolio...', { 
-=======
           const newPortfolioId = result.portfolio._id;
           console.log("✅ Portfolio created with ID:", newPortfolioId);
 
@@ -683,7 +639,6 @@ const PortfolioBuilderPage = () => {
           });
 
           toast.success("Template selected! Setting up your portfolio...", {
->>>>>>> Stashed changes
             duration: 2000,
             id: "template-selected",
           });
