@@ -35,7 +35,7 @@ export default function HomePage() {
         {/* Lazy load sections as user scrolls */}
         <LazySection fallback={<SectionSkeleton />}>
           <Suspense fallback={<SectionSkeleton />}>
-            <TrustBanner />
+            {/* <TrustBanner /> */}
           </Suspense>
         </LazySection>
 

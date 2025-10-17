@@ -99,7 +99,7 @@ const useAuthStore = create(
           set({ isLoading: true });
 
           const result = await authApi.signup({ name, email, password });
-          const { user, token } = result.data; // The user and token are in result.data
+          const { user } = result.data; // The user and token are in result.data
 
           set({
             user,
@@ -207,9 +207,50 @@ const useAuthStore = create(
           return { success: true };
         } catch (error) {
           set({ isLoading: false });
+          
+          // Handle validation errors
+          if (error.response?.data?.details) {
+            return {
+              success: false,
+              error: error.response.data.error || "Validation failed",
+              details: error.response.data.details,
+            };
+          }
+          
           return {
             success: false,
-            error: error.response?.data?.message || "Update failed",
+            error: error.response?.data?.message || error.response?.data?.error || "Update failed",
+          };
+        }
+      },
+
+      uploadAvatar: async (file) => {
+        try {
+          set({ isLoading: true });
+
+          // Validate file
+          if (!file.type.startsWith('image/')) {
+            throw new Error('Please select an image file');
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            throw new Error('File size must be less than 5MB');
+          }
+
+          const updatedUser = await authApi.uploadAvatar(file);
+
+          set({
+            user: updatedUser,
+            isLoading: false,
+          });
+
+          toast.success("Avatar updated successfully!");
+          return { success: true, user: updatedUser };
+        } catch (error) {
+          set({ isLoading: false });
+          return {
+            success: false,
+            error: error.response?.data?.message || error.response?.data?.error || error.message || "Avatar upload failed",
           };
         }
       },

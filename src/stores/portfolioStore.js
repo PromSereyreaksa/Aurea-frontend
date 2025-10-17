@@ -3,10 +3,11 @@ import { portfolioApi } from '../lib/portfolioApi';
 import api from '../lib/baseApi';
 import toast from 'react-hot-toast';
 
-const usePortfolioStore = create((set, get) => ({
+const usePortfolioStore = create((set) => ({
   // State
   portfolios: [],
   currentPortfolio: null,
+  portfolioStats: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -49,25 +50,55 @@ const usePortfolioStore = create((set, get) => ({
     }
   },
 
-  fetchUserPortfolios: async () => {
+  fetchUserPortfolios: async (published = null) => {
     try {
       set({ isLoading: true });
       
-      const response = await api.get('/api/portfolios/user/me');
-      const portfolios = response.data.data.portfolios;
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (published !== null) {
+        params.append('published', published);
+      }
+      
+      const url = `/api/portfolios/user/me${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await api.get(url);
+      
+      // Handle response - check for different structures
+      const portfolios = response.data?.data || response.data?.data?.portfolios || [];
+      const meta = response.data?.meta || {};
       
       set({
         portfolios,
         isLoading: false,
       });
 
-      return { success: true };
+      return { success: true, portfolios, meta };
       
     } catch (error) {
       set({ isLoading: false });
       return { 
         success: false, 
         error: error.response?.data?.message || 'Failed to fetch portfolios' 
+      };
+    }
+  },
+
+  fetchPortfolioStats: async () => {
+    try {
+      const response = await api.get('/api/portfolios/stats');
+      
+      const stats = response.data?.data || response.data;
+      
+      set({
+        portfolioStats: stats,
+      });
+
+      return { success: true, stats };
+      
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to fetch portfolio statistics' 
       };
     }
   },
