@@ -90,7 +90,7 @@ const ModernNavbar = () => {
               alt="AUREA Logo"
               className="h-6 sm:h-8 w-auto transition-all duration-200 group-hover:brightness-110"
             />
-            <span className="text-lg sm:text-2xl font-bold tracking-wide uppercase text-[#1a1a1a] group-hover:text-[#fb8500] transition-colors duration-200">
+            <span className="text-lg sm:text-2xl font-black tracking-tight uppercase text-[#fb8500] group-hover:text-[#ff9500] transition-colors duration-200">
               AUREA
             </span>
           </Link>
