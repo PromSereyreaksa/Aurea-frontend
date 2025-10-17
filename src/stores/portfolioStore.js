@@ -104,9 +104,19 @@ const usePortfolioStore = create((set) => ({
   },
 
   fetchPortfolioById: async (id) => {
+    // Guard against undefined or invalid ID
+    if (!id || id === 'undefined') {
+      console.warn('Invalid portfolio ID:', id, '- skipping fetch');
+      set({ isLoading: false });
+      return {
+        success: false,
+        error: 'Invalid portfolio ID provided'
+      };
+    }
+
     try {
       set({ isLoading: true });
-      
+
       const response = await api.get(`/api/portfolios/${id}`);
       const portfolio = response.data.data.portfolio;
       

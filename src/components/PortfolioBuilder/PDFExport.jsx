@@ -99,6 +99,8 @@ const PortfolioPDF = ({ portfolioData, selectedSections }) => {
       const titles = {
         hero: 'Profile',
         about: 'About Me',
+        work: 'Selected Work',
+        gallery: 'Visual Gallery',
         experience: 'Work Experience',
         education: 'Education',
         skills: 'Skills',
@@ -127,8 +129,17 @@ const PortfolioPDF = ({ portfolioData, selectedSections }) => {
       case 'about':
         return (
           <View style={styles.section} key={sectionId}>
-            <Text style={styles.sectionTitle}>About Me</Text>
-            <Text style={styles.text}>{sectionData.description || ''}</Text>
+            <Text style={styles.sectionTitle}>{sectionData.heading || 'About Me'}</Text>
+            <Text style={styles.text}>{sectionData.content || sectionData.description || ''}</Text>
+            {sectionData.skills && sectionData.skills.length > 0 && (
+              <View style={styles.skillsContainer}>
+                {sectionData.skills.map((skill, index) => (
+                  <Text style={styles.skillItem} key={index}>
+                    {skill}
+                  </Text>
+                ))}
+              </View>
+            )}
           </View>
         );
 
@@ -184,6 +195,40 @@ const PortfolioPDF = ({ portfolioData, selectedSections }) => {
           </View>
         );
 
+      case 'work':
+        return (
+          <View style={styles.section} key={sectionId}>
+            <Text style={styles.sectionTitle}>{sectionData.heading || 'Selected Work'}</Text>
+            {sectionData.projects && sectionData.projects.map((project, index) => (
+              <View style={styles.projectItem} key={index}>
+                <Text style={styles.projectTitle}>{project.title}</Text>
+                <Text style={styles.projectDescription}>{project.description}</Text>
+                {project.meta && (
+                  <Text style={styles.text}>{project.meta}</Text>
+                )}
+                {project.category && (
+                  <Text style={styles.text}>Category: {project.category}</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        );
+
+      case 'gallery':
+        return (
+          <View style={styles.section} key={sectionId}>
+            <Text style={styles.sectionTitle}>{sectionData.heading || 'Visual Gallery'}</Text>
+            {sectionData.images && sectionData.images.map((image, index) => (
+              <View key={index} style={{ marginBottom: 8 }}>
+                <Text style={styles.text}>{image.caption || `Image ${index + 1}`}</Text>
+                {image.meta && (
+                  <Text style={{ fontSize: 10, color: '#9CA3AF' }}>{image.meta}</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        );
+
       case 'projects':
         return (
           <View style={styles.section} key={sectionId}>
@@ -208,21 +253,36 @@ const PortfolioPDF = ({ portfolioData, selectedSections }) => {
       case 'contact':
         return (
           <View style={styles.section} key={sectionId}>
-            <Text style={styles.sectionTitle}>Contact Information</Text>
-            <View style={styles.contactInfo}>
-              {sectionData.email && (
-                <Text style={styles.contactItem}>Email: {sectionData.email}</Text>
-              )}
-              {sectionData.phone && (
-                <Text style={styles.contactItem}>Phone: {sectionData.phone}</Text>
-              )}
-              {sectionData.location && (
-                <Text style={styles.contactItem}>Location: {sectionData.location}</Text>
-              )}
-              {sectionData.website && (
-                <Text style={styles.contactItem}>Website: {sectionData.website}</Text>
-              )}
-            </View>
+            <Text style={styles.sectionTitle}>{sectionData.heading || 'Contact Information'}</Text>
+            {sectionData.description && (
+              <Text style={styles.text}>{sectionData.description}</Text>
+            )}
+            {sectionData.social_links && sectionData.social_links.length > 0 && (
+              <View style={styles.contactInfo}>
+                {sectionData.social_links.map((link, index) => (
+                  <Text key={index} style={styles.contactItem}>
+                    {link.platform}: {link.url}
+                  </Text>
+                ))}
+              </View>
+            )}
+            {/* Fallback for legacy format */}
+            {!sectionData.social_links && (
+              <View style={styles.contactInfo}>
+                {sectionData.email && (
+                  <Text style={styles.contactItem}>Email: {sectionData.email}</Text>
+                )}
+                {sectionData.phone && (
+                  <Text style={styles.contactItem}>Phone: {sectionData.phone}</Text>
+                )}
+                {sectionData.location && (
+                  <Text style={styles.contactItem}>Location: {sectionData.location}</Text>
+                )}
+                {sectionData.website && (
+                  <Text style={styles.contactItem}>Website: {sectionData.website}</Text>
+                )}
+              </View>
+            )}
           </View>
         );
 
@@ -286,6 +346,8 @@ const PDFExport = ({ portfolioData, isVisible, onClose }) => {
     const titles = {
       hero: 'Profile',
       about: 'About Me',
+      work: 'Selected Work',
+      gallery: 'Visual Gallery',
       experience: 'Work Experience',
       education: 'Education',
       skills: 'Skills',

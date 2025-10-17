@@ -1,12 +1,26 @@
-import api, { apiRequest, optimisticUpdate } from './baseApi';
+import api, { apiRequest } from './baseApi';
 
 // Portfolio API functions with caching and optimization
 export const portfolioApi = {
   // Create portfolio with validation
   create: async (portfolioData) => {
+    console.log('=== portfolioApi.create ===');
+    console.log('Creating portfolio with data:', {
+      ...portfolioData,
+      content: portfolioData.content ? '[content object]' : undefined,
+      sections: portfolioData.sections ? `[${portfolioData.sections.length} sections]` : undefined
+    });
+
     return apiRequest(
       async () => {
         const response = await api.post('/api/portfolios', portfolioData);
+
+        console.log('Create response:', response.data);
+
+        // Return the portfolio data directly if it's nested in response
+        if (response.data?.data?.portfolio) {
+          return response.data.data.portfolio;
+        }
         return response.data;
       },
       'Failed to create portfolio'
@@ -105,14 +119,28 @@ export const portfolioApi = {
 
   // Update portfolio with optimistic updates
   update: async (id, updates) => {
+    console.log('=== portfolioApi.update ===');
+    console.log('Portfolio ID:', id);
+    console.log('Updates being sent:', {
+      ...updates,
+      content: updates.content ? '[content object]' : undefined,
+      sections: updates.sections ? `[${updates.sections.length} sections]` : undefined
+    });
+
     return apiRequest(
       async () => {
         const response = await api.put(`/api/portfolios/${id}`, updates);
-        
+
+        console.log('Update response:', response.data);
+
         // Invalidate related caches
         localStorage.removeItem(`aurea_portfolio_${id}`);
         localStorage.removeItem('aurea_user_portfolios');
-        
+
+        // Return the portfolio data directly if it's nested in response
+        if (response.data?.data?.portfolio) {
+          return response.data.data.portfolio;
+        }
         return response.data;
       },
       'Failed to update portfolio'

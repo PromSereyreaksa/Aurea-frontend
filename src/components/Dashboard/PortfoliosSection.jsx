@@ -94,9 +94,16 @@ const PortfoliosSection = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {portfolios.map((portfolio) => (
+          {portfolios.map((portfolio, index) => {
+            // Validate portfolio has an _id
+            if (!portfolio._id) {
+              console.warn('Portfolio missing _id:', portfolio);
+              return null;
+            }
+
+            return (
             <div
-              key={portfolio._id}
+              key={portfolio._id || `portfolio-${index}`}
               className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-visible relative"
             >
               {/* Portfolio Preview */}
@@ -109,7 +116,7 @@ const PortfoliosSection = ({
                           .slice(0, 3)
                           .map((section, idx) => (
                             <div
-                              key={idx}
+                              key={`section-${portfolio._id}-${idx}`}
                               className="border-b border-gray-100 pb-6"
                             >
                               {section.type === "hero" && (
@@ -318,7 +325,8 @@ const PortfoliosSection = ({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
