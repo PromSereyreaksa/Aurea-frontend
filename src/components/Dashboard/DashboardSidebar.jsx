@@ -153,15 +153,15 @@ const DashboardSidebar = ({
   ];
 
   return (
-    <div className="w-64 lg:w-72 bg-gradient-to-b from-[#fb8500] to-[#ff9500] flex flex-col h-full shadow-xl relative">
+    <div className="w-full h-full bg-gradient-to-b from-[#fb8500] to-[#ff9500] flex flex-col shadow-xl relative">
       {/* Mobile Close Button */}
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 lg:hidden bg-white/20 text-white p-2 rounded-lg hover:bg-white/30 transition-all duration-300 z-10"
+          className="absolute top-4 right-4 lg:hidden bg-white/20 text-white p-2 sm:p-3 rounded-lg hover:bg-white/30 transition-all duration-300 z-10"
         >
           <svg
-            className="w-5 h-5"
+            className="w-5 h-5 sm:w-6 sm:h-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -176,8 +176,8 @@ const DashboardSidebar = ({
         </button>
       )}
 
-      {/* Logo Section */}
-      <div className="p-4 lg:p-6 border-b border-white/20">
+      {/* Logo Section - Show on small mobile when sidebar is open, always show on desktop */}
+      <div className="p-4 lg:p-6 border-b border-white/20 sm:hidden lg:block">
         <Link to="/" className="flex items-center gap-3 group">
           <img
             src="/AUREA - Logo.jpg"
@@ -196,7 +196,7 @@ const DashboardSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 pt-16 lg:pt-4 space-y-3 overflow-y-auto">
         {sidebarItems.map((item) => {
           // If item is a link, render as Link component
           if (item.isLink) {
