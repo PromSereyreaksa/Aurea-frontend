@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:readymag.com)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

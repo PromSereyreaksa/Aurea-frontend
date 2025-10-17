@@ -1,0 +1,63 @@
+{
+  "id": "serene",
+  "name": "Serene",
+  "version": "1.0.0",
+  "description": "Botanical and elegant portfolio template with soft, organic, nature-inspired design",
+  "category": "elegant",
+  "tags": ["botanical", "elegant", "nature", "soft", "organic"],
+  "author": "Aurea",
+  "sections": [
+    {
+      "id": "hero",
+      "name": "Hero",
+      "type": "hero",
+      "required": true,
+      "fields": ["title", "subtitle", "description1", "description2"]
+    },
+    {
+      "id": "about",
+      "name": "About",
+      "type": "about",
+      "required": true,
+      "fields": ["name", "role", "image", "bio", "location", "experience"]
+    },
+    {
+      "id": "gallery",
+      "name": "Gallery",
+      "type": "gallery",
+      "required": true,
+      "fields": ["heading", "images"]
+    },
+    {
+      "id": "contact",
+      "name": "Contact",
+      "type": "contact",
+      "required": true,
+      "fields": ["heading", "text", "email", "phone", "instagram"]
+    }
+  ],
+  "colors": {
+    "primary": "#403f33",
+    "secondary": "#6c6258",
+    "accent": "#c4c3bd",
+    "background": "#fafbfb",
+    "surface": "#FFFFFF",
+    "text": "#403f33",
+    "textSecondary": "#6c6258",
+    "border": "#d4d2cd"
+  },
+  "fonts": {
+    "heading": "'Crimson Text', serif",
+    "body": "'Crimson Text', serif",
+    "mono": "'Crimson Text', serif"
+  },
+  "features": [
+    "Responsive design",
+    "Image upload",
+    "Inline editing",
+    "Asymmetric grid layout",
+    "Smooth scrolling",
+    "Sticky navigation",
+    "Keyboard shortcuts"
+  ]
+}
