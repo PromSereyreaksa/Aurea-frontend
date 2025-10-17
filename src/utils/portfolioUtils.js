@@ -46,27 +46,57 @@ export const convertToTemplateFormat = (portfolio) => {
     return legacyMap[id] || id;
   };
 
-  // If already in template format, normalize the templateId
-  if (portfolio.templateId && portfolio.content) {
+  console.log('convertToTemplateFormat - Input portfolio:', {
+    hasTemplate: !!portfolio.template,
+    hasTemplateId: !!portfolio.templateId,
+    hasContent: !!portfolio.content,
+    hasSections: !!portfolio.sections,
+    template: portfolio.template,
+    templateId: portfolio.templateId,
+    sectionsLength: portfolio.sections?.length
+  });
+
+  // Handle backend returning 'template' as string field
+  // Check if portfolio has content field (new format)
+  if (portfolio.content && typeof portfolio.content === 'object') {
+    const templateId = normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon');
+    console.log('Using content-based format with templateId:', templateId);
     return {
       ...portfolio,
-      templateId: normalizeTemplateId(portfolio.templateId)
+      templateId: templateId,
+      content: portfolio.content,
+      styling: portfolio.styling || {},
+      structure: portfolio.structure || {},
+      metadata: portfolio.metadata || {},
     };
   }
 
-  // Convert old sections-based format to new template format
-  const templateData = {
-    templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
-    content: portfolio.sections?.reduce((acc, section) => {
+  // Convert sections-based format to new template format
+  if (portfolio.sections && Array.isArray(portfolio.sections)) {
+    console.log('Converting sections-based format to template format');
+    const content = portfolio.sections.reduce((acc, section) => {
       acc[section.type] = section.content;
       return acc;
-    }, {}) || {},
+    }, {});
+
+    return {
+      templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
+      content: content,
+      styling: portfolio.styling || {},
+      structure: portfolio.structure || {},
+      metadata: portfolio.metadata || {},
+    };
+  }
+
+  // Fallback to empty portfolio structure
+  console.log('Using fallback empty structure');
+  return {
+    templateId: normalizeTemplateId(portfolio.template || portfolio.templateId || 'echolon'),
+    content: {},
     styling: portfolio.styling || {},
     structure: portfolio.structure || {},
     metadata: portfolio.metadata || {},
   };
-
-  return templateData;
 };
 
 /**

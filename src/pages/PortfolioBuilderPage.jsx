@@ -28,8 +28,10 @@ import DynamicTemplateSetup from '../components/PortfolioBuilder/DynamicTemplate
 import TemplatePreview from '../components/PortfolioBuilder/TemplatePreview';
 import FloatingActionButtons from '../components/PortfolioBuilder/FloatingActionButtons';
 import StepIndicator from '../components/PortfolioBuilder/StepIndicator';
-import MaintenanceModal from '../components/PortfolioBuilder/MaintenanceModal';
+// import MaintenanceModal from '../components/PortfolioBuilder/MaintenanceModal'; // Not needed anymore - PDF export works directly
 import PublishModal from '../components/PortfolioBuilder/PublishModal';
+// import PDFExport from '../components/PortfolioBuilder/PDFExport'; // Old client-side PDF export
+import PDFExportBackend from '../components/PortfolioBuilder/PDFExportBackend'; // New backend PDF export
 import { SettingsPanel, HelpTooltip, AutoSaveStatus } from '../components/PortfolioBuilder/PortfolioBuilderUI';
 
 // Custom hooks
@@ -39,7 +41,7 @@ import {
   usePortfolioSave,
   usePortfolioData,
   useBeforeUnloadWarning,
-  useClickOutside,
+  // useClickOutside, // Not needed anymore
 } from '../hooks/usePortfolioBuilder';
 
 // Utilities
@@ -62,6 +64,9 @@ const PortfolioBuilderPage = () => {
   const [searchParams] = useSearchParams();
   const portfolioStore = usePortfolioStore();
 
+  // Debug logging
+  console.log('PortfolioBuilderPage mounted/re-rendered with ID:', id);
+
   // ========================================
   // STATE MANAGEMENT
   // ========================================
@@ -78,7 +83,7 @@ const PortfolioBuilderPage = () => {
 
     // UI State
   const [showPDFExport, setShowPDFExport] = useState(false);
-  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
+  // const [showMaintenancePopup, setShowMaintenancePopup] = useState(false); // Not needed anymore
   const [showSettings, setShowSettings] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
@@ -240,6 +245,15 @@ const PortfolioBuilderPage = () => {
 
     const loadPortfolio = async () => {
       if (!isMounted) return;
+
+      // Guard against undefined or invalid ID
+      if (!id) {
+        console.warn('No portfolio ID provided - likely React StrictMode double mount');
+        // Don't show error or navigate during initial mount with undefined ID
+        // This happens in React StrictMode during development
+        return;
+      }
+
       setInitializing(true);
 
       if (id && id !== 'new') {
@@ -448,7 +462,7 @@ const PortfolioBuilderPage = () => {
   );
 
   useBeforeUnloadWarning(id, autoSaveStatus);
-  useClickOutside(showMaintenancePopup, setShowMaintenancePopup, 'maintenance-popup');
+  // useClickOutside(showMaintenancePopup, setShowMaintenancePopup, 'maintenance-popup'); // Not needed anymore
 
   // ========================================
   // EVENT HANDLERS
@@ -831,7 +845,7 @@ const PortfolioBuilderPage = () => {
                 hasUnsavedChanges={hasUnsavedChanges}
                 onChangeTemplate={handleBackToTemplates}
                 onPreview={handlePreview}
-                onExportPDF={() => setShowMaintenancePopup(true)}
+                onExportPDF={() => setShowPDFExport(true)}
                 onToggleSettings={() => setShowSettings(!showSettings)}
                 onSave={handleSave}
                 onPublish={handlePublishClick}
@@ -877,12 +891,13 @@ const PortfolioBuilderPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Maintenance Modal */}
+      {/* Maintenance Modal - Not needed anymore, PDF export works directly
       <MaintenanceModal
         isOpen={showMaintenancePopup}
         onClose={() => setShowMaintenancePopup(false)}
         onContinue={() => setShowPDFExport(true)}
       />
+      */}
 
       {/* Publish Modal */}
       <PublishModal
@@ -892,6 +907,13 @@ const PortfolioBuilderPage = () => {
         currentSlug={portfolioData?.slug || ''}
         portfolioTitle={title}
         isPublished={portfolioData?.isPublished || false}
+      />
+
+      {/* PDF Export Modal - Using Backend Service */}
+      <PDFExportBackend
+        portfolioData={portfolioData}
+        isVisible={showPDFExport}
+        onClose={() => setShowPDFExport(false)}
       />
     </div>
   );
