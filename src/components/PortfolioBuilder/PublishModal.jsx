@@ -14,6 +14,7 @@ const PublishModal = ({
   const [isAvailable, setIsAvailable] = useState(null);
   const [error, setError] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
+  const [publishingProgress, setPublishingProgress] = useState('');
 
   // Generate initial slug from portfolio title
   useEffect(() => {
@@ -119,11 +120,21 @@ const PublishModal = ({
     }
 
     setIsPublishing(true);
+    setPublishingProgress('Validating subdomain...');
+
     try {
+      setPublishingProgress('Generating HTML files...');
       await onPublish(slug);
-      onClose();
+      setPublishingProgress('Publishing complete!');
+
+      // Small delay to show completion message
+      setTimeout(() => {
+        onClose();
+        setPublishingProgress('');
+      }, 500);
     } catch (err) {
       setError(err.message || 'Failed to publish portfolio');
+      setPublishingProgress('');
     } finally {
       setIsPublishing(false);
     }
@@ -140,16 +151,23 @@ const PublishModal = ({
     setSlug(`${adj}-${noun}-${randomNum}`);
   };
 
-  const getFullUrl = () => {
-    // Return the portfolio URL under aurea.tools domain
-    return `https://aurea.tools/portfolio/${slug}`;
+  const getReactUrl = () => {
+    // React app view (uses your template with React)
+    return `${window.location.origin}/portfolio/${slug}`;
   };
 
-  const copyToClipboard = async () => {
+  const getStaticUrl = () => {
+    // Static HTML file served through frontend domain
+    // In production: https://aurea.tools/{subdomain}/html
+    // In development: http://localhost:5173/{subdomain}/html
+    return `${window.location.origin}/${slug}/html`;
+  };
+
+  const copyToClipboard = async (url, buttonId) => {
     try {
-      await navigator.clipboard.writeText(getFullUrl());
-      // Show a brief visual feedback (you can add a toast here if needed)
-      const button = document.activeElement;
+      await navigator.clipboard.writeText(url);
+      // Show a brief visual feedback
+      const button = document.getElementById(buttonId);
       if (button) {
         const originalText = button.innerHTML;
         button.innerHTML = `
@@ -287,13 +305,17 @@ const PublishModal = ({
 
             {/* URL Preview */}
             {slug && (
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border-2 border-orange-200">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-semibold text-gray-700">
-                    Your Portfolio URL
-                  </label>
+                  <div>
+                    <label className="text-sm font-bold text-orange-900">
+                      Your Portfolio URL
+                    </label>
+                    <p className="text-xs text-orange-700 mt-0.5">Shareable link to your published portfolio</p>
+                  </div>
                   <button
-                    onClick={copyToClipboard}
+                    id="copy-portfolio-url"
+                    onClick={() => copyToClipboard(getStaticUrl(), 'copy-portfolio-url')}
                     className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,28 +324,39 @@ const PublishModal = ({
                     Copy Link
                   </button>
                 </div>
-                <div className="bg-white px-4 py-3 rounded-lg border border-gray-200">
+                <div className="bg-white px-4 py-3 rounded-lg border border-orange-300">
                   <p className="text-sm font-mono text-gray-900 break-all">
-                    {getFullUrl()}
+                    {getStaticUrl()}
                   </p>
+                </div>
+                <div className="mt-3 flex items-start gap-2 text-xs text-orange-800 bg-orange-50/50 px-3 py-2 rounded-lg">
+                  <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <span>Case study links are included automatically if you have added case studies to your projects</span>
                 </div>
               </div>
             )}
 
             {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
               <div className="flex gap-3">
-                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <div className="text-sm text-blue-800 space-y-2">
-                  <p className="font-semibold">What happens when you publish?</p>
-                  <ul className="space-y-1 ml-4 list-disc">
-                    <li>Your portfolio becomes publicly accessible via the URL</li>
-                    <li>Anyone with the link can view your work</li>
-                    <li>You can share this link on social media, resumes, and more</li>
-                    <li>You can unpublish or update your portfolio anytime</li>
-                  </ul>
+                <div className="text-sm text-purple-800 space-y-2">
+                  <p className="font-semibold">Understanding Your URLs</p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="font-medium text-orange-700">🎨 React Portfolio URL:</p>
+                      <p className="text-purple-700 ml-4">Interactive version rendered in the React app - best for sharing with others to view online</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-700">📄 Static HTML URL:</p>
+                      <p className="text-purple-700 ml-4">Standalone HTML file - download and host anywhere (GitHub Pages, Netlify, your own server, or open offline)</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-purple-600 font-medium">✨ Both show the exact same design - choose based on your needs!</p>
                 </div>
               </div>
             </div>
@@ -349,7 +382,9 @@ const PublishModal = ({
               {isPublishing ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Publishing...
+                  <span className="flex flex-col items-start">
+                    <span className="text-xs opacity-80">{publishingProgress}</span>
+                  </span>
                 </>
               ) : (
                 <>

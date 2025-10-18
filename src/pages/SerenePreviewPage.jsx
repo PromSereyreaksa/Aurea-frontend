@@ -1,11 +1,53 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SereneTemplate from '../templates/Serene/SereneTemplate';
 import useAuthStore from '../stores/authStore';
+import { portfolioApi } from '../lib/portfolioApi';
 
 const SerenePreviewPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const [searchParams] = useSearchParams();
+
+  // Check for PDF mode and portfolio ID from query params
+  const portfolioId = searchParams.get('portfolioId');
+  const pdfMode = searchParams.get('pdfMode') === 'true';
+
+  // State for loading real portfolio data
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Load portfolio data if portfolioId is provided OR if data was injected
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      // Check if data was already injected by Puppeteer
+      if (window.__PORTFOLIO_DATA__) {
+        console.log('✓ Using injected portfolio data');
+        setPortfolioData(window.__PORTFOLIO_DATA__);
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, load from API if portfolioId is provided
+      if (portfolioId) {
+        setLoading(true);
+        try {
+          const portfolio = await portfolioApi.getById(portfolioId);
+          if (portfolio) {
+            setPortfolioData(portfolio);
+            // Make data available globally for templateEngine
+            window.__PORTFOLIO_DATA__ = portfolio;
+          }
+        } catch (error) {
+          console.error('Failed to load portfolio data:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadPortfolioData();
+  }, [portfolioId]);
 
   const handleUseTemplate = () => {
     if (isAuthenticated) {
@@ -16,6 +58,30 @@ const SerenePreviewPage = () => {
       navigate('/signup?return=/portfolio-builder/new&template=serene');
     }
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div style={{
+        width: '100%',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#F9F7F4'
+      }}>
+        <div style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '14px',
+          color: '#999999',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}>
+          Loading portfolio...
+        </div>
+      </div>
+    );
+  }
 
   // Mock data for the Serene template preview
   const mockData = {
@@ -124,28 +190,43 @@ const SerenePreviewPage = () => {
     border: '#c4c3c3'
   };
 
+  // Determine which data to use - portfolioData content or mockData fallback
+  // Handle both formats: portfolio.content or direct portfolio data
+  const displayData = portfolioData
+    ? (portfolioData.content || portfolioData)
+    : mockData;
+
+  // Debug logging
+  console.log('Serene Preview - Data Status:', {
+    hasPortfolioData: !!portfolioData,
+    hasContent: !!portfolioData?.content,
+    usingMockData: !portfolioData,
+    pdfMode
+  });
+
   return (
     <div style={{
       width: '100%',
       minHeight: '100vh',
       backgroundColor: sereneColors.background
     }}>
-      {/* Preview Header */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: sereneColors.surface,
-        color: sereneColors.text,
-        padding: '20px 40px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        zIndex: 1000,
-        borderBottom: `1px solid ${sereneColors.border}`,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-      }}>
+      {/* Preview Header - Hidden in PDF mode */}
+      {!pdfMode && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: sereneColors.surface,
+          color: sereneColors.text,
+          padding: '20px 40px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          zIndex: 1000,
+          borderBottom: `1px solid ${sereneColors.border}`,
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+        }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -232,12 +313,13 @@ const SerenePreviewPage = () => {
             USE THIS TEMPLATE
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
-      {/* Template Content with margin for fixed header */}
-      <div style={{ marginTop: '80px' }}>
+      {/* Template Content with margin for fixed header (no margin in PDF mode) */}
+      <div style={{ marginTop: pdfMode ? '0' : '80px' }}>
         <SereneTemplate
-          content={mockData}
+          content={displayData}
           styling={{
             colors: sereneColors,
             fonts: {
@@ -251,8 +333,9 @@ const SerenePreviewPage = () => {
         />
       </div>
 
-      {/* Preview Footer */}
-      <div style={{
+      {/* Preview Footer - Hidden in PDF mode */}
+      {!pdfMode && (
+        <div style={{
         backgroundColor: sereneColors.surface,
         color: sereneColors.text,
         padding: '40px',
@@ -277,7 +360,8 @@ const SerenePreviewPage = () => {
         }}>
           Logo Design / Brand Identity Portfolio
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 };

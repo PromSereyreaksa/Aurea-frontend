@@ -31,6 +31,8 @@ const TemplatesShowcasePage = lazy(() =>
 const PublishedPortfolioPage = lazy(() =>
   import("./pages/PublishedPortfolioPage")
 );
+const StaticHTMLViewer = lazy(() => import("./pages/StaticHTMLViewer"));
+const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer"));
 
 // Lazy load templates (heavy components)
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
@@ -142,6 +144,16 @@ function App() {
             <Route
               path="/portfolio/:portfolioId/project/:projectId"
               element={<EchelonCaseStudyPage />}
+            />
+
+            {/* Static HTML Routes - Must come after other routes to avoid conflicts */}
+            <Route
+              path="/:subdomain/html"
+              element={<StaticHTMLViewer />}
+            />
+            <Route
+              path="/:subdomain/case-study-:projectId.html"
+              element={<StaticCaseStudyViewer />}
             />
           </Routes>
         </Suspense>
