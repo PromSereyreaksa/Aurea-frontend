@@ -20,6 +20,8 @@ import usePortfolioStore from '../stores/portfolioStore';
 
 
 // Template utilities
+import { templateAdapter } from '../lib/templateAdapter';
+// Keep old imports as fallback for now
 import { getTemplate, createPortfolioFromTemplate } from '../templates';
 
 // Components

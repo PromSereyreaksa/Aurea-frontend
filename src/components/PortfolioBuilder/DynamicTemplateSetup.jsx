@@ -48,8 +48,15 @@ const DynamicTemplateSetup = ({
 
   // Handle completion
   const handleComplete = () => {
+    console.log('=== SETUP COMPLETE ===');
+    console.log('Template:', template);
+    console.log('Template defaultContent:', template?.defaultContent);
+    console.log('Form Data:', formData);
+
     // Convert form data to template content format
     const content = convertFormDataToContent(formData, template);
+    console.log('Converted Content:', content);
+
     onComplete(content);
   };
 
@@ -176,9 +183,22 @@ const StepIndicatorCustom = ({ step, currentStep, onStepClick, totalSteps }) => 
  * Maps the nested form data back to the template's expected structure
  */
 const convertFormDataToContent = (formData, template) => {
+  // Ensure template has defaultContent
+  if (!template || !template.defaultContent) {
+    console.error('Template or defaultContent is missing:', template);
+    return {};
+  }
+
   const content = JSON.parse(JSON.stringify(template.defaultContent)); // Deep clone
 
+  // Handle empty formData
+  if (!formData || Object.keys(formData).length === 0) {
+    return content;
+  }
+
   for (const [stepId, stepData] of Object.entries(formData)) {
+    // Skip if stepData is undefined
+    if (!stepData) continue;
     if (stepId === 'basic') {
       // Basic info goes to root level
       continue;
