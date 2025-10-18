@@ -216,14 +216,36 @@ const PortfolioBuilderPage = () => {
       const result = await portfolioApi.publish(currentId, subdomain);
 
       if (result.success || result.data) {
-        toast.success(`Portfolio published! View at: aurea.tools/portfolio/${subdomain}`);
+        // Get deployment details
+        const deploymentData = result.data || result;
+        const template = deploymentData.portfolio?.template || deploymentData.deployment?.template || 'your template';
+        const filesCount = deploymentData.deployment?.filesGenerated?.length || 0;
+        const siteUrl = deploymentData.site?.url || `aurea.tool/${subdomain}`;
+
+        // Show detailed success message
+        toast.success(
+          `🎉 Portfolio published successfully!\n\n` +
+          `Template: ${template}\n` +
+          `Files: ${filesCount} generated\n` +
+          `URL: ${siteUrl}`,
+          { duration: 6000 }
+        );
+
+        console.log('📦 Published Portfolio Details:', {
+          template,
+          filesGenerated: deploymentData.deployment?.filesGenerated,
+          htmlFile: deploymentData.site?.htmlFile,
+          url: siteUrl
+        });
 
         // Update local state
         setPortfolioData(prev => ({
           ...prev,
           subdomain: subdomain,
           isPublished: true,
-          publishedAt: new Date().toISOString()
+          publishedAt: new Date().toISOString(),
+          publishedUrl: siteUrl,
+          template: template
         }));
 
         // Refresh portfolio list

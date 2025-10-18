@@ -195,9 +195,12 @@ export const portfolioApi = {
   publish: async (id, subdomain) => {
     return apiRequest(
       async () => {
+        // Use longer timeout for publish (30 seconds) since it generates HTML files
         const response = await api.post('/api/sites/sub-publish', {
           portfolioId: id,
-          subdomain: subdomain
+          customSubdomain: subdomain
+        }, {
+          timeout: 30000 // 30 seconds for HTML generation
         });
 
         // Update cache

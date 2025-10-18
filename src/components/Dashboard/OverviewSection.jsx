@@ -602,9 +602,7 @@ const OverviewSection = ({ portfolios, user, setActiveSection }) => {
                   );
                   return publishedPortfolio ? (
                     <a
-                      href={`https://aurea.com/${user?.username || "user"}/${
-                        publishedPortfolio.slug || publishedPortfolio._id
-                      }`}
+                      href={`${window.location.origin}/${publishedPortfolio.slug}/html`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group block rounded-xl border-2 border-neutral-200 p-5 hover:border-[#fb8500] hover:shadow-md transition-all duration-300"
@@ -626,8 +624,7 @@ const OverviewSection = ({ portfolios, user, setActiveSection }) => {
                             </span>
                           </div>
                           <p className="text-xs text-neutral-500 font-medium truncate">
-                            aurea.com/{user?.username || "user"}/
-                            {publishedPortfolio.slug || publishedPortfolio._id}
+                            {window.location.host}/{publishedPortfolio.slug}/html
                           </p>
                         </div>
                         <svg
