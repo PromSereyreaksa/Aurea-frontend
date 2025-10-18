@@ -191,26 +191,47 @@ export const portfolioApi = {
     );
   },
 
-  // Publish portfolio
-  publish: async (id) => {
+  // Publish portfolio to subdomain (Gmail-style)
+  publish: async (id, subdomain) => {
     return apiRequest(
       async () => {
-        const response = await api.put(`/api/portfolios/${id}`, { published: true });
-        
+        const response = await api.post('/api/sites/sub-publish', {
+          portfolioId: id,
+          subdomain: subdomain
+        });
+
         // Update cache
         const cacheKey = `aurea_portfolio_${id}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { data } = JSON.parse(cached);
           localStorage.setItem(cacheKey, JSON.stringify({
-            data: { ...data, published: true },
+            data: {
+              ...data,
+              isPublished: true,
+              subdomain: subdomain
+            },
             timestamp: Date.now()
           }));
         }
-        
+
+        // Clear user portfolios cache to refresh list
+        localStorage.removeItem('aurea_user_portfolios');
+
         return response.data;
       },
       'Failed to publish portfolio'
+    );
+  },
+
+  // Get published site by subdomain
+  getPublishedSite: async (subdomain) => {
+    return apiRequest(
+      async () => {
+        const response = await api.get(`/api/sites/${subdomain}`);
+        return response.data;
+      },
+      'Failed to fetch published site'
     );
   },
 

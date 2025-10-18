@@ -11,6 +11,9 @@ import { Toaster, toast } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/PortfolioBuilder/ProtectedRoute";
 
+// Template migration utilities
+import { autoMigrateIfNeeded } from "./utils/templateMigration";
+
 // Lazy load all other pages
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
@@ -31,6 +34,7 @@ const PublishedPortfolioPage = lazy(() =>
 
 // Lazy load templates (heavy components)
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
+const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
@@ -62,6 +66,16 @@ function ScrollToTop() {
 }
 
 function App() {
+  // Auto-migrate templates on app startup (only in development)
+  useEffect(() => {
+    // Only run auto-migration in development mode
+    if (import.meta.env.DEV) {
+      autoMigrateIfNeeded().catch(err => {
+        console.error('Template auto-migration failed:', err);
+      });
+    }
+  }, []);
+
   return (
     <Router>
       <ScrollToTop />
@@ -111,6 +125,10 @@ function App() {
             <Route
               path="/template-preview/echelon"
               element={<EchelonPreviewPage />}
+            />
+            <Route
+              path="/template-preview/serene"
+              element={<SerenePreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route

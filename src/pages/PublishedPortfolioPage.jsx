@@ -25,8 +25,9 @@ const PublishedPortfolioPage = () => {
       setLoading(true);
       setError(null);
 
+      // Use the new /api/sites/:subdomain endpoint for published sites
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/portfolios/public/${slug}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/sites/${slug}`
       );
 
       if (!response.ok) {
@@ -39,7 +40,8 @@ const PublishedPortfolioPage = () => {
       }
 
       const data = await response.json();
-      
+
+      // The /api/sites/:subdomain endpoint returns the portfolio data directly
       if (data.success && data.data) {
         setPortfolio(data.data);
       } else {
