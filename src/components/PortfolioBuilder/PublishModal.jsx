@@ -141,12 +141,30 @@ const PublishModal = ({
   };
 
   const getFullUrl = () => {
-    return `${window.location.origin}/portfolio/${slug}`;
+    // Return the portfolio URL under aurea.tools domain
+    return `https://aurea.tools/portfolio/${slug}`;
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(getFullUrl());
-    // Could add a toast notification here
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(getFullUrl());
+      // Show a brief visual feedback (you can add a toast here if needed)
+      const button = document.activeElement;
+      if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = `
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          button.innerHTML = originalText;
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   if (!isOpen) return null;
@@ -177,9 +195,9 @@ const PublishModal = ({
                 {isPublished ? 'Update Published Portfolio' : 'Publish Your Portfolio'}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {isPublished 
-                  ? 'Update your portfolio URL or republish changes' 
-                  : 'Make your portfolio accessible to everyone'}
+                {isPublished
+                  ? 'Update your portfolio URL or republish changes'
+                  : 'Make your portfolio publicly accessible with a custom URL'}
               </p>
             </div>
             <button
@@ -197,10 +215,10 @@ const PublishModal = ({
             {/* Portfolio URL Section */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Portfolio URL Slug
+                Portfolio Slug
               </label>
               <p className="text-sm text-gray-600 mb-4">
-                Choose a unique URL for your portfolio. This is how people will find your work.
+                Choose a unique slug for your portfolio. It will be accessible at aurea.tools/portfolio/your-slug
               </p>
 
               {/* Slug Input */}

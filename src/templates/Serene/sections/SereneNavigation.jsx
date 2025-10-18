@@ -9,58 +9,68 @@ const SereneNavigation = ({ content, styling, isEditing, onChange }) => {
   const { colors, fonts } = styling;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const menuItems = content.menuItems || [
-    { label: 'Home', link: '#home' },
+  const defaultMenuItems = [
     { label: 'About', link: '#about' },
-    { label: 'Gallery', link: '#gallery' },
+    { label: 'Shipping & returns', link: '#shipping' },
+    { label: 'Cart', link: '#cart' },
   ];
+
+  const menuItems = content.menuItems || defaultMenuItems;
 
   return (
     <nav
-      className="sticky top-0 z-50 backdrop-blur-md border-b"
+      className="sticky top-0 z-50 border-b"
       style={{
-        backgroundColor: `${colors.surface}ee`,
+        backgroundColor: colors.surface,
         borderColor: colors.border,
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="px-8 py-6">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            {content.logoImage && !isEditing && (
-              <img
-                src={content.logoImage}
-                alt="Logo"
-                className="h-8 w-auto"
-              />
-            )}
-            <span
-              className="text-xl font-semibold"
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => isEditing && onChange('logo', e.target.textContent)}
-              style={{ fontFamily: fonts.headingFont, color: colors.primary }}
+          {/* Logo - Blossom style with superscript 's' */}
+          <div className="flex items-center">
+            <div
+              className="text-[32px] tracking-[0.02em]"
+              style={{
+                color: colors.primary,
+                fontFamily: fonts.bodyFont,
+                fontWeight: 500,
+                paddingTop: '4px'
+              }}
             >
-              {content.logo || 'Portfolio'}
-            </span>
+              <span
+                contentEditable={isEditing}
+                suppressContentEditableWarning
+                onBlur={(e) => isEditing && onChange('logo', e.target.textContent)}
+              >
+                {content.logo || (
+                  <>
+                    Blo<sup className="text-[18px] relative -top-2">s</sup>som
+                  </>
+                )}
+              </span>
+            </div>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center gap-10">
             {menuItems.map((item, index) => (
               <a
                 key={index}
                 href={item.link}
-                className="transition-colors hover:opacity-70"
+                className="transition-colors hover:text-[#3d3d3d]"
                 style={{
-                  color: colors.text,
-                  fontFamily: fonts.bodyFont
+                  color: colors.secondary,
+                  fontFamily: fonts.bodyFont,
+                  fontWeight: 500,
+                  fontSize: '13px',
+                  paddingTop: '4px'
                 }}
               >
                 {item.label}
               </a>
             ))}
-          </div>
+          </nav>
 
           {/* Mobile Menu Button */}
           <button
@@ -85,9 +95,9 @@ const SereneNavigation = ({ content, styling, isEditing, onChange }) => {
               <a
                 key={index}
                 href={item.link}
-                className="block py-2 transition-colors hover:opacity-70"
+                className="block py-2 text-[14px] transition-colors"
                 style={{
-                  color: colors.text,
+                  color: colors.secondary,
                   fontFamily: fonts.bodyFont
                 }}
                 onClick={() => setIsMenuOpen(false)}

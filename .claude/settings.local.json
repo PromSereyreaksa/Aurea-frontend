@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(curl -s \"$VITE_API_BASE_URL:-https://aurea-backend-production-8a87.up.railway.app/api/templates\")",
       "Bash(curl:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(tree src/templates -L 2 -I node_modules)",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []

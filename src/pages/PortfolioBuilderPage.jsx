@@ -15,8 +15,10 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
-// Stores
+// Stores & API
 import usePortfolioStore from '../stores/portfolioStore';
+import { portfolioApi } from '../lib/portfolioApi';
+import { templateApi } from '../lib/templateApi';
 
 
 // Template utilities
@@ -192,44 +194,44 @@ const PortfolioBuilderPage = () => {
     setShowPublishModal(true);
   };
 
-  const handlePublish = async (slug) => {
-    console.log('Publishing with slug:', slug);
-    
+  const handlePublish = async (subdomain) => {
+    console.log('Publishing to subdomain:', subdomain);
+
     try {
-      const portfolioToPublish = {
-        ...portfolioData,
-        slug: slug,
-        isPublished: true,
-        publishedAt: new Date().toISOString()
-      };
+      // First save the portfolio if there are unsaved changes
+      if (hasUnsavedChanges) {
+        const saveResult = await handleSave();
+        if (!saveResult || !saveResult.success) {
+          throw new Error('Please save your portfolio before publishing');
+        }
+      }
 
-      const result = await publish(
-        portfolioToPublish,
-        selectedTemplate,
-        title,
-        description,
-        cleanupPlaceholderData,
-        convertContentToSections
-      );
+      // Get the current portfolio ID
+      const currentId = portfolioData?.id || id;
+      if (!currentId || currentId === 'new') {
+        throw new Error('Please save your portfolio before publishing');
+      }
 
-      if (result.success) {
-        toast.success('Portfolio published successfully!');
-        
+      // Call the new subdomain publish API
+      const result = await portfolioApi.publish(currentId, subdomain);
+
+      if (result.success || result.data) {
+        toast.success(`Portfolio published! View at: aurea.tools/portfolio/${subdomain}`);
+
         // Update local state
         setPortfolioData(prev => ({
           ...prev,
-          slug: slug,
-          isPublished: true
+          subdomain: subdomain,
+          isPublished: true,
+          publishedAt: new Date().toISOString()
         }));
 
-        // Navigate if new portfolio
-        if (id === 'new' && result.result?.portfolio?._id) {
-          navigate(`/portfolio-builder/${result.result.portfolio._id}`);
-        }
+        // Refresh portfolio list
+        await portfolioStore.fetchUserPortfolios();
 
-        return result;
+        return { success: true };
       } else {
-        throw new Error(result.error || 'Failed to publish');
+        throw new Error(result.error || 'Failed to publish portfolio');
       }
     } catch (error) {
       console.error('Publish error:', error);
@@ -484,8 +486,19 @@ const PortfolioBuilderPage = () => {
     if (id === 'new') {
       // NEW APPROACH: Create portfolio immediately when template is selected
       console.log('🎨 Creating new portfolio immediately with template:', template.id);
-      
+
       try {
+        // AUTO-SYNC: Sync template schema to backend before creating portfolio
+        // This ensures the backend has the latest template definition
+        console.log('🔄 Syncing template schema to backend...');
+        try {
+          await templateApi.syncTemplateSchema(template);
+          console.log('✅ Template schema synced successfully');
+        } catch (syncError) {
+          // Don't block portfolio creation if sync fails
+          console.warn('⚠️ Template sync failed, continuing anyway:', syncError);
+        }
+
         // Create a minimal portfolio with the template
         const initialPortfolioData = {
           title: `${template.name} Portfolio`,
@@ -500,20 +513,20 @@ const PortfolioBuilderPage = () => {
 
         // Create the portfolio in the database
         const result = await portfolioStore.createPortfolio(initialPortfolioData);
-        
+
         console.log('📥 createPortfolio result:', result);
-        
+
         if (result && result.success && result.portfolio?._id) {
           console.log('✅ Portfolio created with ID:', result.portfolio._id);
-          
+
           // Navigate to the new portfolio ID with setup=true parameter
           // This tells the page to show the setup form for this new portfolio
           navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
-          
+
           // The useEffect will reload the portfolio data and show setup
-          toast.success('Template selected! Setting up your portfolio...', { 
+          toast.success('Template selected! Setting up your portfolio...', {
             duration: 2000,
-            id: 'template-selected' 
+            id: 'template-selected'
           });
         } else {
           console.error('❌ Invalid result:', result);
