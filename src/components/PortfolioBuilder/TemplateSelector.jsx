@@ -1,15 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { getAllTemplates } from '../../templates';
+import { templateAdapter } from '../../lib/templateAdapter';
 
 const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
-  const templates = getAllTemplates();
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Fetch templates from backend on mount
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const fetchTemplates = async () => {
+    try {
+      setLoading(true);
+      const fetchedTemplates = await templateAdapter.getAllTemplates();
+      console.log('Fetched templates:', fetchedTemplates);
+      setTemplates(fetchedTemplates);
+    } catch (error) {
+      console.error('Failed to fetch templates:', error);
+      // Fallback to static templates if backend fails
+      const { getAllTemplates } = await import('../../templates/index.js');
+      setTemplates(getAllTemplates());
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTemplateSelect = (template) => {
     onSelectTemplate(template);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#fb8500] mx-auto mb-4"></div>
+            <p className="text-neutral-600">Loading templates...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-12">

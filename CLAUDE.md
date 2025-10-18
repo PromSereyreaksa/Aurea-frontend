@@ -52,6 +52,7 @@ src/
 ├── pages/              # Page components (lazy-loaded except HomePage)
 ├── templates/          # Portfolio templates
 │   ├── Echelon/        # Swiss-style design template
+│   ├── Serene/         # Botanical-style elegant template
 │   └── Shared/         # Shared template components (Animations, Backgrounds)
 ├── stores/             # Zustand state management
 │   ├── authStore.js    # Authentication state & JWT management
@@ -62,7 +63,12 @@ src/
 │   ├── portfolioApi.js # Portfolio management endpoints
 │   ├── caseStudyApi.js # Case study endpoints
 │   └── cloudinaryApi.js # Image upload integration
-└── hooks/              # Custom React hooks
+├── hooks/              # Custom React hooks
+│   └── usePortfolioBuilder.js # Portfolio builder hooks
+└── utils/              # Utility functions
+    ├── portfolioUtils.js # Data transformations
+    ├── templateAnalyzer.js # Template analysis
+    └── animationConfig.js # GSAP configurations
 ```
 
 ### Routing Structure

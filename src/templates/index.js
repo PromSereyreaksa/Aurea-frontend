@@ -1,8 +1,10 @@
 // Template system for portfolio builder
-// Each template defines structure, default content, and styling
+// This is the FALLBACK when backend API is unavailable
+// Templates are fetched from backend in production
 
 // Import template components
 import EchelonTemplate from './Echelon/EchelonTemplate';
+import SereneTemplate from './Serene/SereneTemplate';
 
 export const templates = {
   'echolon': {
@@ -13,7 +15,7 @@ export const templates = {
     preview: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     previewUrl: '/template-preview/echelon',
     component: EchelonTemplate,
-    
+
     // Template structure defines sections and their layout
     structure: {
       hero: {
@@ -89,14 +91,14 @@ export const templates = {
     // Swiss/International Typographic Style configuration
     styling: {
       colors: {
-        primary: '#000000',       // Pure black
-        secondary: '#666666',     // Medium gray
-        accent: '#B80000',        // Swiss red for accents
-        background: '#FFFFFF',    // Pure white
-        surface: '#FFFFFF',       // Pure white
-        text: '#000000',          // Pure black
-        textSecondary: '#666666', // Medium gray
-        border: '#000000'         // Black borders
+        primary: '#000000',
+        secondary: '#666666',
+        accent: '#B80000',
+        background: '#FFFFFF',
+        surface: '#FFFFFF',
+        text: '#000000',
+        textSecondary: '#666666',
+        border: '#000000'
       },
       fonts: {
         heading: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -105,13 +107,13 @@ export const templates = {
       },
       typography: {
         scale: {
-          h1: '72px',   // Large headlines
-          h2: '48px',   // Section headings
-          h3: '32px',   // Subsection headings
-          h4: '24px',   // Small headings
-          body: '18px', // Body text
-          small: '16px', // Small text
-          meta: '14px'  // Metadata
+          h1: '72px',
+          h2: '48px',
+          h3: '32px',
+          h4: '24px',
+          body: '18px',
+          small: '16px',
+          meta: '14px'
         },
         lineHeight: {
           tight: 1.1,
@@ -130,17 +132,134 @@ export const templates = {
         baseline: '8px'
       },
       spacing: {
-        section: '120px',  // Large section spacing
-        element: '40px',   // Element spacing
-        tight: '16px',     // Tight spacing
-        baseline: '8px'    // Baseline grid
+        section: '120px',
+        element: '40px',
+        tight: '16px',
+        baseline: '8px'
       },
       borderRadius: {
-        none: '0px'        // No border radius for Swiss style
+        none: '0px'
       }
     },
 
-    // Responsive breakpoints
+    responsive: {
+      mobile: '640px',
+      tablet: '768px',
+      desktop: '1024px',
+      wide: '1280px'
+    }
+  },
+
+  'serene': {
+    id: 'serene',
+    name: 'Serene',
+    description: 'Botanical and elegant portfolio template with soft, organic, nature-inspired design',
+    category: 'creative',
+    preview: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    previewUrl: '/template-preview/serene',
+    component: SereneTemplate,
+
+    structure: {
+      navigation: {
+        type: 'navigation',
+        layout: 'sticky_nav',
+        editable: ['logo', 'logoImage', 'menuItems']
+      },
+      hero: {
+        type: 'hero',
+        layout: 'centered_elegant',
+        editable: ['title', 'subtitle', 'description1', 'description2']
+      },
+      about: {
+        type: 'about',
+        layout: 'split_layout',
+        editable: ['name', 'role', 'image', 'bio', 'location', 'experience']
+      },
+      gallery: {
+        type: 'gallery',
+        layout: 'asymmetric_grid',
+        editable: ['heading', 'images']
+      }
+    },
+
+    defaultContent: {
+      navigation: {
+        logo: 'Your Name',
+        logoImage: '',
+        menuItems: [
+          { label: 'Home', link: '#home' },
+          { label: 'About', link: '#about' },
+          { label: 'Gallery', link: '#gallery' }
+        ]
+      },
+      hero: {
+        title: 'Welcome to My Portfolio',
+        subtitle: 'Creating beauty through design',
+        description1: '',
+        description2: ''
+      },
+      about: {
+        name: 'Jane Doe',
+        role: 'Creative Designer',
+        image: '',
+        bio: 'Tell us about yourself...',
+        location: 'City, Country',
+        experience: '5+ years'
+      },
+      gallery: {
+        heading: 'My Work',
+        images: [
+          { image: '', title: 'Project 1', description: 'Description', price: '', caption: '' },
+          { image: '', title: 'Project 2', description: 'Description', price: '', caption: '' },
+          { image: '', title: 'Project 3', description: 'Description', price: '', caption: '' }
+        ]
+      }
+    },
+
+    styling: {
+      colors: {
+        primary: '#403f33',
+        secondary: '#6c6258',
+        accent: '#c4c3bd',
+        background: '#fafbfb',
+        surface: '#FFFFFF',
+        text: '#403f33',
+        textSecondary: '#6c6258',
+        border: '#d4d2cd'
+      },
+      fonts: {
+        heading: "'Crimson Text', serif",
+        body: "'Crimson Text', serif",
+        mono: "'Crimson Text', serif"
+      },
+      typography: {
+        scale: {
+          h1: '72px',
+          h2: '48px',
+          h3: '32px',
+          h4: '24px',
+          body: '18px',
+          small: '16px',
+          meta: '14px'
+        },
+        lineHeight: {
+          tight: 1.1,
+          normal: 1.4,
+          relaxed: 1.6
+        },
+        fontWeight: {
+          regular: 400,
+          bold: 600
+        }
+      },
+      spacing: {
+        section: '120px',
+        element: '40px',
+        tight: '16px',
+        baseline: '8px'
+      }
+    },
+
     responsive: {
       mobile: '640px',
       tablet: '768px',
@@ -154,7 +273,7 @@ export const templates = {
 export const getTemplate = (templateId) => {
   // Normalize template ID (handle old IDs)
   const normalizedId = normalizeTemplateId(templateId);
-  
+
   // Return template or null if not found
   return templates[normalizedId] || null;
 };
@@ -162,15 +281,16 @@ export const getTemplate = (templateId) => {
 // Normalize template IDs to handle legacy/old IDs
 const normalizeTemplateId = (templateId) => {
   if (!templateId) return 'echolon';
-  
+
   // Map old template IDs to new ones
   const legacyMap = {
     'minimal-designer': 'echolon',
     'minimal': 'echolon',
     'designer': 'echolon',
-    'swiss': 'echolon'
+    'swiss': 'echolon',
+    'echelon': 'echolon' // Handle correct spelling
   };
-  
+
   return legacyMap[templateId] || templateId;
 };
 
@@ -189,7 +309,7 @@ export const createPortfolioFromTemplate = (templateId, customizations = {}) => 
   // Deep merge function to merge nested objects
   const deepMerge = (target, source) => {
     const result = { ...target };
-    
+
     for (const key in source) {
       if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
         result[key] = deepMerge(result[key] || {}, source[key]);
@@ -197,15 +317,15 @@ export const createPortfolioFromTemplate = (templateId, customizations = {}) => 
         result[key] = source[key];
       }
     }
-    
+
     return result;
   };
 
   // Merge content with customizations
   const mergedContent = deepMerge(template.defaultContent, customizations);
-  
+
   // Merge styling if provided
-  const mergedStyling = customizations.styling 
+  const mergedStyling = customizations.styling
     ? deepMerge(template.styling, customizations.styling)
     : template.styling;
 
