@@ -20,11 +20,14 @@ import usePortfolioStore from '../stores/portfolioStore';
 import { portfolioApi } from '../lib/portfolioApi';
 import { templateApi } from '../lib/templateApi';
 
-
 // Template utilities
 import { templateAdapter } from '../lib/templateAdapter';
 // Keep old imports as fallback for now
 import { getTemplate, createPortfolioFromTemplate } from '../templates';
+
+// Validation
+import useTemplateValidation from '../hooks/useTemplateValidation';
+import ValidationDisplay from '../components/PortfolioBuilder/ValidationDisplay';
 
 // Components
 import TemplateSelector from '../components/PortfolioBuilder/TemplateSelector';
@@ -34,6 +37,7 @@ import FloatingActionButtons from '../components/PortfolioBuilder/FloatingAction
 import StepIndicator from '../components/PortfolioBuilder/StepIndicator';
 // import MaintenanceModal from '../components/PortfolioBuilder/MaintenanceModal'; // Not needed anymore - PDF export works directly
 import PublishModal from '../components/PortfolioBuilder/PublishModal';
+import TemplateChangeModal from '../components/PortfolioBuilder/TemplateChangeModal';
 // import PDFExport from '../components/PortfolioBuilder/PDFExport'; // Old client-side PDF export
 import PDFExportBackend from '../components/PortfolioBuilder/PDFExportBackend'; // New backend PDF export
 import { SettingsPanel, HelpTooltip, AutoSaveStatus } from '../components/PortfolioBuilder/PortfolioBuilderUI';
@@ -91,6 +95,7 @@ const PortfolioBuilderPage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showTemplateChangeModal, setShowTemplateChangeModal] = useState(false);
 
   // Track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -99,7 +104,7 @@ const PortfolioBuilderPage = () => {
 
   // Custom hooks for complex logic
   const { portfolioData, setPortfolioData, isUserEditing, setIsUserEditing } = usePortfolioData(null);
-  
+
   const { autoSaveStatus, autoSaveToLocalStorage, clearDraft } = useAutoSave(
     id,
     portfolioData,
@@ -111,6 +116,13 @@ const PortfolioBuilderPage = () => {
 
   const { isSaving, isPublishing, save, publish } = usePortfolioSave(id, portfolioStore, clearDraft);
 
+  // Validation hook - only validate when we have a template and portfolio data
+  const { valid, errors, isValidating, validate } = useTemplateValidation(
+    selectedTemplate?.id || selectedTemplate?.templateId,
+    portfolioData?.content,
+    { validateOnChange: false, validateOnMount: false, debounceMs: 500 }
+  );
+
   // ========================================
   // EVENT HANDLERS (defined early for hooks)
   // ========================================
@@ -121,7 +133,7 @@ const PortfolioBuilderPage = () => {
     console.log('Current id from route:', id);
     console.log('isNavigatingAwayRef.current:', isNavigatingAwayRef.current);
     console.log('hasUnsavedChanges:', hasUnsavedChanges);
-    
+
     // Prevent saving if navigating away (for new portfolios)
     if (isNavigatingAwayRef.current) {
       console.log('❌ Navigation in progress, blocking save');
@@ -133,6 +145,27 @@ const PortfolioBuilderPage = () => {
       console.log('❌ No changes to save');
       toast('No changes to save', { id: 'no-changes', icon: 'ℹ️' });
       return;
+    }
+
+    // VALIDATION: Validate content before saving
+    console.log('🔍 Validating portfolio content...');
+    if (selectedTemplate && portfolioData?.content) {
+      // Run validation
+      const validationResult = await validate();
+
+      if (!validationResult || !validationResult.valid) {
+        console.log('❌ Validation failed:', validationResult?.errors || errors);
+        toast.error('Please fix validation errors before saving', {
+          id: 'validation-failed',
+          duration: 3000
+        });
+
+        // Scroll to top to show ValidationDisplay
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      console.log('✅ Validation passed');
     }
 
     console.log('✅ Proceeding with save...');
@@ -149,7 +182,7 @@ const PortfolioBuilderPage = () => {
 
     if (result.success) {
       console.log('Save successful!');
-      
+
       // Update last saved data reference
       lastSavedDataRef.current = {
         content: portfolioData.content,
@@ -157,23 +190,23 @@ const PortfolioBuilderPage = () => {
         title,
         description,
       };
-      
+
       // Mark as no unsaved changes IMMEDIATELY to prevent duplicate saves
       setHasUnsavedChanges(false);
       console.log('Set hasUnsavedChanges to false');
-      
+
       // Show success animation
       setShowSaveSuccess(true);
-      
+
       // Navigate if creating new portfolio - do it IMMEDIATELY with replace
       if (id === 'new' && result.result?.portfolio?._id) {
         const newId = result.result.portfolio._id;
         console.log('🚀 NEW PORTFOLIO - Navigating to:', newId);
-        
+
         // Set navigation flag to block any additional saves
         isNavigatingAwayRef.current = true;
         console.log('Set isNavigatingAwayRef to true');
-        
+
         // Use replace: true to prevent going back to 'new' route
         // Navigate immediately to prevent duplicate saves
         navigate(`/portfolio-builder/${newId}`, { replace: true });
@@ -749,6 +782,37 @@ const PortfolioBuilderPage = () => {
     setIsEditing(true);
   };
 
+  // Template change
+  const handleTemplateChangeClick = () => {
+    if (id === 'new') {
+      toast.error('Please save your portfolio before changing templates');
+      return;
+    }
+    setShowTemplateChangeModal(true);
+  };
+
+  const handleTemplateChange = (newTemplate, migratedContent, analysis) => {
+    console.log('🎨 Template changed:', newTemplate.name);
+    console.log('Migration analysis:', analysis);
+
+    // Update template and content
+    setSelectedTemplate(newTemplate);
+    setPortfolioData(prev => ({
+      ...prev,
+      templateId: newTemplate.id,
+      content: migratedContent,
+      styling: {
+        ...newTemplate.styling,
+        ...prev.styling, // Preserve any custom styling
+      }
+    }));
+
+    // Mark as unsaved
+    setHasUnsavedChanges(true);
+
+    toast.success(`Changed to ${newTemplate.name} template!`);
+  };
+
   // Metadata changes
   const handleTitleChange = (newTitle) => {
     setTitle(newTitle);
@@ -815,13 +879,26 @@ const PortfolioBuilderPage = () => {
               </h1>
             </div>
 
-            {/* Auto-save status */}
+            {/* Auto-save status & Validation status */}
             {(step === 'customize' || step === 'preview') && (
               <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
                 <AutoSaveStatus status={autoSaveStatus} />
               </div>
             )}
           </div>
+
+          {/* Validation Display - Show only in customize mode with errors */}
+          {step === 'customize' && selectedTemplate && portfolioData?.content && errors.length > 0 && (
+            <div className="pb-4">
+              <ValidationDisplay
+                valid={valid}
+                errors={errors}
+                isValidating={isValidating}
+                showSuccess={false}
+                compact={true}
+              />
+            </div>
+          )}
         </div>
 
         {/* Step Indicator */}
@@ -880,7 +957,7 @@ const PortfolioBuilderPage = () => {
                 showSaveSuccess={showSaveSuccess}
                 showSettings={showSettings}
                 hasUnsavedChanges={hasUnsavedChanges}
-                onChangeTemplate={handleBackToTemplates}
+                onChangeTemplate={handleTemplateChangeClick}
                 onPreview={handlePreview}
                 onExportPDF={() => setShowPDFExport(true)}
                 onToggleSettings={() => setShowSettings(!showSettings)}
@@ -944,6 +1021,15 @@ const PortfolioBuilderPage = () => {
         currentSlug={portfolioData?.slug || ''}
         portfolioTitle={title}
         isPublished={portfolioData?.isPublished || false}
+      />
+
+      {/* Template Change Modal */}
+      <TemplateChangeModal
+        isOpen={showTemplateChangeModal}
+        onClose={() => setShowTemplateChangeModal(false)}
+        currentTemplate={selectedTemplate}
+        currentContent={portfolioData?.content}
+        onTemplateChange={handleTemplateChange}
       />
 
       {/* PDF Export Modal - Using Backend Service */}

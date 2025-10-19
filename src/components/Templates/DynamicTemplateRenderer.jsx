@@ -17,6 +17,10 @@ const sectionComponents = {
   gallery: lazy(() => import('./Sections/DynamicGallerySection')),
   contact: lazy(() => import('./Sections/DynamicContactSection')),
   custom: lazy(() => import('./Sections/DynamicCustomSection')),
+  // Additional section type mappings
+  projects: lazy(() => import('./Sections/DynamicWorkSection')), // Alias for work
+  portfolio: lazy(() => import('./Sections/DynamicWorkSection')), // Alias for work
+  navigation: lazy(() => import('./Sections/DynamicCustomSection')), // Use custom for nav
 };
 
 // Loading placeholder

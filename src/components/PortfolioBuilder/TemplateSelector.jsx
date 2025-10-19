@@ -5,7 +5,11 @@ import { templateAdapter } from '../../lib/templateAdapter';
 
 const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
   const [templates, setTemplates] = useState([]);
+  const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('popular');
   const navigate = useNavigate();
 
   // Fetch templates from backend on mount
@@ -19,15 +23,58 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
       const fetchedTemplates = await templateAdapter.getAllTemplates();
       console.log('Fetched templates:', fetchedTemplates);
       setTemplates(fetchedTemplates);
+      setFilteredTemplates(fetchedTemplates);
     } catch (error) {
       console.error('Failed to fetch templates:', error);
       // Fallback to static templates if backend fails
       const { getAllTemplates } = await import('../../templates/index.js');
-      setTemplates(getAllTemplates());
+      const fallbackTemplates = getAllTemplates();
+      setTemplates(fallbackTemplates);
+      setFilteredTemplates(fallbackTemplates);
     } finally {
       setLoading(false);
     }
   };
+
+  // Filter and sort templates
+  useEffect(() => {
+    let result = [...templates];
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      result = result.filter(t => t.category === selectedCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(t =>
+        t.name.toLowerCase().includes(query) ||
+        t.description?.toLowerCase().includes(query) ||
+        t.tags?.some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+
+    // Sort templates
+    switch (sortBy) {
+      case 'popular':
+        result.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+        break;
+      case 'newest':
+        result.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        break;
+      case 'name':
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        break;
+    }
+
+    setFilteredTemplates(result);
+  }, [templates, selectedCategory, searchQuery, sortBy]);
+
+  // Get unique categories
+  const categories = ['all', ...new Set(templates.map(t => t.category).filter(Boolean))];
 
   const handleTemplateSelect = (template) => {
     onSelectTemplate(template);
@@ -92,8 +139,61 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
         )}
       </div>
 
+      {/* Filters and Search */}
+      <div className="mb-8 flex flex-col md:flex-row gap-4">
+        {/* Search */}
+        <div className="flex-1">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search templates by name, description, or tags..."
+              className="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-[#fb8500] focus:outline-none transition-colors"
+            />
+            <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fb8500] focus:outline-none transition-colors bg-white cursor-pointer capitalize"
+          >
+            {categories.map(cat => (
+              <option key={cat} value={cat} className="capitalize">
+                {cat === 'all' ? 'All Categories' : cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sort */}
+        <div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fb8500] focus:outline-none transition-colors bg-white cursor-pointer"
+          >
+            <option value="popular">Most Popular</option>
+            <option value="newest">Newest First</option>
+            <option value="name">Alphabetical</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Results count */}
+      <div className="mb-6 text-sm text-gray-600">
+        Showing {filteredTemplates.length} of {templates.length} templates
+        {searchQuery && ` matching "${searchQuery}"`}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {templates.map((template) => (
+        {filteredTemplates.map((template) => (
           <motion.div
             key={template.id}
             className={`group relative bg-white border-2 overflow-hidden transition-all duration-300 hover:shadow-2xl ${
@@ -166,24 +266,31 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
 
             {/* Template Info */}
             <div className="p-6">
-              <h3 className="font-bold text-xl text-[#1a1a1a] mb-2 group-hover:text-[#fb8500] transition-colors">
-                {template.name}
-              </h3>
-              <p className="text-neutral-600 text-sm mb-4 leading-relaxed">
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="font-bold text-xl text-[#1a1a1a] group-hover:text-[#fb8500] transition-colors">
+                  {template.name}
+                </h3>
+                {template.isPremium && (
+                  <span className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded">
+                    PRO
+                  </span>
+                )}
+              </div>
+
+              <p className="text-neutral-600 text-sm mb-4 pb-4 border-b border-gray-200 leading-relaxed">
                 {template.description}
               </p>
-              
-              {/* Template features */}
+
+              {/* Template features/tags */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-3 py-1 bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider">
+                <span className="px-3 py-1 bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider capitalize">
                   {template.category}
                 </span>
-                <span className="px-3 py-1 bg-[#fb8500]/10 text-[#fb8500] text-xs font-semibold uppercase tracking-wider">
-                  Responsive
-                </span>
-                <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold uppercase tracking-wider">
-                  Customizable
-                </span>
+                {template.tags && template.tags.slice(0, 2).map(tag => (
+                  <span key={tag} className="px-3 py-1 bg-[#fb8500]/10 text-[#fb8500] text-xs font-semibold capitalize">
+                    {tag}
+                  </span>
+                ))}
               </div>
 
               {/* Action Buttons - Consistent with dashboard style */}
