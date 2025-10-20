@@ -38,6 +38,8 @@ const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer")
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
 const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
 const SereneAboutPreviewPage = lazy(() => import("./pages/SereneAboutPreviewPage"));
+const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
+const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
@@ -147,6 +149,14 @@ function App() {
             <Route
               path="/template-preview/serene/about"
               element={<SereneAboutPreviewPage />}
+            />
+            <Route
+              path="/template-preview/chic"
+              element={<ChicPreviewPage />}
+            />
+            <Route
+              path="/template-preview/boldfolio"
+              element={<BoldFolioPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route
