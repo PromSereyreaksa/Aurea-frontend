@@ -10,12 +10,16 @@ import api from './baseApi';
 // Import existing template components (keep using them)
 import EchelonTemplate from '../templates/Echelon/EchelonTemplate';
 import SereneTemplate from '../templates/Serene/SereneTemplate';
+import ChicTemplate from '../templates/Chic/ChicTemplate';
+import BoldFolioTemplate from '../templates/BoldFolio/BoldFolioTemplate';
 
 // Map template IDs to their components
 const templateComponents = {
   'echelon': EchelonTemplate,
   'echolon': EchelonTemplate, // Handle typo in existing data
   'serene': SereneTemplate,
+  'chic': ChicTemplate,
+  'boldfolio': BoldFolioTemplate,
 };
 
 class TemplateAdapter {
