@@ -37,6 +37,8 @@ const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer")
 // Lazy load templates (heavy components)
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
 const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
+const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
+const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
@@ -131,6 +133,14 @@ function App() {
             <Route
               path="/template-preview/serene"
               element={<SerenePreviewPage />}
+            />
+            <Route
+              path="/template-preview/chic"
+              element={<ChicPreviewPage />}
+            />
+            <Route
+              path="/template-preview/boldfolio"
+              element={<BoldFolioPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route

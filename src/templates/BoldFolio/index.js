@@ -1,10 +1,14 @@
 /**
  * BoldFolio Template Export
+ * Bold, creative portfolio template with striking typography
  */
 
-export { default } from "./boldfolio";
-export { default as BoldFolio } from "./boldfolio";
-export { default as Navigation } from "./sections/Navigation";
-export { default as ProjectSection } from "./sections/ProjectSection";
-export { default as HomePage } from "./sections/HomePage";
-export { default as WorkPage } from "./sections/WorkPage";
+// Export main template component
+export { default } from './BoldFolioTemplate';
+export { default as BoldFolioTemplate } from './BoldFolioTemplate';
+
+// Export individual section components
+export { default as BoldFolioHero } from './sections/BoldFolioHero';
+export { default as BoldFolioAbout } from './sections/BoldFolioAbout';
+export { default as BoldFolioWork } from './sections/BoldFolioWork';
+export { default as BoldFolioContact } from './sections/BoldFolioContact';

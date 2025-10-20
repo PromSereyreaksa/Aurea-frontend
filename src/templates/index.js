@@ -5,6 +5,8 @@
 // Import template components
 import EchelonTemplate from './Echelon/EchelonTemplate';
 import SereneTemplate from './Serene/SereneTemplate';
+import ChicTemplate from './Chic/ChicTemplate';
+import BoldFolioTemplate from './BoldFolio/BoldFolioTemplate';
 
 export const templates = {
   'echolon': {
@@ -265,6 +267,330 @@ export const templates = {
       tablet: '768px',
       desktop: '1024px',
       wide: '1280px'
+    }
+  },
+
+  'chic': {
+    id: 'chic',
+    name: 'Chic',
+    description: 'Editorial/Magazine-inspired portfolio with asymmetric sidebar layout and clean typography. Features a sticky left info panel and a two-column project grid with alternating layouts.',
+    category: 'editorial',
+    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    previewUrl: '/template-preview/chic',
+    component: ChicTemplate,
+
+    structure: {
+      hero: {
+        type: 'hero',
+        layout: 'sidebar_info_panel',
+        editable: ['name', 'initials', 'bio', 'instagram', 'linkedin', 'behance']
+      },
+      about: {
+        type: 'about',
+        layout: 'sidebar_additional',
+        editable: ['skills', 'experience']
+      },
+      work: {
+        type: 'work',
+        layout: 'asymmetric_editorial_grid',
+        editable: ['projects']
+      },
+      contact: {
+        type: 'contact',
+        layout: 'sidebar_bottom',
+        editable: ['email', 'phone', 'telegram', 'whatsapp', 'availability']
+      }
+    },
+
+    defaultContent: {
+      hero: {
+        name: 'Your Name',
+        initials: 'Y.N.',
+        bio: 'I am a designer focused on brand identity, editorial design, and typography. My work emphasizes clarity, strategic whitespace, and creating visual systems that communicate with precision and elegance.',
+        instagram: 'https://instagram.com/yourname',
+        instagramLabel: 'INSTAGRAM',
+        linkedin: 'https://linkedin.com/in/yourname',
+        linkedinLabel: 'LINKEDIN',
+        behance: 'https://behance.net/yourname',
+        behanceLabel: 'BEHANCE'
+      },
+      about: {
+        skills: 'Brand Identity, Editorial Design, Typography, Art Direction',
+        experience: '5+ years experience working with studios and agencies globally'
+      },
+      work: {
+        projects: [
+          {
+            id: 1,
+            title: 'CHAOSK',
+            subtitle: 'Brand Identity',
+            description: 'Complete brand identity system for an innovative design collective. Including logo design, typography selection, color system, and comprehensive brand guidelines.',
+            image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=1200&h=800&fit=crop',
+            category: 'Brand Identity',
+            year: '2023',
+            awards: 'Awwwards Nominee 2023',
+            link: ''
+          },
+          {
+            id: 2,
+            title: 'NOVA EDITORIAL',
+            subtitle: 'Magazine Design',
+            description: 'Art direction and layout design for a contemporary art and culture publication. Focus on bold typography and strategic use of whitespace.',
+            image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&h=800&fit=crop',
+            category: 'Editorial',
+            year: '2024',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 3,
+            title: 'SPECTRUM',
+            subtitle: 'Web Experience',
+            description: 'UI/UX design for an interactive digital experience showcasing emerging artists. Minimalist interface with emphasis on content.',
+            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=800&fit=crop',
+            category: 'Digital',
+            year: '2024',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 4,
+            title: 'APEX STUDIOS',
+            subtitle: 'Visual Identity',
+            description: 'Complete visual identity system for a multidisciplinary creative studio based in Berlin.',
+            image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&h=800&fit=crop',
+            category: 'Branding',
+            year: '2023',
+            awards: '',
+            link: ''
+          }
+        ]
+      },
+      contact: {
+        email: 'hello@yourname.com',
+        emailLabel: 'EMAIL',
+        phone: '+1 (123) 456-7890',
+        phoneLabel: 'PHONE',
+        telegram: 'https://t.me/yourname',
+        telegramLabel: 'TELEGRAM',
+        whatsapp: '',
+        whatsappLabel: 'WHATSAPP',
+        availability: 'Available for freelance work and collaborations'
+      }
+    },
+
+    styling: {
+      colors: {
+        primary: '#000000',
+        secondary: '#333333',
+        accent: '#FFD700',
+        background: '#FFFFFF',
+        surface: '#F8F7F5',
+        text: '#000000',
+        textSecondary: '#333333',
+        textLight: '#666666',
+        border: '#E5E5E5',
+        borderDark: '#CCCCCC',
+        hover: '#000000'
+      },
+      fonts: {
+        heading: '"Helvetica Neue", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Suisse Intl", "Inter", Roboto, Arial, sans-serif',
+        body: '"Helvetica Neue", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Suisse Intl", "Inter", Roboto, Arial, sans-serif',
+        mono: '"SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
+      },
+      typography: {
+        scale: {
+          h1: '3.5rem',
+          h2: '2rem',
+          h3: '1.25rem',
+          h4: '1rem',
+          body: '0.9375rem',
+          small: '0.75rem',
+          meta: '0.75rem'
+        },
+        lineHeight: {
+          tight: 1.1,
+          normal: 1.5,
+          relaxed: 1.7
+        },
+        fontWeight: {
+          normal: 400,
+          medium: 500,
+          semibold: 600,
+          bold: 700
+        },
+        letterSpacing: {
+          tight: '-0.02em',
+          normal: '0',
+          wide: '0.05em'
+        }
+      },
+      spacing: {
+        section: '4rem',
+        element: '2rem',
+        tight: '1.5rem',
+        baseline: '8px'
+      },
+      borderRadius: {
+        none: '0px',
+        sm: '0px',
+        md: '0px',
+        lg: '0px',
+        full: '0px'
+      }
+    },
+
+    responsive: {
+      mobile: '640px',
+      tablet: '768px',
+      desktop: '1024px',
+      wide: '1400px'
+    }
+  },
+
+  'boldfolio': {
+    id: 'boldfolio',
+    name: 'BoldFolio',
+    description: 'Bold, creative portfolio template with striking typography and vibrant magenta accents. Perfect for designers and creatives who want to make a statement.',
+    category: 'creative',
+    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    previewUrl: '/template-preview/boldfolio',
+    component: BoldFolioTemplate,
+
+    structure: {
+      hero: {
+        type: 'hero',
+        layout: 'fullscreen_bold',
+        editable: ['title', 'subtitle', 'description', 'cta']
+      },
+      work: {
+        type: 'work',
+        layout: 'project_showcase',
+        editable: ['projects']
+      },
+      about: {
+        type: 'about',
+        layout: 'minimal',
+        editable: ['heading', 'name', 'role', 'bio', 'location', 'email']
+      },
+      contact: {
+        type: 'contact',
+        layout: 'centered',
+        editable: ['heading', 'text', 'email', 'social']
+      }
+    },
+
+    defaultContent: {
+      hero: {
+        title: 'Driven by passion—and<br />fuelled by curiosity.',
+        subtitle: 'Designer and art-director<br />based in Montreal, Quebec.',
+        description: 'Think of design as a way<br />to transform problems into<br />empowering opportunities<br />and create appealing visuals<br />that connect with people.',
+        cta: 'Open for collaborations!'
+      },
+      work: {
+        projects: [
+          {
+            title: 'Ice Peak',
+            description: 'A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.',
+            images: [
+              { width: '580px', height: '380px', src: '' },
+              { width: '450px', height: '280px', src: '' }
+            ],
+            logo: '<span>|||</span><span>|||</span><span style="font-size: 100px; letter-spacing: 12px">ICE</span><span style="font-size: 100px; letter-spacing: 12px">PEAK</span>',
+            link: ''
+          },
+          {
+            title: 'The Recreationist',
+            description: 'Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.',
+            images: [
+              { width: '250px', height: '280px', src: '' },
+              { width: '580px', height: '380px', src: '' }
+            ],
+            logo: '',
+            link: ''
+          },
+          {
+            title: 'Hyperloop',
+            description: 'Identity and store for a brand<br />selling minimalistic jewelry.',
+            images: [
+              { width: '250px', height: '280px', src: '' },
+              { width: '500px', height: '500px', src: '' }
+            ],
+            logo: '',
+            link: ''
+          }
+        ]
+      },
+      about: {
+        heading: 'About',
+        name: 'Your Name',
+        role: 'Designer & Art Director',
+        bio: 'I believe in design as a transformative force that turns problems into empowering opportunities. My work focuses on creating appealing visuals that connect with people on a deeper level.',
+        location: 'Montreal, Quebec',
+        email: 'hello@yourname.com'
+      },
+      contact: {
+        heading: "Let's Work Together",
+        text: 'Have a project in mind? Let\'s create something amazing together.',
+        email: 'hello@yourname.com',
+        social: {
+          twitter: '',
+          linkedin: '',
+          instagram: '',
+          behance: '',
+          dribbble: ''
+        }
+      }
+    },
+
+    styling: {
+      colors: {
+        primary: '#ff0080',
+        secondary: '#000000',
+        accent: '#ff0080',
+        background: '#FFFFFF',
+        text: '#000000',
+        textSecondary: '#666666'
+      },
+      fonts: {
+        heading: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
+        body: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
+        mono: '"SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
+      },
+      typography: {
+        scale: {
+          h1: '52px',
+          h2: '52px',
+          h3: '36px',
+          h4: '24px',
+          body: '24px',
+          small: '18px',
+          meta: '14px'
+        },
+        lineHeight: {
+          tight: 1.2,
+          normal: 1.5,
+          relaxed: 1.7
+        },
+        fontWeight: {
+          normal: 400,
+          medium: 500,
+          bold: 700
+        }
+      },
+      spacing: {
+        section: '120px',
+        element: '60px',
+        tight: '20px',
+        baseline: '10px'
+      }
+    },
+
+    responsive: {
+      mobile: '640px',
+      tablet: '768px',
+      desktop: '1024px',
+      wide: '1400px'
     }
   }
 };
