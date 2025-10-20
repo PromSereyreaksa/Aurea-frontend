@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import SereneTemplate from '../templates/Serene/SereneTemplate';
+import SereneAboutPage from '../templates/Serene/SereneAboutPage';
 import useAuthStore from '../stores/authStore';
 import { portfolioApi } from '../lib/portfolioApi';
 
-const SerenePreviewPage = () => {
+const SereneAboutPreviewPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const [searchParams] = useSearchParams();
@@ -68,7 +68,7 @@ const SerenePreviewPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F9F7F4'
+        backgroundColor: '#ffffff'
       }}>
         <div style={{
           fontFamily: "'Inter', sans-serif",
@@ -83,7 +83,7 @@ const SerenePreviewPage = () => {
     );
   }
 
-  // Mock data for the Serene template preview
+  // Mock data for the Serene About page preview
   const mockData = {
     navigation: {
       logo: 'Preview',
@@ -91,86 +91,11 @@ const SerenePreviewPage = () => {
         { label: 'About', link: '/template-preview/serene/about' }
       ]
     },
-    hero: {
-      title: 'Rachel Garcia is a logo designer & brand identity specialist based in Melbourne',
-      description1: 'Specializing in minimalist logo design and comprehensive brand identity systems that bring clarity and recognition to modern businesses.',
-      description2: 'With over 8 years of experience, I create distinctive logos that capture the essence of brands through clean, memorable design solutions.'
-    },
-    gallery: {
-      heroText1: 'Award-winning logo designer specializing in creating distinctive brand identities for global companies across various industries.',
-      heroText2: 'From international sports organizations to luxury fashion brands, each project showcases a commitment to strategic design thinking and visual excellence.',
-      firstRow: [
-        {
-          image: '/mockDataImage/logo/chanel.jpg',
-          title: 'Chanel',
-          description: 'Luxury fashion brand identity',
-          span: 2
-        },
-        {
-          image: '/mockDataImage/logo/loiusvulton.png',
-          title: 'Louis Vuitton',
-          description: 'Premium lifestyle brand',
-          span: 1
-        },
-        {
-          image: '/mockDataImage/logo/Arsenal-Logo.png',
-          title: 'Arsenal FC',
-          description: 'Sports team logo design',
-          span: 2
-        }
-      ],
-      secondRow: [
-        {
-          image: '/mockDataImage/logo/lalakers.png',
-          title: 'LA Lakers',
-          description: 'Professional basketball team',
-          span: 2
-        },
-        {
-          image: '/mockDataImage/logo/nba.jpg',
-          title: 'NBA',
-          description: 'Sports league branding',
-          span: 3
-        },
-        {
-          image: '/mockDataImage/logo/Premier-League-Symbol.png',
-          title: 'Premier League',
-          description: 'Football league identity',
-          span: 2
-        },
-        {
-          image: '/mockDataImage/logo/adidas.webp',
-          title: 'Adidas',
-          description: 'Athletic brand logo',
-          span: 2
-        }
-      ],
-      thirdRow: [
-        {
-          image: '/mockDataImage/logo/84e482f1ccb817ac426324d294eb5f59.jpg',
-          title: 'Brand Logo',
-          description: 'Corporate identity design',
-          span: 2
-        },
-        {
-          image: '/mockDataImage/logo/media_17770be5de64c9b159b23a7da870ae0bd5bc0f400.jpeg',
-          title: 'Media Brand',
-          description: 'Digital media logo',
-          span: 2
-        },
-        {
-          image: '/mockDataImage/logo/pasted-image-0-2-3-1024x950.png',
-          title: 'Shell',
-          description: 'Energy company logo',
-          span: 1
-        }
-      ]
-    },
     about: {
-      bio1: 'Rachel Garcia began tattooing fresh out of art school, and her botanical work has a painterly quality that reflects her training:',
-      tagline: ' with delicate highlights and shadows.',
-      bio2: 'After graduating with a Bachelor of Fine Arts from Greenkrug College of Arts & Design (Auckland, New Zealand) in 2013, her work has been an ever-evolving platform for self-expression.',
-      bio3: 'Rachel often travels to visit museums for inspiration. Recent projects were inspired by a visit to the Sotheby\'s Institute of Art, London.'
+      bio1: 'Specializing in minimalist logo design and comprehensive brand identity systems that bring clarity and recognition to modern businesses.',
+      tagline: '',
+      bio2: 'With over 8 years of experience, I create distinctive logos that capture the essence of brands through clean, memorable design solutions.',
+      bio3: 'Award-winning logo designer specializing in creating distinctive brand identities for global companies across various industries.'
     }
   };
 
@@ -193,7 +118,7 @@ const SerenePreviewPage = () => {
     : mockData;
 
   // Debug logging
-  console.log('Serene Preview - Data Status:', {
+  console.log('Serene About Preview - Data Status:', {
     hasPortfolioData: !!portfolioData,
     hasContent: !!portfolioData?.content,
     usingMockData: !portfolioData,
@@ -229,12 +154,12 @@ const SerenePreviewPage = () => {
           gap: '20px'
         }}>
           <div style={{
-            fontFamily: "'Crimson Text', serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: '24px',
             fontWeight: 600,
             color: sereneColors.primary
           }}>
-            SERENE
+            SERENE - ABOUT
           </div>
           <div style={{
             fontFamily: "'Inter', sans-serif",
@@ -314,7 +239,7 @@ const SerenePreviewPage = () => {
 
       {/* Template Content with margin for fixed header (no margin in PDF mode) */}
       <div style={{ marginTop: pdfMode ? '0' : '80px' }}>
-        <SereneTemplate
+        <SereneAboutPage
           content={displayData}
           styling={{
             colors: sereneColors,
@@ -339,13 +264,13 @@ const SerenePreviewPage = () => {
         borderTop: `1px solid ${sereneColors.border}`
       }}>
         <div style={{
-          fontFamily: "'Crimson Text', serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: '16px',
           marginBottom: '15px',
           fontWeight: 600,
           color: sereneColors.primary
         }}>
-          This is a preview of the SERENE template
+          This is a preview of the SERENE template - About Page
         </div>
         <div style={{
           fontFamily: "'Inter', sans-serif",
@@ -354,7 +279,7 @@ const SerenePreviewPage = () => {
           textTransform: 'uppercase',
           letterSpacing: '0.1em'
         }}>
-          Logo Design / Brand Identity Portfolio
+          Portfolio About Page
         </div>
         </div>
       )}
@@ -362,4 +287,4 @@ const SerenePreviewPage = () => {
   );
 };
 
-export default SerenePreviewPage;
+export default SereneAboutPreviewPage;

@@ -37,11 +37,15 @@ const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer")
 // Lazy load templates (heavy components)
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
 const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
+const SereneAboutPreviewPage = lazy(() => import("./pages/SereneAboutPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
 const EchelonCaseStudyEditorPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyEditorPage")
+);
+const SereneAboutEditorPage = lazy(() =>
+  import("./templates/Serene/SereneAboutEditorPage")
 );
 
 // Loading fallback component
@@ -125,12 +129,24 @@ function App() {
               }
             />
             <Route
+              path="/portfolio-builder/:portfolioId/about"
+              element={
+                <ProtectedRoute>
+                  <SereneAboutEditorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/template-preview/echelon"
               element={<EchelonPreviewPage />}
             />
             <Route
               path="/template-preview/serene"
               element={<SerenePreviewPage />}
+            />
+            <Route
+              path="/template-preview/serene/about"
+              element={<SereneAboutPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route

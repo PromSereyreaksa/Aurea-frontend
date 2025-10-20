@@ -184,12 +184,10 @@ export const templates = {
 
     defaultContent: {
       navigation: {
-        logo: 'Your Name',
+        logo: 'Blossom',
         logoImage: '',
         menuItems: [
-          { label: 'Home', link: '#home' },
-          { label: 'About', link: '#about' },
-          { label: 'Gallery', link: '#gallery' }
+          { label: 'About', link: '#about' }
         ]
       },
       hero: {

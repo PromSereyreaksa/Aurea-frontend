@@ -4,10 +4,12 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import ImageCropModal from '../../../components/Shared/ImageCropModal';
 
 const SereneGallery = ({ content, styling, isEditing, onChange }) => {
   const { colors, fonts } = styling;
   const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [cropModalState, setCropModalState] = useState(null); // { imageUrl, rowType, index }
 
   // First row - 3 items (masonry: medium-tall, short, medium) - NO IMAGES, just placeholders
   const defaultFirstRow = [
@@ -37,8 +39,8 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
   const displaySecondRow = content.secondRow || defaultSecondRow;
   const displayThirdRow = content.thirdRow || defaultThirdRow;
 
-  // Handle image upload
-  const handleImageUpload = async (rowType, index, file) => {
+  // Handle image selection and show crop modal
+  const handleImageSelect = (rowType, index, file) => {
     if (!file) return;
 
     // Validate file type
@@ -53,11 +55,34 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
       return;
     }
 
+    // Create preview URL and show crop modal
+    const imageUrl = URL.createObjectURL(file);
+    setCropModalState({ imageUrl, rowType, index, originalFile: file });
+  };
+
+  // Handle cropped image upload
+  const handleCroppedImageUpload = async (croppedBlob) => {
+    if (!cropModalState) return;
+
+    const { rowType, index } = cropModalState;
     setUploadingIndex(`${rowType}-${index}`);
 
     try {
+      // Convert blob to File object with proper metadata
+      const croppedFile = new File(
+        [croppedBlob],
+        'cropped-image.jpg',
+        { type: 'image/jpeg', lastModified: Date.now() }
+      );
+
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', croppedFile);
+
+      console.log('Uploading cropped image:', {
+        size: croppedFile.size,
+        type: croppedFile.type,
+        name: croppedFile.name
+      });
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
         method: 'POST',
@@ -68,6 +93,8 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload error response:', errorText);
         throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
       }
 
@@ -92,11 +119,16 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
       alert(`Failed to upload image: ${error.message}`);
     } finally {
       setUploadingIndex(null);
+      setCropModalState(null);
+      // Clean up the preview URL
+      if (cropModalState?.imageUrl) {
+        URL.revokeObjectURL(cropModalState.imageUrl);
+      }
     }
   };
 
   const ProductCard = ({ product, index, rowType }) => {
-    // Calculate height based on span (280px base * span) - adjusted for better proportions
+    // Calculate height based on span (280px base * span) - full screen layout
     const height = `${(product.span || 2) * 280}px`;
     const isUploading = uploadingIndex === `${rowType}-${index}`;
 
@@ -107,11 +139,10 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
         style={{ gridRow: `span ${product.span || 2}` }}
       >
         <div
-          className="relative overflow-hidden w-full transition-all duration-300 hover:shadow-lg rounded-md"
+          className="relative overflow-hidden w-full transition-all duration-200 rounded-sm"
           style={{
-            backgroundColor: '#fafafa',
+            backgroundColor: '#f3f4f6',
             height: height,
-            border: `1px solid ${colors.border || '#e0e0e0'}`,
             cursor: isEditing ? 'pointer' : 'default'
           }}
           onClick={() => {
@@ -130,8 +161,10 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
-                  handleImageUpload(rowType, index, file);
+                  handleImageSelect(rowType, index, file);
                 }
+                // Reset input so same file can be selected again
+                e.target.value = '';
               }}
             />
           )}
@@ -139,32 +172,25 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
           {isUploading ? (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
-                <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-[#9e9b95] text-sm">Uploading...</p>
+                <div className="w-10 h-10 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
+                <p className="text-gray-500 text-xs">Uploading...</p>
               </div>
             </div>
           ) : product.image ? (
-            <div className="w-full h-full flex items-center justify-center p-4">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="max-w-full max-h-full object-contain"
-                loading="eager"
-                style={{
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                }}
-              />
-            </div>
+            <img
+              src={product.image}
+              alt={product.title}
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
+                <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
                 {isEditing && (
-                  <p className="text-[#9e9b95] text-sm">Click to upload image</p>
+                  <p className="text-gray-400 text-xs mt-2">Click to upload</p>
                 )}
               </div>
             </div>
@@ -186,12 +212,13 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
                 onChange(rowType, updatedRow);
               }
             }}
+            className="mb-2"
             style={{
-              color: colors.text,
+              color: '#4a5568',
               fontFamily: fonts.bodyFont,
               fontWeight: 500,
-              fontSize: '17px',
-              paddingTop: '4px',
+              fontSize: '24px',
+              lineHeight: '1.4',
               outline: isEditing ? '1px dashed transparent' : 'none',
               cursor: isEditing ? 'text' : 'default'
             }}
@@ -221,13 +248,11 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
                 onChange(rowType, updatedRow);
               }
             }}
-            className="mt-2"
             style={{
-              color: colors.text,
+              color: '#6b7280',
               fontFamily: fonts.bodyFont,
               fontWeight: 500,
-              fontSize: '15px',
-              paddingTop: '4px',
+              fontSize: '18px',
               outline: isEditing ? '1px dashed transparent' : 'none',
               cursor: isEditing ? 'text' : 'default'
             }}
@@ -248,15 +273,30 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
   };
 
   return (
-    <section
-      id="gallery"
-      className="py-16"
-      style={{ backgroundColor: colors.background }}
-    >
+    <>
+      {/* Image Crop Modal */}
+      {cropModalState && (
+        <ImageCropModal
+          imageUrl={cropModalState.imageUrl}
+          onCropComplete={handleCroppedImageUpload}
+          onClose={() => {
+            if (cropModalState?.imageUrl) {
+              URL.revokeObjectURL(cropModalState.imageUrl);
+            }
+            setCropModalState(null);
+          }}
+        />
+      )}
+
+      <section
+        id="gallery"
+        className="py-16"
+        style={{ backgroundColor: colors.background }}
+      >
       <div className="px-8">
         {/* First Row: Hero Text on Left + 3 Images on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-16 mb-20">
-          {/* Hero Text - Left Column, no extra margin */}
+          {/* Hero Text - Left Column */}
           <div className="space-y-10">
             <div
               className="leading-[1.7]"
@@ -266,12 +306,12 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
               style={{
                 color: colors.text,
                 fontFamily: fonts.bodyFont,
-                fontWeight: 500,
-                fontSize: '18px',
+                fontWeight: 600,
+                fontSize: '21px',
                 paddingTop: '4px'
               }}
             >
-              {content.heroText1 || 'Craft your compelling story here. Share what makes your work unique and captivating.'}
+              {content.heroText1 || (isEditing ? 'Click to edit: Add your compelling introduction here. Share what makes your work unique and captivating.' : 'Melbourne-based tattoo artist Rachel Garcia creates tattoos inspired by nature with a soft watercolor technique.')}
             </div>
             <div
               className="leading-[1.7]"
@@ -281,12 +321,12 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
               style={{
                 color: colors.text,
                 fontFamily: fonts.bodyFont,
-                fontWeight: 500,
-                fontSize: '18px',
+                fontWeight: 600,
+                fontSize: '21px',
                 paddingTop: '4px'
               }}
             >
-              {content.heroText2 || 'Tell your audience about your creative process, expertise, or what drives your passion for design.'}
+              {content.heroText2 || (isEditing ? 'Click to edit: Tell your audience about your creative process, expertise, or what drives your passion.' : 'Her delicate, nostalgic flowers, plants and birds are inked with the precision of scientific illustrations (grandma would approve).')}
             </div>
           </div>
 
@@ -298,24 +338,12 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
           </div>
         </div>
 
-        {/* Divider */}
-        <div
-          className="border-t mb-20"
-          style={{ borderColor: colors.border }}
-        />
-
         {/* Second Row - 4 Images (Masonry) */}
         <div className="grid grid-cols-4 gap-8 auto-rows-[280px] mb-20">
           {displaySecondRow.map((product, index) => (
             <ProductCard key={index} product={product} index={index} rowType="secondRow" />
           ))}
         </div>
-
-        {/* Divider */}
-        <div
-          className="border-t mb-20"
-          style={{ borderColor: colors.border }}
-        />
 
         {/* Third Row - 3 Images (Masonry) */}
         <div className="grid grid-cols-3 gap-8 auto-rows-[280px]">
@@ -325,6 +353,7 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 

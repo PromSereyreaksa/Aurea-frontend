@@ -4,140 +4,111 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
-const SereneAbout = ({ content, styling, isEditing, onChange }) => {
+const SereneAbout = ({ content, styling, isEditing, onChange, portfolioId }) => {
   const { colors, fonts } = styling;
+  const navigate = useNavigate();
+
+  const handleEditAboutPage = () => {
+    if (portfolioId) {
+      navigate(`/portfolio-builder/${portfolioId}/about`);
+    }
+  };
 
   return (
     <section
       id="about"
-      className="py-20 px-6"
-      style={{ backgroundColor: colors.surface }}
+      className="py-20 px-8"
+      style={{ backgroundColor: colors.background, position: 'relative' }}
     >
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Image Side */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="order-2 md:order-1"
+      {/* Edit About Page Button - Only visible in editing mode */}
+      {isEditing && portfolioId && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={handleEditAboutPage}
+            className="px-6 py-3 bg-gray-800 text-white hover:bg-gray-700 transition-colors text-sm uppercase tracking-wider font-medium shadow-lg"
+            style={{
+              fontFamily: fonts.bodyFont
+            }}
           >
-            {content.image ? (
-              <img
-                src={content.image}
-                alt={content.name || 'Profile'}
-                className="w-full aspect-square rounded-lg object-cover shadow-lg"
-                style={{ borderColor: colors.border }}
-              />
-            ) : (
-              isEditing && (
-                <div
-                  className="w-full aspect-square rounded-lg flex items-center justify-center bg-gray-100"
-                  style={{ borderColor: colors.border }}
-                >
-                  <p className="text-gray-400">Click to add image</p>
-                </div>
-              )
-            )}
-          </motion.div>
+            ✏️ Edit About Page
+          </button>
+        </div>
+      )}
 
-          {/* Content Side */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="order-1 md:order-2"
-          >
-            {/* Name */}
-            <h2
-              className="text-4xl md:text-5xl font-serif mb-4"
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => isEditing && onChange('name', e.target.textContent)}
-              style={{
-                fontFamily: fonts.headingFont,
-                color: colors.primary
-              }}
-            >
-              {content.name || 'About Me'}
-            </h2>
-
-            {/* Role */}
+      <div>
+        <div className="grid md:grid-cols-3 gap-16">
+          {/* Column 1 */}
+          <div className="text-gray-500 leading-relaxed">
             <p
-              className="text-xl mb-6 opacity-70"
               contentEditable={isEditing}
               suppressContentEditableWarning
-              onBlur={(e) => isEditing && onChange('role', e.target.textContent)}
+              onBlur={(e) => isEditing && onChange('bio1', e.target.textContent)}
               style={{
+                color: colors.text,
                 fontFamily: fonts.bodyFont,
-                color: colors.secondary
+                fontWeight: 600,
+                fontSize: '21px',
+                lineHeight: '1.7'
               }}
             >
-              {content.role || (isEditing ? 'Your Role' : '')}
+              {content.bio1 || (isEditing ? 'Click to edit: First paragraph of your about section. Share your background and story.' : 'Specializing in minimalist logo design and comprehensive brand identity systems that bring clarity and recognition to modern businesses.')}
             </p>
 
-            {/* Divider */}
-            <div
-              className="h-px w-16 mb-6"
-              style={{ backgroundColor: colors.accent }}
-            />
-
-            {/* Bio */}
-            <p
-              className="text-base md:text-lg leading-relaxed whitespace-pre-wrap mb-8"
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => isEditing && onChange('bio', e.target.textContent)}
-              style={{
-                fontFamily: fonts.bodyFont,
-                color: colors.text
-              }}
-            >
-              {content.bio || (isEditing ? 'Tell us about yourself...' : '')}
-            </p>
-
-            {/* Details */}
-            <div className="space-y-3">
-              {(content.location || isEditing) && (
-                <div className="flex items-center space-x-3">
-                  <span style={{ color: colors.accent }}>📍</span>
-                  <span
-                    className="text-sm"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => isEditing && onChange('location', e.target.textContent)}
-                    style={{
-                      fontFamily: fonts.bodyFont,
-                      color: colors.textSecondary
-                    }}
-                  >
-                    {content.location || (isEditing ? 'City, Country' : '')}
-                  </span>
-                </div>
-              )}
-
-              {(content.experience || isEditing) && (
-                <div className="flex items-center space-x-3">
-                  <span style={{ color: colors.accent }}>⏱</span>
-                  <span
-                    className="text-sm"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => isEditing && onChange('experience', e.target.textContent)}
-                    style={{
-                      fontFamily: fonts.bodyFont,
-                      color: colors.textSecondary
-                    }}
-                  >
-                    {content.experience || (isEditing ? '5+ years' : '')}
-                  </span>
-                </div>
-              )}
+            <div className="mt-8">
+              <span
+                contentEditable={isEditing}
+                suppressContentEditableWarning
+                onBlur={(e) => isEditing && onChange('tagline', e.target.textContent)}
+                style={{
+                  color: colors.text,
+                  fontFamily: fonts.bodyFont,
+                  fontSize: '21px',
+                  fontWeight: 600,
+                  lineHeight: '1.7'
+                }}
+              >
+                {content.tagline || (isEditing ? 'Click to edit: Add a special tagline or quote about your work here.' : '')}
+              </span>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="text-gray-500 leading-relaxed">
+            <p
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => isEditing && onChange('bio2', e.target.textContent)}
+              style={{
+                color: colors.text,
+                fontFamily: fonts.bodyFont,
+                fontWeight: 600,
+                fontSize: '21px',
+                lineHeight: '1.7'
+              }}
+            >
+              {content.bio2 || (isEditing ? 'Click to edit: Second paragraph. Describe your education, experience, or approach.' : 'With over 8 years of experience, I create distinctive logos that capture the essence of brands through clean, memorable design solutions.')}
+            </p>
+          </div>
+
+          {/* Column 3 */}
+          <div className="text-gray-500 leading-relaxed">
+            <p
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => isEditing && onChange('bio3', e.target.textContent)}
+              style={{
+                color: colors.text,
+                fontFamily: fonts.bodyFont,
+                fontWeight: 600,
+                fontSize: '21px',
+                lineHeight: '1.7'
+              }}
+            >
+              {content.bio3 || (isEditing ? 'Click to edit: Third paragraph. Share what inspires you or recent achievements.' : 'Award-winning logo designer specializing in creating distinctive brand identities for global companies across various industries.')}
+            </p>
+          </div>
         </div>
       </div>
     </section>
