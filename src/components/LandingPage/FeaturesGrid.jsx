@@ -1,50 +1,29 @@
 import { motion } from "framer-motion";
 import {
-  Zap,
-  Palette,
-  Smartphone,
-  Rocket,
+  Clock,
   Wrench,
-  Infinity,
+  Rocket,
 } from "lucide-react";
 import animations from "../../utils/animationConfig";
 
 const features = [
   {
-    icon: Zap,
-    title: "Lightning Fast",
+    icon: Clock,
+    title: "Efficient",
     description:
-      "Build and publish your portfolio in under 10 minutes. No setup, no hassle, just results.",
-  },
-  {
-    icon: Palette,
-    title: "Design Freedom",
-    description:
-      "Complete creative control with our intuitive visual editor. Your style, your way.",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile Perfect",
-    description:
-      "Every portfolio looks stunning on any device. Responsive by default, beautiful everywhere.",
-  },
-  {
-    icon: Rocket,
-    title: "One-Click Deploy",
-    description:
-      "Publish instantly with custom domains. Go live in seconds, not hours.",
+      "Portfolio setup in just a few minutes. No hassle, no waiting, just seamless creation from start to finish.",
   },
   {
     icon: Wrench,
     title: "Zero Code",
     description:
-      "Focus on design, not development. No coding knowledge required, ever.",
+      "Focus on design, not development. Every layout, animation, and section is built visually—no coding required.",
   },
   {
-    icon: Infinity,
-    title: "Unlimited Projects",
+    icon: Rocket,
+    title: "Instant Deploy",
     description:
-      "Showcase as many projects as you want. No limits, no restrictions.",
+      "With one click, your portfolio is live. Hosted, optimized, and ready to share instantly.",
   },
 ];
 
@@ -64,34 +43,6 @@ export default function FeaturesGrid() {
             </span>
           </motion.div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={animations.viewportConfig}
-            transition={{
-              duration: animations.config.duration,
-              delay: animations.getDelay(1),
-            }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
-          >
-            Everything you need,
-            <br />
-            <span className="text-[#fb8500]">nothing you don't</span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={animations.viewportConfig}
-            transition={{
-              duration: animations.config.duration,
-              delay: animations.getDelay(2),
-            }}
-            className="text-xl text-gray-600 max-w-2xl mx-auto"
-          >
-            Built for designers who want to focus on their craft, not wrestle
-            with technology.
-          </motion.p>
         </div>
 
         {/* Features Grid */}

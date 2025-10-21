@@ -6,6 +6,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 // Eagerly load only critical components (landing page)
 import HomePage from "./pages/HomePage";
@@ -125,6 +127,8 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <SpeedInsights />
+      <Analytics />
       <div className="min-h-screen bg-white text-black font-sans">
         <Suspense fallback={<PageLoader />}>
           <Routes>
