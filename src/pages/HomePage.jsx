@@ -4,17 +4,15 @@ import ModernHero from "../components/LandingPage/ModernHero";
 import ModernFooter from "../components/LandingPage/ModernFooter";
 import LazySection from "../components/LazySection";
 
-// Lazy load sections that are below the fold
+// Eagerly load sections that are in navigation for instant access
+import FeaturesGrid from "../components/LandingPage/FeaturesGrid";
+import TestimonialsSection from "../components/LandingPage/TestimonialsSection";
+
+// Lazy load other sections below the fold
 const TrustBanner = lazy(() => import("../components/LandingPage/TrustBanner"));
-const FeaturesGrid = lazy(() =>
-  import("../components/LandingPage/FeaturesGrid")
-);
 const HowItWorks = lazy(() => import("../components/LandingPage/HowItWorks"));
 const StatsSection = lazy(() =>
   import("../components/LandingPage/StatsSection")
-);
-const TestimonialsSection = lazy(() =>
-  import("../components/LandingPage/TestimonialsSection")
 );
 const FinalCTA = lazy(() => import("../components/LandingPage/FinalCTA"));
 
@@ -32,38 +30,26 @@ export default function HomePage() {
         {/* Hero always loads immediately */}
         <ModernHero />
 
-        {/* Lazy load sections as user scrolls */}
-        <LazySection fallback={<SectionSkeleton />}>
-          <Suspense fallback={<SectionSkeleton />}>
-            {/* <TrustBanner /> */}
-          </Suspense>
-        </LazySection>
+        {/* Eagerly loaded sections - in navigation, no lazy loading */}
+        <FeaturesGrid />
 
-        <LazySection fallback={<SectionSkeleton />}>
-          <Suspense fallback={<SectionSkeleton />}>
-            <FeaturesGrid />
-          </Suspense>
-        </LazySection>
-
-        <LazySection fallback={<SectionSkeleton />}>
+        {/* Lazy load sections with aggressive preloading */}
+        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
           <Suspense fallback={<SectionSkeleton />}>
             <HowItWorks />
           </Suspense>
         </LazySection>
 
-        <LazySection fallback={<SectionSkeleton />}>
+        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
           <Suspense fallback={<SectionSkeleton />}>
             <StatsSection />
           </Suspense>
         </LazySection>
 
-        <LazySection fallback={<SectionSkeleton />}>
-          <Suspense fallback={<SectionSkeleton />}>
-            <TestimonialsSection />
-          </Suspense>
-        </LazySection>
+        {/* Testimonials - eagerly loaded for navigation */}
+        <TestimonialsSection />
 
-        <LazySection fallback={<SectionSkeleton />}>
+        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
           <Suspense fallback={<SectionSkeleton />}>
             <FinalCTA />
           </Suspense>

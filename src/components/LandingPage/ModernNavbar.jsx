@@ -11,7 +11,7 @@ const ModernNavbar = () => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (sectionId === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
