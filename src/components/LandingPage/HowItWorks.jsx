@@ -1,21 +1,21 @@
 import { motion } from "framer-motion";
-import { Upload, Wand2, Share2 } from "lucide-react";
+import { Layout, FileText, Share2 } from "lucide-react";
 import animations from "../../utils/animationConfig";
 
 const steps = [
   {
-    icon: Upload,
+    icon: Layout,
     number: "01",
-    title: "Upload Your Work",
+    title: "Pick a Template",
     description:
-      "Drag and drop your design files, images, and case studies. We support all major formats.",
+      "Choose from our collection of beautifully designed templates to get started.",
   },
   {
-    icon: Wand2,
+    icon: FileText,
     number: "02",
-    title: "Customize Your Portfolio",
+    title: "Fill in Setup Form",
     description:
-      "Use our intuitive visual editor to personalize layouts, colors, and typography to match your brand.",
+      "You can change or modify everything later or skip the form entirely.",
   },
   {
     icon: Share2,
@@ -55,9 +55,9 @@ export default function HowItWorks() {
             }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
           >
-            Three steps to
+            Get started in
             <br />
-            <span className="text-[#fb8500]">portfolio perfection</span>
+            <span className="text-[#fb8500]">three simple steps</span>
           </motion.h2>
 
           <motion.p
@@ -70,8 +70,7 @@ export default function HowItWorks() {
             }}
             className="text-xl text-gray-600 max-w-2xl mx-auto"
           >
-            Getting your portfolio online has never been easier. No technical
-            skills required.
+            Building your portfolio is simple and intuitive. No coding required.
           </motion.p>
         </div>
 

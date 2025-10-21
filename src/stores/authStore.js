@@ -51,31 +51,18 @@ const useAuthStore = create(
           set({ isLoading: true });
 
           const result = await authApi.login({ email, password });
-          console.log("Login result:", result); // Debug log
 
           if (!result || !result.data || !result.data.user) {
             throw new Error("Invalid login response structure");
           }
 
-          const { user, token } = result.data; // The user and token are in result.data
-
-          console.log("User:", user, "Token:", token); // Debug log
+          const { user, token } = result.data;
 
           set({
             user,
             isAuthenticated: true,
             isLoading: false,
           });
-
-          // Check what was actually stored in localStorage
-          console.log(
-            "After login - localStorage token:",
-            localStorage.getItem("aurea_token")
-          );
-          console.log(
-            "After login - localStorage user:",
-            localStorage.getItem("aurea_user")
-          );
 
           // Start token expiration monitoring
           get().startTokenExpirationCheck();
@@ -84,7 +71,6 @@ const useAuthStore = create(
           toast.success("Login successful!", { duration: 2000 });
           return { success: true };
         } catch (error) {
-          console.error("Login error:", error); // Debug log
           set({ isLoading: false });
           return {
             success: false,
@@ -149,11 +135,9 @@ const useAuthStore = create(
       },
 
       checkAuth: async () => {
-        console.log("checkAuth called"); // Debug log
         try {
           // First check if we have a valid, non-expired token
           if (!authApi.isAuthenticated()) {
-            console.log("authApi.isAuthenticated() returned false"); // Debug log
             // Token is missing or expired, clear state
             set({
               user: null,
@@ -163,12 +147,8 @@ const useAuthStore = create(
             return;
           }
 
-          console.log("Token is valid, fetching user data"); // Debug log
-
           // Get fresh user data to verify the token works
           const user = await authApi.getCurrentUser();
-
-          console.log("checkAuth - user data retrieved:", user); // Debug log
 
           set({
             user,
@@ -178,7 +158,6 @@ const useAuthStore = create(
           // Start token expiration monitoring if user is authenticated
           get().startTokenExpirationCheck();
         } catch (error) {
-          console.error("checkAuth error:", error); // Debug log
           // API call failed, clear invalid auth state
           set({
             user: null,
