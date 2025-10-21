@@ -57,12 +57,11 @@ export default function ModernHero() {
             duration: animations.config.duration,
             delay: animations.getDelay(2),
           }}
-          className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed"
         >
           The fastest way for designers to showcase their work.
           <br className="hidden md:block" />
-          No coding required. No templates. Just your vision, beautifully
-          presented.
+          Showcase your work effortlessly - pick a template and let your creativity shine.
         </motion.p>
 
         {/* Scroll Indicator */}
@@ -82,7 +81,7 @@ export default function ModernHero() {
             onClick={() => {
               const featuresSection = document.getElementById("features");
               if (featuresSection) {
-                featuresSection.scrollIntoView({ behavior: "smooth" });
+                featuresSection.scrollIntoView({ behavior: "smooth", block: "start" });
               }
             }}
             animate={{ y: [0, 8, 0] }}

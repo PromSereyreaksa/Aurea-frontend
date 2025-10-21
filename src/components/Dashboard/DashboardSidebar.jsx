@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../stores/authStore";
@@ -6,22 +6,31 @@ import useAuthStore from "../../stores/authStore";
 const DashboardSidebar = ({
   activeSection,
   setActiveSection,
-  user,
+  user: rawUser,
   onClose,
 }) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Handle nested user object structure (same as ProfilePage)
+  const user = rawUser?.user || rawUser;
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
+      // Add a delay to show the loading state
+      await new Promise(resolve => setTimeout(resolve, 1500));
       await logout();
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
+      setIsLoggingOut(false);
     }
   };
 
-  const sidebarItems = [
+  // Main menu items
+  const menuItems = [
     {
       id: "overview",
       name: "Overview",
@@ -80,6 +89,7 @@ const DashboardSidebar = ({
       ),
       isLink: true,
       link: "/templates",
+      external: true,
     },
     {
       id: "analytics",
@@ -140,6 +150,37 @@ const DashboardSidebar = ({
     },
   ];
 
+  // General section items
+  const generalItems = [
+    {
+      id: "settings",
+      name: "Settings",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      ),
+      isLink: true,
+      link: "/profile",
+    },
+  ];
+
   return (
     <div className="w-full h-full bg-gradient-to-b from-[#fb8500] to-[#ff9500] flex flex-col shadow-xl relative">
       {/* Mobile Close Button */}
@@ -184,129 +225,174 @@ const DashboardSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 lg:px-4 py-4 lg:py-6 pt-16 lg:pt-4 space-y-3 overflow-y-auto">
-        {sidebarItems.map((item) => {
-          // If item is a link, render as Link component
-          if (item.isLink) {
-            return (
-              <Link
-                key={item.id}
-                to={item.link}
-                className="w-full flex items-center justify-between px-3 py-3 text-left transition-all duration-300 text-white/90 hover:bg-white/10 rounded-lg group"
-              >
-                <div className="flex items-center flex-1">
-                  <div className="w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all duration-300">
-                    {React.cloneElement(item.icon, { className: "w-6 h-6" })}
+      <nav className="flex-1 px-4 lg:px-5 py-4 lg:py-6 pt-16 lg:pt-4 overflow-y-auto">
+        {/* MENU Section */}
+        <div className="mb-8">
+          <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3 px-3">
+            Menu
+          </p>
+          <div className="space-y-1">
+            {menuItems.map((item) => {
+              // If item is a link, render as Link component
+              if (item.isLink) {
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.link}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 text-white/90 hover:bg-white/10 rounded-lg group"
+                  >
+                    <div className="flex items-center justify-center flex-shrink-0">
+                      {React.cloneElement(item.icon, { className: "w-5 h-5" })}
+                    </div>
+                    <span className="font-medium text-sm truncate flex-1">
+                      {item.name}
+                    </span>
+                    {item.external && (
+                      <svg
+                        className="w-4 h-4 flex-shrink-0 opacity-70"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    )}
+                  </Link>
+                );
+              }
+
+              // Otherwise, render as button for section navigation
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 rounded-lg ${
+                    activeSection === item.id
+                      ? "bg-white text-[#fb8500]"
+                      : "text-white/90 hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-center justify-center flex-shrink-0">
+                    {React.cloneElement(item.icon, { className: "w-5 h-5" })}
                   </div>
-                  <span className="font-semibold text-sm truncate">
+                  <span className="font-medium text-sm truncate">
                     {item.name}
                   </span>
-                </div>
-                {/* Diagonal Arrow Indicator */}
-                <svg
-                  className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors duration-300 flex-shrink-0 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </Link>
-            );
-          }
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          // Otherwise, render as button for section navigation
-          return (
+        {/* GENERAL Section */}
+        <div>
+          <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3 px-3">
+            General
+          </p>
+          <div className="space-y-1">
+            {generalItems.map((item) => {
+              // If item is a link, render as Link component
+              if (item.isLink) {
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.link}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 text-white/90 hover:bg-white/10 rounded-lg group"
+                  >
+                    <div className="flex items-center justify-center flex-shrink-0">
+                      {React.cloneElement(item.icon, { className: "w-5 h-5" })}
+                    </div>
+                    <span className="font-medium text-sm truncate">
+                      {item.name}
+                    </span>
+                  </Link>
+                );
+              }
+
+              // Otherwise, render as button
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 text-white/90 hover:bg-white/10 rounded-lg"
+                >
+                  <div className="flex items-center justify-center flex-shrink-0">
+                    {React.cloneElement(item.icon, { className: "w-5 h-5" })}
+                  </div>
+                  <span className="font-medium text-sm truncate">
+                    {item.name}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* Logout Button */}
             <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center px-3 py-3 text-left transition-all duration-300 rounded-lg ${
-                activeSection === item.id
-                  ? "bg-white text-[#fb8500] shadow-lg"
-                  : "text-white/90 hover:bg-white/10"
-              }`}
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 text-white/90 hover:bg-white/10 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <div
-                className={`w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 ${
-                  activeSection === item.id
-                    ? "bg-[#fb8500] text-white"
-                    : "bg-white/10"
-                }`}
-              >
-                {React.cloneElement(item.icon, { className: "w-6 h-6" })}
+              <div className="flex items-center justify-center flex-shrink-0">
+                {isLoggingOut ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                )}
               </div>
-              <span className="font-semibold text-sm truncate">
-                {item.name}
+              <span className="font-medium text-sm truncate">
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </span>
             </button>
-          );
-        })}
+          </div>
+        </div>
       </nav>
 
       {/* User Profile Section - Bottom */}
-      <div className="border-t border-white/20 p-4 lg:p-4 bg-[#ff9500]/30">
-        {/* View Profile Button */}
-        <Link
-          to="/profile"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-300 group"
-        >
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md">
-            <span className="text-[#fb8500] text-lg font-black">
-              {user?.name?.charAt(0)?.toUpperCase() || "U"}
-            </span>
+      <div className="border-t border-white/20 p-4 bg-white/5">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {user?.avatar || user?.profilePicture ? (
+              <img
+                src={user.avatar || user.profilePicture}
+                alt={user?.name || "User"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-[#fb8500] text-lg font-bold">
+                {user?.name?.charAt(0)?.toUpperCase() || user?.firstName?.charAt(0)?.toUpperCase() || "U"}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white truncate">
-              {user?.name || "User"}
+            <p className="text-l font-semibold text-white truncate">
+              {user?.firstName && user?.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user?.name || user?.username || "User"}
             </p>
-            <p className="text-xs text-white/80 truncate">View profile</p>
+            <p className="text-xs text-white/70 truncate">
+              {user?.email || "user@example.com"}
+            </p>
           </div>
-          <svg
-            className="w-5 h-5 text-white/70 group-hover:text-white transition-colors duration-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </Link>
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-500/20 transition-all duration-300 group mt-2"
-        >
-          <div className="w-10 h-10 rounded-lg bg-white/10 group-hover:bg-red-500/30 flex items-center justify-center flex-shrink-0 transition-all duration-300">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-bold text-white">Logout</p>
-            <p className="text-xs text-white/80">Sign out of your account</p>
-          </div>
-        </button>
+        </div>
       </div>
+
     </div>
   );
 };
