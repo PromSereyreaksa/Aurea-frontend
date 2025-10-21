@@ -9,7 +9,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import SereneNavigation from './sections/SereneNavigation';
 import SereneHero from './sections/SereneHero';
-import SereneAbout from './sections/SereneAbout';
 import SereneGallery from './sections/SereneGallery';
 
 const SereneTemplate = ({
@@ -20,22 +19,22 @@ const SereneTemplate = ({
   className = '',
   portfolioId,
 }) => {
-  // Merge styling from backend with defaults - Blossom color palette (exact match)
+  // Merge styling from backend with defaults - Clean Blossom color palette
   const colors = styling?.colorScheme || styling?.colors || {
-    primary: '#3d3d3d',
-    secondary: '#9e9b95',
-    accent: '#d4cfc8',
-    background: '#e8e6e3',
+    primary: '#4a5568',
+    secondary: '#9ca3af',
+    accent: '#e5e7eb',
+    background: '#ffffff',
     surface: '#ffffff',
-    text: '#3d3d3d',
-    textSecondary: '#9e9b95',
-    border: '#c4c3c3'
+    text: '#6b7280',
+    textSecondary: '#9ca3af',
+    border: '#e5e7eb'
   };
 
   const fonts = styling?.typography || styling?.fonts || {
-    headingFont: "tscy, 'Crimson Text', serif",
-    bodyFont: "tscy, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    monoFont: "tscy, 'Crimson Text', serif"
+    headingFont: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    bodyFont: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    monoFont: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   };
 
   // Apply global styling
@@ -63,7 +62,7 @@ const SereneTemplate = ({
     >
       {/* Global Font Import */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet"
       />
 
@@ -74,6 +73,7 @@ const SereneTemplate = ({
           styling={{ colors, fonts }}
           isEditing={isEditing}
           onChange={(fieldId, value) => onContentChange('navigation', fieldId, value)}
+          portfolioId={portfolioId}
         />
       )}
 
@@ -86,6 +86,8 @@ const SereneTemplate = ({
           onChange={(fieldId, value) => onContentChange('gallery', fieldId, value)}
         />
       )}
+
+      {/* About Section removed - now on separate page accessed via navbar */}
 
       {/* Footer */}
       <footer

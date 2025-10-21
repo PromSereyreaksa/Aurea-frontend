@@ -1,18 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import useAuthStore from '../stores/authStore';
+import usePortfolioStore from '../stores/portfolioStore';
 
 const TemplateCard = ({ template }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { createPortfolio } = usePortfolioStore();
+  const [isCreating, setIsCreating] = useState(false);
 
-  const handleUseTemplate = () => {
-    if (isAuthenticated) {
-      // If logged in, go directly to portfolio builder with template pre-selected
-      navigate(`/portfolio-builder/new?template=${template.id}`);
-    } else {
-      // If not logged in, redirect to signup with return URL
-      navigate(`/signup?return=/portfolio-builder/new&template=${template.id}`);
+  const handleUseTemplate = async () => {
+    if (!isAuthenticated) {
+      // If not logged in, redirect to signup with return URL to templates
+      navigate(`/signup?return=/templates`);
+      return;
+    }
+
+    // If logged in, create the portfolio directly
+    setIsCreating(true);
+    try {
+      const initialPortfolioData = {
+        title: `${template.name} Portfolio`,
+        description: `Portfolio created with ${template.name} template`,
+        template: template.id,
+        sections: [],
+        styling: template.styling || {},
+        published: false,
+      };
+
+      const result = await createPortfolio(initialPortfolioData);
+
+      if (result && result.success && result.portfolio?._id) {
+        toast.success('Template selected! Redirecting to portfolio builder...', {
+          duration: 2000,
+          id: 'template-selected'
+        });
+
+        // Navigate directly to the portfolio builder with the setup step
+        navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
+      } else {
+        const errorMsg = result?.error || 'Failed to create portfolio';
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Failed to create portfolio:', error);
+      toast.error(`Failed to create portfolio: ${error.message || 'Please try again.'}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -158,35 +193,41 @@ const TemplateCard = ({ template }) => {
               e.stopPropagation();
               handleUseTemplate();
             }}
+            disabled={isCreating}
             style={{
               flex: 1,
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '12px',
               fontWeight: 700,
               color: '#FFFFFF',
-              backgroundColor: '#FF6B35',
-              border: '2px solid #FF6B35',
+              backgroundColor: isCreating ? '#999999' : '#FF6B35',
+              border: `2px solid ${isCreating ? '#999999' : '#FF6B35'}`,
               padding: '12px 20px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              cursor: 'pointer',
+              cursor: isCreating ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              opacity: isCreating ? 0.7 : 1
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#E55A2B';
-              e.target.style.borderColor = '#E55A2B';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+              if (!isCreating) {
+                e.target.style.backgroundColor = '#E55A2B';
+                e.target.style.borderColor = '#E55A2B';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#FF6B35';
-              e.target.style.borderColor = '#FF6B35';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              if (!isCreating) {
+                e.target.style.backgroundColor = '#FF6B35';
+                e.target.style.borderColor = '#FF6B35';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }
             }}
           >
-            USE TEMPLATE
+            {isCreating ? 'CREATING...' : 'USE TEMPLATE'}
           </button>
         </div>
       </div>

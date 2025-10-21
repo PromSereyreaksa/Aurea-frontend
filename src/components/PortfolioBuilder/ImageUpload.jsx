@@ -1,10 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder = "Upload Image" }) => {
+const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '', placeholder = "Upload Image" }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const prevImageRef = useRef(currentImage);
+
+  // Reset loading state when currentImage changes
+  useEffect(() => {
+    if (currentImage !== prevImageRef.current) {
+      setImageLoading(false);
+      setImageError(false);
+      prevImageRef.current = currentImage;
+    }
+  }, [currentImage]);
 
   // Handle file upload to actual backend
   const handleFileUpload = async (file) => {
@@ -29,6 +41,8 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
       const formData = new FormData();
       formData.append('image', file);
 
+      console.log('📤 ImageUpload: Uploading file...', file.name);
+
       // Upload to your backend API
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
         method: 'POST',
@@ -44,18 +58,21 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
       }
 
       const result = await response.json();
-      console.log('Upload response:', result);
+      console.log('✅ ImageUpload: Upload response:', result);
 
       if (result.success && result.data?.url) {
         // Use the URL from your backend response
+        console.log('✅ ImageUpload: Calling onImageChange with URL:', result.data.url);
+        setImageError(false); // Reset error state
+        setImageLoading(true); // Start loading the image
         onImageChange(result.data.url);
-        console.log('Image uploaded successfully:', result.data.url);
+        console.log('✅ ImageUpload: onImageChange called successfully');
       } else {
         throw new Error(result.message || 'Upload failed - no URL returned');
       }
-      
+
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ ImageUpload: Upload error:', error);
       alert(`Failed to upload image: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -97,8 +114,11 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
     fileInputRef.current?.click();
   };
 
+  // Debug logging
+  console.log('🖼️ ImageUpload render - currentImage:', currentImage);
+
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative max-w-sm mx-auto ${className}`}>
       <input
         ref={fileInputRef}
         type="file"
@@ -106,18 +126,57 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
         onChange={handleChange}
         className="hidden"
       />
-      
+
       {/* If we have an image, show preview */}
       {currentImage ? (
         <div className="relative group">
           <img
             src={currentImage}
             alt="Current"
-            className="w-full h-64 object-cover rounded-lg border-2 border-gray-300 cursor-pointer hover:opacity-90 transition-opacity"
+            className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300 cursor-pointer hover:opacity-90 transition-opacity"
             onClick={openFileDialog}
             title="Click to change image"
+            onLoad={(e) => {
+              console.log('✅ Image loaded successfully:', e.target.src);
+              setImageError(false);
+              setImageLoading(false); // Image loaded successfully
+            }}
+            onError={(e) => {
+              console.error('❌ Image failed to load:', e.target.src);
+              console.error('❌ Error event:', e);
+              setImageError(true);
+              setImageLoading(false);
+            }}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-lg flex items-center justify-center">
+
+          {/* Show loading overlay while image is loading */}
+          {imageLoading && !imageError && (
+            <div className="absolute inset-0 bg-white bg-opacity-90 rounded-lg flex flex-col items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Loading image...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Show error overlay if image failed to load */}
+          {imageError && (
+            <div className="absolute inset-0 bg-red-50 border-2 border-red-300 rounded-lg flex flex-col items-center justify-center">
+              <svg className="w-12 h-12 text-red-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p className="text-sm text-red-600 font-medium mb-2">Failed to load image</p>
+              <p className="text-xs text-red-500 px-4 text-center break-all">{currentImage}</p>
+              <button
+                onClick={openFileDialog}
+                className="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600"
+              >
+                Upload New Image
+              </button>
+            </div>
+          )}
+
+          <div className="absolute inset-0 group-hover:bg-gray-900 group-hover:bg-opacity-40 transition-all rounded-lg flex items-center justify-center">
             <button
               onClick={openFileDialog}
               className="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-900 px-4 py-2 rounded-lg font-medium shadow-lg"
@@ -143,11 +202,11 @@ const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder 
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={`
-            w-full h-64 border-2 border-dashed rounded-lg
+            w-full aspect-square border-2 border-dashed rounded-lg
             flex flex-col items-center justify-center cursor-pointer
             transition-all duration-200
-            ${dragActive 
-              ? 'border-orange-500 bg-orange-50' 
+            ${dragActive
+              ? 'border-orange-500 bg-orange-50'
               : 'border-gray-300 bg-gray-50 hover:border-orange-400 hover:bg-orange-50'
             }
             ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}

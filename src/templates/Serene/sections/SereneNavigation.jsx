@@ -4,71 +4,81 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const SereneNavigation = ({ content, styling, isEditing, onChange }) => {
+const SereneNavigation = ({ content, styling, isEditing, onChange, portfolioId }) => {
   const { colors, fonts } = styling;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Check if we're in builder mode (editing) or preview mode
+  const isInBuilder = isEditing;
 
   const defaultMenuItems = [
-    { label: 'About', link: '#about' },
-    { label: 'Shipping & returns', link: '#shipping' },
-    { label: 'Cart', link: '#cart' },
+    { label: 'About', link: isInBuilder ? `/portfolio-builder/${portfolioId}/about` : '/template-preview/serene/about' },
   ];
 
-  const menuItems = content.menuItems || defaultMenuItems;
+  // In builder mode, always use the new about editor link, otherwise use content.menuItems if available
+  const menuItems = isInBuilder ? defaultMenuItems : (content.menuItems || defaultMenuItems);
 
   return (
-    <nav
-      className="sticky top-0 z-50 border-b"
+    <header
+      className="border-b border-gray-200 bg-white"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,
       }}
     >
-      <div className="px-8 py-6">
-        <div className="flex items-center justify-between">
-          {/* Logo - Blossom style with superscript 's' */}
-          <div className="flex items-center">
-            <div
-              className="text-[32px] tracking-[0.02em]"
-              style={{
-                color: colors.primary,
-                fontFamily: fonts.bodyFont,
-                fontWeight: 500,
-                paddingTop: '4px'
-              }}
+      <div className="px-8 py-4">
+        <div className="flex justify-between items-center">
+          {/* Logo - Blossom style - BOLD */}
+          <button
+            onClick={() => {
+              if (isInBuilder) {
+                // In builder mode, scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                // In preview mode, navigate to home
+                navigate('/template-preview/serene');
+              }
+            }}
+            className="text-2xl tracking-wider transition-opacity hover:opacity-70"
+            style={{
+              color: colors.text,
+              fontFamily: fonts.bodyFont,
+              fontWeight: 600,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0
+            }}
+          >
+            <span
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => isEditing && onChange('logo', e.target.textContent)}
             >
-              <span
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => isEditing && onChange('logo', e.target.textContent)}
-              >
-                {content.logo || (
-                  <>
-                    Blo<sup className="text-[18px] relative -top-2">s</sup>som
-                  </>
-                )}
-              </span>
-            </div>
-          </div>
+              {content.logo || 'Blossom'}
+            </span>
+          </button>
 
           {/* Desktop Menu */}
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden md:flex space-x-12">
             {menuItems.map((item, index) => (
-              <a
+              <Link
                 key={index}
-                href={item.link}
-                className="transition-colors hover:text-[#3d3d3d]"
+                to={item.link}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
                 style={{
                   color: colors.secondary,
                   fontFamily: fonts.bodyFont,
                   fontWeight: 500,
-                  fontSize: '13px',
-                  paddingTop: '4px'
+                  fontSize: '16px',
+                  textDecoration: 'none'
                 }}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -92,23 +102,26 @@ const SereneNavigation = ({ content, styling, isEditing, onChange }) => {
             className="md:hidden mt-4 pb-4 space-y-3"
           >
             {menuItems.map((item, index) => (
-              <a
+              <Link
                 key={index}
-                href={item.link}
-                className="block py-2 text-[14px] transition-colors"
+                to={item.link}
+                className="block py-2 text-[16px] transition-colors"
                 style={{
                   color: colors.secondary,
-                  fontFamily: fonts.bodyFont
+                  fontFamily: fonts.bodyFont,
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                  padding: '8px 0'
                 }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </motion.div>
         )}
       </div>
-    </nav>
+    </header>
   );
 };
 

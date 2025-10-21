@@ -12,7 +12,7 @@ import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/PortfolioBuilder/ProtectedRoute";
 
 // Template migration utilities
-import { autoMigrateIfNeeded } from "./utils/templateMigration";
+import { autoMigrateIfNeeded, migrateSingleTemplate, migrateAllTemplates } from "./utils/templateMigration";
 
 // Lazy load all other pages
 const AboutPage = lazy(() => import("./pages/AboutPage"));
@@ -37,11 +37,17 @@ const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer")
 // Lazy load templates (heavy components)
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
 const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
+const SereneAboutPreviewPage = lazy(() => import("./pages/SereneAboutPreviewPage"));
+const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
+const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
 const EchelonCaseStudyEditorPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyEditorPage")
+);
+const SereneAboutEditorPage = lazy(() =>
+  import("./templates/Serene/SereneAboutEditorPage")
 );
 
 // Loading fallback component
@@ -69,13 +75,51 @@ function ScrollToTop() {
 
 function App() {
   // Auto-migrate templates on app startup (only in development)
+  // DISABLED TEMPORARILY - causing fetch errors
   useEffect(() => {
     // Only run auto-migration in development mode
-    if (import.meta.env.DEV) {
-      autoMigrateIfNeeded().catch(err => {
-        console.error('Template auto-migration failed:', err);
-      });
-    }
+    // if (import.meta.env.DEV) {
+    //   autoMigrateIfNeeded().catch(err => {
+    //     console.error('Template auto-migration failed:', err);
+    //   });
+    // }
+    console.log('🔄 Template auto-migration DISABLED');
+    
+    // Expose template migration functions to window for manual triggering
+    // Usage in console:
+    //   window.resyncTemplates() - re-sync all templates
+    //   window.resyncEchelon() - re-sync just Echelon template
+    window.resyncTemplates = async () => {
+      console.log('🔄 Re-syncing all templates...');
+      try {
+        const result = await migrateAllTemplates();
+        console.log('✅ Templates re-synced successfully:', result);
+        toast.success('Templates re-synced! Refresh the page.');
+        return result;
+      } catch (error) {
+        console.error('❌ Failed to re-sync templates:', error);
+        toast.error('Failed to re-sync templates');
+        throw error;
+      }
+    };
+    
+    window.resyncEchelon = async () => {
+      console.log('🔄 Re-syncing Echelon template...');
+      try {
+        const result = await migrateSingleTemplate('echelon');
+        console.log('✅ Echelon template re-synced successfully:', result);
+        toast.success('Echelon template re-synced! Refresh the page.');
+        return result;
+      } catch (error) {
+        console.error('❌ Failed to re-sync Echelon:', error);
+        toast.error('Failed to re-sync Echelon template');
+        throw error;
+      }
+    };
+    
+    console.log('💡 Template re-sync functions available:');
+    console.log('   window.resyncTemplates() - re-sync all templates');
+    console.log('   window.resyncEchelon() - re-sync just Echelon template');
   }, []);
 
   return (
@@ -125,12 +169,32 @@ function App() {
               }
             />
             <Route
+              path="/portfolio-builder/:portfolioId/about"
+              element={
+                <ProtectedRoute>
+                  <SereneAboutEditorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/template-preview/echelon"
               element={<EchelonPreviewPage />}
             />
             <Route
               path="/template-preview/serene"
               element={<SerenePreviewPage />}
+            />
+            <Route
+              path="/template-preview/serene/about"
+              element={<SereneAboutPreviewPage />}
+            />
+            <Route
+              path="/template-preview/chic"
+              element={<ChicPreviewPage />}
+            />
+            <Route
+              path="/template-preview/boldfolio"
+              element={<BoldFolioPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route

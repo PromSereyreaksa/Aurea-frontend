@@ -1,0 +1,288 @@
+{
+    "_id": {
+        "$oid": "68f33feda4d9481d010d2d1c"
+    },
+    "templateId": "serene",
+    "name": "Serene",
+    "slug": "serene",
+    "description": "Botanical and elegant portfolio template with soft, organic, nature-inspired design",
+    "thumbnail": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "category": "creative",
+    "schema": {
+        "sections": [
+            {
+                "id": "navigation",
+                "name": "Navigation",
+                "description": "Navigation section",
+                "fields": [
+                    {
+                        "id": "logo",
+                        "label": "Logo",
+                        "type": "text",
+                        "placeholder": "Blossom",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "logoImage",
+                        "label": "Logo Image",
+                        "type": "text",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "menuItems",
+                        "label": "Menu Items",
+                        "type": "array",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": {
+                    "$numberInt": "0"
+                }
+            },
+            {
+                "id": "hero",
+                "name": "Hero",
+                "description": "Hero section",
+                "fields": [
+                    {
+                        "id": "title",
+                        "label": "Title",
+                        "type": "text",
+                        "placeholder": "Welcome to My Portfolio",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "subtitle",
+                        "label": "Subtitle",
+                        "type": "text",
+                        "placeholder": "Creating beauty through design",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "description1",
+                        "label": "Description1",
+                        "type": "text",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "description2",
+                        "label": "Description2",
+                        "type": "text",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": {
+                    "$numberInt": "1"
+                }
+            },
+            {
+                "id": "about",
+                "name": "About",
+                "description": "About section",
+                "fields": [
+                    {
+                        "id": "name",
+                        "label": "Name",
+                        "type": "text",
+                        "placeholder": "Jane Doe",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "role",
+                        "label": "Role",
+                        "type": "text",
+                        "placeholder": "Creative Designer",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "image",
+                        "label": "Image",
+                        "type": "text",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "bio",
+                        "label": "Bio",
+                        "type": "text",
+                        "placeholder": "Tell us about yourself...",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "500"
+                            }
+                        }
+                    },
+                    {
+                        "id": "location",
+                        "label": "Location",
+                        "type": "text",
+                        "placeholder": "City, Country",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "experience",
+                        "label": "Experience",
+                        "type": "text",
+                        "placeholder": "5+ years",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": {
+                    "$numberInt": "2"
+                }
+            },
+            {
+                "id": "gallery",
+                "name": "Gallery",
+                "description": "Gallery section",
+                "fields": [
+                    {
+                        "id": "heading",
+                        "label": "Heading",
+                        "type": "text",
+                        "placeholder": "My Work",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    },
+                    {
+                        "id": "images",
+                        "label": "Images",
+                        "type": "array",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": {
+                                "$numberInt": "100"
+                            }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": {
+                    "$numberInt": "3"
+                }
+            }
+        ],
+        "styling": {
+            "colorScheme": {
+                "primary": "#403f33",
+                "secondary": "#6c6258",
+                "accent": "#c4c3bd",
+                "background": "#fafbfb",
+                "surface": "#FFFFFF",
+                "text": "#403f33",
+                "textSecondary": "#6c6258",
+                "border": "#d4d2cd"
+            },
+            "typography": {
+                "headingFont": "'Crimson Text', serif",
+                "bodyFont": "'Crimson Text', serif",
+                "scale": "default"
+            },
+            "spacing": "default",
+            "customCSS": ""
+        }
+    },
+    "caseStudySchema": {
+        "enabled": false,
+        "fields": []
+    },
+    "version": "1.0.0",
+    "isActive": true,
+    "isDefault": false,
+    "usageCount": {
+        "$numberInt": "0"
+    },
+    "isPremium": false,
+    "createdBy": "Aurea",
+    "tags": [
+        "creative",
+        "serene",
+        "elegant"
+    ],
+    "createdAt": {
+        "$date": {
+            "$numberLong": "1760772077386"
+        }
+    },
+    "updatedAt": {
+        "$date": {
+            "$numberLong": "1760980507785"
+        }
+    },
+    "__v": {
+        "$numberInt": "0"
+    }
+}

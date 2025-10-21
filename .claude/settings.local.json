@@ -1,12 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(curl -s \"$VITE_API_BASE_URL:-https://aurea-backend-production-8a87.up.railway.app/api/templates\")",
-      "Bash(curl:*)",
-      "Bash(echo:*)",
-      "Bash(tree src/templates -L 2 -I node_modules)",
-      "Bash(npm run dev)"
+      "Bash(cat package.json)",
+      "Bash(python3 -m json.tool)",
+      "Bash(npm run build)",
+      "Bash(npm install react-easy-crop --save)",
+      "Bash(npm uninstall react-image-crop)"
     ],
     "deny": [],
     "ask": []
