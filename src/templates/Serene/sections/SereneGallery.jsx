@@ -33,11 +33,36 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
     { image: '', title: 'Project Title', description: 'Project description', span: 1 },
   ];
 
-  // Always use the same data whether editing or previewing
-  // If user has content, use it. Otherwise use defaults as placeholder
-  const displayFirstRow = content.firstRow || defaultFirstRow;
-  const displaySecondRow = content.secondRow || defaultSecondRow;
-  const displayThirdRow = content.thirdRow || defaultThirdRow;
+  // ALWAYS show all placeholder slots by merging saved data with defaults
+  // This ensures we always show 3+4+3=10 slots even if user only uploaded 1 image
+  const mergeWithDefaults = (savedRow, defaultRow) => {
+    if (!savedRow || savedRow.length === 0) {
+      // No saved data - use all defaults
+      return defaultRow;
+    }
+
+    // Ensure we have at least as many items as defaults
+    const result = [...defaultRow];
+
+    // Overlay saved items at their indices
+    savedRow.forEach((savedItem, index) => {
+      if (index < result.length) {
+        result[index] = {
+          ...result[index],
+          ...savedItem
+        };
+      } else {
+        // Saved data has more items than default - append them
+        result.push(savedItem);
+      }
+    });
+
+    return result;
+  };
+
+  const displayFirstRow = mergeWithDefaults(content.firstRow, defaultFirstRow);
+  const displaySecondRow = mergeWithDefaults(content.secondRow, defaultSecondRow);
+  const displayThirdRow = mergeWithDefaults(content.thirdRow, defaultThirdRow);
 
   // Handle image selection and show crop modal
   const handleImageSelect = (rowType, index, file) => {
@@ -176,7 +201,7 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
                 <p className="text-gray-500 text-xs">Uploading...</p>
               </div>
             </div>
-          ) : product.image ? (
+          ) : product.image && product.image !== '__EMPTY__' ? (
             <img
               src={product.image}
               alt={product.title}

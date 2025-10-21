@@ -208,10 +208,23 @@ export const templates = {
       },
       gallery: {
         heading: 'My Work',
-        images: [
-          { image: '', title: 'Project 1', description: 'Description', price: '', caption: '' },
-          { image: '', title: 'Project 2', description: 'Description', price: '', caption: '' },
-          { image: '', title: 'Project 3', description: 'Description', price: '', caption: '' }
+        heroText1: 'Melbourne-based tattoo artist Rachel Garcia creates tattoos inspired by nature with a soft watercolor technique.',
+        heroText2: 'Her delicate, nostalgic flowers, plants and birds are inked with the precision of scientific illustrations (grandma would approve).',
+        firstRow: [
+          { image: '', title: 'Project 1', description: 'Description', price: '', caption: '', span: 2 },
+          { image: '', title: 'Project 2', description: 'Description', price: '', caption: '', span: 1 },
+          { image: '', title: 'Project 3', description: 'Description', price: '', caption: '', span: 2 }
+        ],
+        secondRow: [
+          { image: '', title: 'Project 4', description: 'Description', price: '', caption: '', span: 2 },
+          { image: '', title: 'Project 5', description: 'Description', price: '', caption: '', span: 3 },
+          { image: '', title: 'Project 6', description: 'Description', price: '', caption: '', span: 2 },
+          { image: '', title: 'Project 7', description: 'Description', price: '', caption: '', span: 2 }
+        ],
+        thirdRow: [
+          { image: '', title: 'Project 8', description: 'Description', price: '', caption: '', span: 2 },
+          { image: '', title: 'Project 9', description: 'Description', price: '', caption: '', span: 2 },
+          { image: '', title: 'Project 10', description: 'Description', price: '', caption: '', span: 1 }
         ]
       }
     },
@@ -291,7 +304,7 @@ export const templates = {
       work: {
         type: 'work',
         layout: 'asymmetric_editorial_grid',
-        editable: ['projects']
+        editable: ['projects', 'image']
       },
       contact: {
         type: 'contact',
@@ -323,7 +336,7 @@ export const templates = {
             title: 'CHAOSK',
             subtitle: 'Brand Identity',
             description: 'Complete brand identity system for an innovative design collective. Including logo design, typography selection, color system, and comprehensive brand guidelines.',
-            image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=1200&h=800&fit=crop',
+            image: '',
             category: 'Brand Identity',
             year: '2023',
             awards: 'Awwwards Nominee 2023',
@@ -334,7 +347,7 @@ export const templates = {
             title: 'NOVA EDITORIAL',
             subtitle: 'Magazine Design',
             description: 'Art direction and layout design for a contemporary art and culture publication. Focus on bold typography and strategic use of whitespace.',
-            image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&h=800&fit=crop',
+            image: '',
             category: 'Editorial',
             year: '2024',
             awards: '',
@@ -345,7 +358,7 @@ export const templates = {
             title: 'SPECTRUM',
             subtitle: 'Web Experience',
             description: 'UI/UX design for an interactive digital experience showcasing emerging artists. Minimalist interface with emphasis on content.',
-            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=800&fit=crop',
+            image: '',
             category: 'Digital',
             year: '2024',
             awards: '',
@@ -356,7 +369,7 @@ export const templates = {
             title: 'APEX STUDIOS',
             subtitle: 'Visual Identity',
             description: 'Complete visual identity system for a multidisciplinary creative studio based in Berlin.',
-            image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&h=800&fit=crop',
+            image: '',
             category: 'Branding',
             year: '2023',
             awards: '',
@@ -464,7 +477,7 @@ export const templates = {
       work: {
         type: 'work',
         layout: 'project_showcase',
-        editable: ['projects']
+        editable: ['projects', 'images']
       },
       about: {
         type: 'about',

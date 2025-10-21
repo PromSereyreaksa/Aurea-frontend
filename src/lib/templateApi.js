@@ -242,15 +242,38 @@ class TemplateAPI {
       // Extract fields from defaultContent
       const sectionContent = template.defaultContent?.[sectionId] || {};
       const fields = Object.entries(sectionContent).map(([fieldId, defaultValue]) => {
+        // Check if this is an image field
+        const isImageField = fieldId === 'image' || 
+                            fieldId === 'src' || 
+                            fieldId.includes('image') || 
+                            fieldId.includes('Image') ||
+                            fieldId.includes('photo') ||
+                            fieldId.includes('avatar');
+        
+        // Determine max length based on field type (skip for images)
+        let maxLength;
+        if (!isImageField) {
+          if (fieldId === 'bio') {
+            maxLength = 500;
+          } else if (fieldId === 'description') {
+            maxLength = 200;
+          } else {
+            maxLength = 100; // Default for text fields
+          }
+        }
+        
+        const validation = {};
+        if (maxLength) {
+          validation.maxLength = maxLength;
+        }
+        
         return {
           id: fieldId,
           label: this.humanizeFieldName(fieldId),
           type: this.inferFieldType(defaultValue),
           placeholder: typeof defaultValue === 'string' ? defaultValue : '',
           required: sectionConfig.required || false,
-          validation: {
-            maxLength: fieldId === 'bio' ? 500 : fieldId === 'description' ? 200 : 100
-          }
+          validation: validation
         };
       });
 

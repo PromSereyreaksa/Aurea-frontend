@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 /**
@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
  * Exact specifications: 1024px content area, absolute positioning
  * Left column: 467px @ x:40px | Right column: 705px @ x:517px
  */
-const ChicWork = ({ content = {}, styling = {}, isEditing = false }) => {
+const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange }) => {
   const fonts = styling.fonts || {};
   const projects = content.projects || [];
+  const [uploadingIndex, setUploadingIndex] = useState(null);
 
   // Exact positioning patterns from reference design
   // Each project gets: { column: 'left'|'right', x, y, width, height, zIndex }
@@ -61,6 +62,74 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false }) => {
   };
 
   const canvasHeight = calculateCanvasHeight();
+
+  // Handle image upload
+  const handleImageUpload = async (file, projectIndex) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    setUploadingIndex(projectIndex);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        // Update the project image
+        const updatedProjects = [...projects];
+        updatedProjects[projectIndex] = {
+          ...updatedProjects[projectIndex],
+          image: result.data.url
+        };
+
+        if (onContentChange) {
+          onContentChange('work', 'projects', updatedProjects);
+        }
+
+        console.log('Image uploaded successfully:', result.data.url);
+      } else {
+        throw new Error(result.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  // Handle file input change
+  const handleFileChange = (e, projectIndex) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file, projectIndex);
+    }
+  };
 
   return (
     <div
@@ -144,24 +213,109 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false }) => {
             )}
 
             {/* Project Image */}
-            {project.image && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ duration: 0.6 }}
-                style={{
-                  position: 'absolute',
-                  left: `${layout.x}px`,
-                  top: `${layout.y}px`,
-                  width: `${layout.width}px`,
-                  height: `${layout.height}px`,
-                  zIndex: layout.zIndex,
-                  overflow: 'hidden',
-                  cursor: project.link ? 'pointer' : 'default'
-                }}
-                onClick={() => project.link && window.open(project.link, '_blank')}
-              >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.6 }}
+              style={{
+                position: 'absolute',
+                left: `${layout.x}px`,
+                top: `${layout.y}px`,
+                width: `${layout.width}px`,
+                height: `${layout.height}px`,
+                zIndex: layout.zIndex,
+                overflow: 'hidden',
+                cursor: isEditing ? 'pointer' : (project.link ? 'pointer' : 'default'),
+                backgroundColor: project.image ? 'transparent' : '#f3f4f6'
+              }}
+              onClick={(e) => {
+                if (isEditing) {
+                  e.stopPropagation();
+                  document.getElementById(`file-input-chic-${index}`).click();
+                } else if (project.link) {
+                  window.open(project.link, '_blank');
+                }
+              }}
+            >
+              {/* Hidden file input */}
+              {isEditing && (
+                <input
+                  id={`file-input-chic-${index}`}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => handleFileChange(e, index)}
+                />
+              )}
+
+              {/* Upload overlay for editing mode */}
+              {isEditing && !project.image && uploadingIndex !== index && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f3f4f6',
+                    border: '2px dashed #d1d5db'
+                  }}
+                >
+                  <svg
+                    style={{ width: '48px', height: '48px', color: '#9ca3af', marginBottom: '8px' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p style={{ fontFamily: fonts.inter, fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                    Click to upload image
+                  </p>
+                </div>
+              )}
+
+              {/* Uploading state */}
+              {uploadingIndex === index && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    zIndex: 10
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #f3f4f6',
+                        borderTop: '4px solid #E86223',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        margin: '0 auto 8px'
+                      }}
+                    />
+                    <p style={{ fontFamily: fonts.inter, fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                      Uploading...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Image */}
+              {project.image && (
                 <img
                   src={project.image}
                   alt={project.title || 'Project'}
@@ -174,14 +328,50 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false }) => {
                     opacity: 1
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.01)';
+                    if (!isEditing) e.target.style.transform = 'scale(1.01)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = 'scale(1)';
                   }}
                 />
-              </motion.div>
-            )}
+              )}
+
+              {/* Edit overlay when hovering over existing image */}
+              {isEditing && project.image && (
+                <div
+                  className="edit-overlay"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background-color 0.3s ease',
+                    pointerEvents: 'none'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.4)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0)'; }}
+                >
+                  <p
+                    style={{
+                      fontFamily: fonts.inter,
+                      fontSize: '14px',
+                      color: '#ffffff',
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      margin: 0,
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => { e.target.style.opacity = 1; }}
+                  >
+                    Click to change image
+                  </p>
+                </div>
+              )}
+            </motion.div>
           </React.Fragment>
         );
       })}
@@ -261,5 +451,17 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false }) => {
     </div>
   );
 };
+
+// Add keyframe animation for spinner
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 export default ChicWork;

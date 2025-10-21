@@ -1,0 +1,172 @@
+{
+  "id": "chic",
+  "name": "Chic",
+  "description": "Editorial/Magazine-inspired portfolio with asymmetric sidebar layout and clean typography. Features a sticky left info panel and a two-column project grid with alternating layouts.",
+  "category": "editorial",
+  "preview": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "previewUrl": "/template-preview/chic",
+  "structure": {
+    "hero": {
+      "type": "hero",
+      "layout": "sidebar_info_panel",
+      "editable": ["name", "initials", "bio", "instagram", "linkedin", "behance"]
+    },
+    "about": {
+      "type": "about",
+      "layout": "sidebar_additional",
+      "editable": ["skills", "experience"]
+    },
+    "work": {
+      "type": "work",
+      "layout": "asymmetric_editorial_grid",
+      "editable": ["projects", "image"]
+    },
+    "contact": {
+      "type": "contact",
+      "layout": "sidebar_bottom",
+      "editable": ["email", "phone", "telegram", "whatsapp", "availability"]
+    }
+  },
+  "defaultContent": {
+    "hero": {
+      "name": "Your Name",
+      "initials": "Y.N.",
+      "bio": "I am a designer focused on brand identity, editorial design, and typography. My work emphasizes clarity, strategic whitespace, and creating visual systems that communicate with precision and elegance.",
+      "instagram": "https://instagram.com/yourname",
+      "instagramLabel": "INSTAGRAM",
+      "linkedin": "https://linkedin.com/in/yourname",
+      "linkedinLabel": "LINKEDIN",
+      "behance": "https://behance.net/yourname",
+      "behanceLabel": "BEHANCE"
+    },
+    "about": {
+      "skills": "Brand Identity, Editorial Design, Typography, Art Direction",
+      "experience": "5+ years experience working with studios and agencies globally"
+    },
+    "work": {
+      "projects": [
+        {
+          "id": 1,
+          "title": "CHAOSK",
+          "subtitle": "Brand Identity",
+          "description": "Complete brand identity system for an innovative design collective. Including logo design, typography selection, color system, and comprehensive brand guidelines.",
+          "image": "",
+          "category": "Brand Identity",
+          "year": "2023",
+          "awards": "Awwwards Nominee 2023",
+          "link": ""
+        },
+        {
+          "id": 2,
+          "title": "NOVA EDITORIAL",
+          "subtitle": "Magazine Design",
+          "description": "Art direction and layout design for a contemporary art and culture publication. Focus on bold typography and strategic use of whitespace.",
+          "image": "",
+          "category": "Editorial",
+          "year": "2024",
+          "awards": "",
+          "link": ""
+        },
+        {
+          "id": 3,
+          "title": "SPECTRUM",
+          "subtitle": "Web Experience",
+          "description": "UI/UX design for an interactive digital experience showcasing emerging artists. Minimalist interface with emphasis on content.",
+          "image": "",
+          "category": "Digital",
+          "year": "2024",
+          "awards": "",
+          "link": ""
+        },
+        {
+          "id": 4,
+          "title": "APEX STUDIOS",
+          "subtitle": "Visual Identity",
+          "description": "Complete visual identity system for a multidisciplinary creative studio based in Berlin.",
+          "image": "",
+          "category": "Branding",
+          "year": "2023",
+          "awards": "",
+          "link": ""
+        }
+      ]
+    },
+    "contact": {
+      "email": "hello@yourname.com",
+      "emailLabel": "EMAIL",
+      "phone": "+1 (123) 456-7890",
+      "phoneLabel": "PHONE",
+      "telegram": "https://t.me/yourname",
+      "telegramLabel": "TELEGRAM",
+      "whatsapp": "",
+      "whatsappLabel": "WHATSAPP",
+      "availability": "Available for freelance work and collaborations"
+    }
+  },
+  "styling": {
+    "colors": {
+      "primary": "#000000",
+      "secondary": "#333333",
+      "accent": "#FFD700",
+      "background": "#FFFFFF",
+      "surface": "#F8F7F5",
+      "text": "#000000",
+      "textSecondary": "#333333",
+      "textLight": "#666666",
+      "border": "#E5E5E5",
+      "borderDark": "#CCCCCC",
+      "hover": "#000000"
+    },
+    "fonts": {
+      "heading": "\"Helvetica Neue\", -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", \"Suisse Intl\", \"Inter\", Roboto, Arial, sans-serif",
+      "body": "\"Helvetica Neue\", -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", \"Suisse Intl\", \"Inter\", Roboto, Arial, sans-serif",
+      "mono": "\"SF Mono\", Consolas, \"Liberation Mono\", Menlo, monospace"
+    },
+    "typography": {
+      "scale": {
+        "h1": "3.5rem",
+        "h2": "2rem",
+        "h3": "1.25rem",
+        "h4": "1rem",
+        "body": "0.9375rem",
+        "small": "0.75rem",
+        "meta": "0.75rem"
+      },
+      "lineHeight": {
+        "tight": 1.1,
+        "normal": 1.5,
+        "relaxed": 1.7
+      },
+      "fontWeight": {
+        "normal": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "letterSpacing": {
+        "tight": "-0.02em",
+        "normal": "0",
+        "wide": "0.05em"
+      }
+    },
+    "spacing": {
+      "section": "4rem",
+      "element": "2rem",
+      "tight": "1.5rem",
+      "baseline": "8px"
+    },
+    "borderRadius": {
+      "none": "0px",
+      "sm": "0px",
+      "md": "0px",
+      "lg": "0px",
+      "full": "0px"
+    }
+  },
+  "responsive": {
+    "mobile": "640px",
+    "tablet": "768px",
+    "desktop": "1024px",
+    "wide": "1400px"
+  }
+}

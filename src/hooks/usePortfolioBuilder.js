@@ -152,6 +152,13 @@ export const usePortfolioSave = (portfolioId, portfolioStore, clearDraft) => {
       console.log('Is new portfolio?', portfolioId === 'new');
       console.log('Will CREATE:', portfolioId === 'new' || !portfolioId);
       console.log('Will UPDATE:', portfolioId && portfolioId !== 'new');
+      console.log('📤 Saving gallery data:', {
+        firstRow: saveData.content.gallery?.firstRow?.length,
+        secondRow: saveData.content.gallery?.secondRow?.length,
+        thirdRow: saveData.content.gallery?.thirdRow?.length,
+        sectionsCount: saveData.sections?.length,
+        gallerySection: saveData.sections?.find(s => s.type === 'gallery')?.content
+      });
       
       if (portfolioId && portfolioId !== 'new') {
         console.log('→ Calling updatePortfolio with ID:', portfolioId);
