@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import EchelonTemplate from '../templates/Echelon/EchelonTemplate';
 import useAuthStore from '../stores/authStore';
+import usePortfolioStore from '../stores/portfolioStore';
 import { portfolioApi } from '../lib/portfolioApi';
+import { getTemplate } from '../templates';
 
 const EchelonPreviewPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { createPortfolio } = usePortfolioStore();
   const [searchParams] = useSearchParams();
 
   // Check for PDF mode and portfolio ID from query params
@@ -16,6 +20,7 @@ const EchelonPreviewPage = () => {
   // State for loading real portfolio data
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Load portfolio data if portfolioId is provided OR if data was injected
   useEffect(() => {
@@ -49,13 +54,52 @@ const EchelonPreviewPage = () => {
     loadPortfolioData();
   }, [portfolioId]);
 
-  const handleUseTemplate = () => {
-    if (isAuthenticated) {
-      // If logged in, go directly to portfolio builder with template pre-selected
-      navigate('/portfolio-builder/new?template=echolon');
-    } else {
-      // If not logged in, redirect to signup with return URL
-      navigate('/signup?return=/portfolio-builder/new&template=echolon');
+  const handleUseTemplate = async () => {
+    if (!isAuthenticated) {
+      // If not logged in, redirect to signup with return URL to preview page
+      navigate('/signup?return=/template-preview/echelon');
+      return;
+    }
+
+    // If logged in, create the portfolio directly
+    setIsCreating(true);
+    try {
+      // Get the Echelon template
+      const template = getTemplate('echolon');
+
+      if (!template) {
+        throw new Error('Echelon template not found');
+      }
+
+      const initialPortfolioData = {
+        title: `${template.name} Portfolio`,
+        description: `Portfolio created with ${template.name} template`,
+        template: template.id,
+        sections: [],
+        styling: template.styling || {},
+        published: false,
+      };
+
+      console.log('Creating portfolio with template:', template.id);
+      const result = await createPortfolio(initialPortfolioData);
+
+      if (result && result.success && result.portfolio?._id) {
+        toast.success('Template selected! Redirecting to setup...', {
+          duration: 2000,
+          id: 'template-selected'
+        });
+
+        // Navigate directly to the portfolio builder with the setup step
+        navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
+      } else {
+        const errorMsg = result?.error || 'Failed to create portfolio';
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Failed to create portfolio:', error);
+      toast.error(`Failed to create portfolio: ${error.message || 'Please try again.'}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -234,34 +278,40 @@ const EchelonPreviewPage = () => {
           
           <button
             onClick={handleUseTemplate}
+            disabled={isCreating}
             style={{
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '13px',
               fontWeight: 700,
               color: '#FFFFFF',
-              backgroundColor: '#FF6B35',
-              border: '2px solid #FF6B35',
+              backgroundColor: isCreating ? '#999999' : '#FF6B35',
+              border: `2px solid ${isCreating ? '#999999' : '#FF6B35'}`,
               padding: '10px 30px',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
-              cursor: 'pointer',
+              cursor: isCreating ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              opacity: isCreating ? 0.7 : 1
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#E55A2B';
-              e.target.style.borderColor = '#E55A2B';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+              if (!isCreating) {
+                e.target.style.backgroundColor = '#E55A2B';
+                e.target.style.borderColor = '#E55A2B';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#FF6B35';
-              e.target.style.borderColor = '#FF6B35';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              if (!isCreating) {
+                e.target.style.backgroundColor = '#FF6B35';
+                e.target.style.borderColor = '#FF6B35';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }
             }}
           >
-            USE THIS TEMPLATE
+            {isCreating ? 'CREATING...' : 'USE THIS TEMPLATE'}
           </button>
         </div>
         </div>

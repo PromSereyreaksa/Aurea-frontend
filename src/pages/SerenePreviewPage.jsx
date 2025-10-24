@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import SereneTemplate from '../templates/Serene/SereneTemplate';
 import useAuthStore from '../stores/authStore';
+import usePortfolioStore from '../stores/portfolioStore';
 import { portfolioApi } from '../lib/portfolioApi';
+import { getTemplate } from '../templates';
 
 const SerenePreviewPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { createPortfolio } = usePortfolioStore();
   const [searchParams] = useSearchParams();
 
   // Check for PDF mode and portfolio ID from query params
@@ -16,6 +20,7 @@ const SerenePreviewPage = () => {
   // State for loading real portfolio data
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Load portfolio data if portfolioId is provided OR if data was injected
   useEffect(() => {
@@ -49,13 +54,44 @@ const SerenePreviewPage = () => {
     loadPortfolioData();
   }, [portfolioId]);
 
-  const handleUseTemplate = () => {
-    if (isAuthenticated) {
-      // If logged in, go directly to portfolio builder with template pre-selected
-      navigate('/portfolio-builder/new?template=serene');
-    } else {
-      // If not logged in, redirect to signup with return URL
-      navigate('/signup?return=/portfolio-builder/new&template=serene');
+  const handleUseTemplate = async () => {
+    if (!isAuthenticated) {
+      navigate('/signup?return=/template-preview/serene');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const template = getTemplate('serene');
+      if (!template) {
+        throw new Error('Serene template not found');
+      }
+
+      const initialPortfolioData = {
+        title: `${template.name} Portfolio`,
+        description: `Portfolio created with ${template.name} template`,
+        template: template.id,
+        sections: [],
+        styling: template.styling || {},
+        published: false,
+      };
+
+      const result = await createPortfolio(initialPortfolioData);
+
+      if (result && result.success && result.portfolio?._id) {
+        toast.success('Template selected! Redirecting to setup...', {
+          duration: 2000,
+          id: 'template-selected'
+        });
+        navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
+      } else {
+        throw new Error(result?.error || 'Failed to create portfolio');
+      }
+    } catch (error) {
+      console.error('Failed to create portfolio:', error);
+      toast.error(`Failed to create portfolio: ${error.message || 'Please try again.'}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -281,32 +317,38 @@ const SerenePreviewPage = () => {
 
           <button
             onClick={handleUseTemplate}
+            disabled={isCreating}
             style={{
               fontFamily: "'Inter', sans-serif",
               fontSize: '13px',
               fontWeight: 500,
               color: sereneColors.surface,
-              backgroundColor: sereneColors.primary,
-              border: `1px solid ${sereneColors.primary}`,
+              backgroundColor: isCreating ? '#999999' : sereneColors.primary,
+              border: `1px solid ${isCreating ? '#999999' : sereneColors.primary}`,
               padding: '10px 30px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              cursor: 'pointer',
+              cursor: isCreating ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
-              borderRadius: '2px'
+              borderRadius: '2px',
+              opacity: isCreating ? 0.7 : 1
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = sereneColors.text;
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(61, 61, 61, 0.2)';
+              if (!isCreating) {
+                e.target.style.backgroundColor = sereneColors.text;
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(61, 61, 61, 0.2)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = sereneColors.primary;
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              if (!isCreating) {
+                e.target.style.backgroundColor = sereneColors.primary;
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }
             }}
           >
-            USE THIS TEMPLATE
+            {isCreating ? 'CREATING...' : 'USE THIS TEMPLATE'}
           </button>
         </div>
         </div>

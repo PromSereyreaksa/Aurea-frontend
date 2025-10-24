@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
 import { SwissGrid as SwissGridDecoration } from '../components/SwissDecorations';
 import { SwissHeading, SwissBody } from '../components/SwissTypography';
+import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const EchelonAbout = ({ 
+const EchelonAbout = ({
   content,
   isEditing = false,
-  onContentChange 
+  onContentChange
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const { uploadImage } = useImageUpload();
   
   const { 
     name = 'DESIGNER NAME',
@@ -41,7 +43,7 @@ const EchelonAbout = ({
     }
   };
 
-  // Upload image to backend/Cloudinary
+  // Upload image with all optimizations
   const handleImageUpload = async (file) => {
     if (!file) return;
 
@@ -57,34 +59,32 @@ const EchelonAbout = ({
       return;
     }
 
+    console.log('📤 Starting optimized upload for about image...');
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
+    const localPreview = URL.createObjectURL(file);
+    handleImageChange(localPreview);
+
+    // 2. Mark as uploading
     setIsUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
-        }
+      // 3. Upload with all optimizations (compression, fake progress, direct upload)
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
+      console.log('✅ Upload complete for about image:', cloudinaryUrl);
 
-      const result = await response.json();
+      // 4. Replace blob URL with final Cloudinary URL
+      handleImageChange(cloudinaryUrl);
 
-      if (result.success && result.data?.url) {
-        handleImageChange(result.data.url);
-        console.log('Image uploaded successfully:', result.data.url);
-      } else {
-        throw new Error(result.message || 'Upload failed - no URL returned');
-      }
+      // Clean up blob URL
+      URL.revokeObjectURL(localPreview);
+
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       alert(`Failed to upload image: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -292,40 +292,36 @@ const EchelonAbout = ({
               />
             )}
 
-            {/* Upload indicator */}
+            {/* Upload indicator - Small corner badge (non-blocking) */}
             {isUploading && (
               <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                top: '10px',
+                right: '10px',
+                backgroundColor: '#FF0000',
+                color: '#FFFFFF',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                zIndex: 10,
+                boxShadow: '0 2px 8px rgba(255, 0, 0, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10
+                gap: '8px'
               }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    border: '3px solid rgba(255, 255, 255, 0.3)',
-                    borderTop: '3px solid #FF0000',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    margin: '0 auto 16px'
-                  }}></div>
-                  <div style={{
-                    fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: 'clamp(12px, 1.2vw, 14px)',
-                    color: '#FFFFFF',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.15em'
-                  }}>
-                    Uploading...
-                  </div>
-                </div>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderTop: '2px solid #FFFFFF',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite'
+                }}></div>
+                Uploading
               </div>
             )}
           </div>

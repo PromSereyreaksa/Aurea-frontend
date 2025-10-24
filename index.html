@@ -21,13 +21,26 @@
     />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Font: Monda -->
+
+    <!-- Performance: Preconnect to critical domains -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Monda:wght@400;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Backend API - Warm up connection for faster uploads -->
+    <link rel="preconnect" href="https://aurea-backend-production-8a87.up.railway.app" crossorigin />
+    <link rel="dns-prefetch" href="https://aurea-backend-production-8a87.up.railway.app" />
+
+    <!-- Cloudinary - Pre-establish connection for instant image uploads -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preconnect" href="https://api.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://api.cloudinary.com" />
+
     <title>AUREA – Creative Toolkit</title>
   </head>
   <body>

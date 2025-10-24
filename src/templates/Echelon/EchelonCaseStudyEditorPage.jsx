@@ -510,11 +510,25 @@ const CaseStudyEditorPage = () => {
       return;
     }
 
+    // 1. INSTANT PREVIEW - Show image immediately using blob URL
+    const localPreview = URL.createObjectURL(file);
+
+    if (type === 'hero') {
+      setCaseStudy(prev => ({ ...prev, heroImage: localPreview }));
+      console.log('✨ Showing instant preview for hero image:', localPreview);
+    } else if (type === 'subsection') {
+      updateSubsection(sectionIndex, subsectionIndex, 'image', localPreview);
+      console.log(`✨ Showing instant preview for subsection image [${sectionIndex}][${subsectionIndex}]:`, localPreview);
+    }
+
+    // 2. Start upload in background
     setIsUploadingImage(true);
 
     try {
       const formData = new FormData();
       formData.append('image', file);
+
+      console.log(`📤 Uploading ${type} image to Cloudinary in background...`);
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
         method: 'POST',
@@ -532,20 +546,25 @@ const CaseStudyEditorPage = () => {
 
       if (result.success && result.data?.url) {
         const imageUrl = result.data.url;
-        
+
+        // 3. Replace blob URL with Cloudinary URL
         if (type === 'hero') {
           setCaseStudy(prev => ({ ...prev, heroImage: imageUrl }));
         } else if (type === 'subsection') {
           updateSubsection(sectionIndex, subsectionIndex, 'image', imageUrl);
         }
-        
-        console.log('Image uploaded successfully:', imageUrl);
+
+        console.log(`✅ Cloudinary upload complete for ${type}:`, imageUrl);
+
+        // Clean up blob URL to free memory
+        URL.revokeObjectURL(localPreview);
       } else {
         throw new Error(result.message || 'Upload failed - no URL returned');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       alert(`Failed to upload image: ${error.message}`);
+      // Keep the preview so user can see what they tried to upload
     } finally {
       setIsUploadingImage(false);
     }

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
+import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const EchelonGallery = ({ 
+const EchelonGallery = ({
   content,
   isEditing = false,
-  onContentChange 
+  onContentChange
 }) => {
-  const { 
+  const {
     heading = 'GALLERY',
     images = []
   } = content;
 
   const [selectedImage, setSelectedImage] = useState(null);
-  const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
+  const { uploadImage } = useImageUpload();
 
   const handleHeadingChange = (newHeading) => {
     if (onContentChange) {
@@ -46,37 +48,40 @@ const EchelonGallery = ({
       return;
     }
 
-    setUploadingIndex(index);
+    console.log(`📤 Starting optimized upload for gallery image ${index}...`);
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
+    const localPreview = URL.createObjectURL(file);
+    handleImageChange(index, 'src', localPreview);
+
+    // 2. Mark as uploading
+    setUploadingIndexes(prev => new Map(prev).set(index, { progress: 0 }));
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
-        }
+      // 3. Upload with all optimizations (compression, fake progress, direct upload)
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
+      console.log(`✅ Upload complete for gallery image ${index}:`, cloudinaryUrl);
 
-      const result = await response.json();
+      // 4. Replace blob URL with final Cloudinary URL
+      handleImageChange(index, 'src', cloudinaryUrl);
 
-      if (result.success && result.data?.url) {
-        handleImageChange(index, 'src', result.data.url);
-        console.log('Image uploaded successfully:', result.data.url);
-      } else {
-        throw new Error(result.message || 'Upload failed - no URL returned');
-      }
+      // Clean up blob URL
+      URL.revokeObjectURL(localPreview);
+
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       alert(`Failed to upload image: ${error.message}`);
     } finally {
-      setUploadingIndex(null);
+      // 5. Clear uploading state
+      setUploadingIndexes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(index);
+        return newMap;
+      });
     }
   };
 
@@ -322,40 +327,56 @@ const EchelonGallery = ({
                     </>
                   )}
 
-                  {/* Upload indicator */}
-                  {uploadingIndex === index && (
+                  {/* Enhanced Upload Progress Indicator */}
+                  {uploadingIndexes.has(index) && (
                     <div style={{
                       position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: '#FF0000',
+                      color: '#FFFFFF',
+                      padding: '10px 18px',
+                      borderRadius: '6px',
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      zIndex: 10,
+                      boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 10
+                      gap: '10px',
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}>
-                      <div style={{ textAlign: 'center' }}>
+                      {/* Animated spinner with glow */}
+                      <div style={{
+                        position: 'relative',
+                        width: '14px',
+                        height: '14px'
+                      }}>
                         <div style={{
-                          width: '40px',
-                          height: '40px',
-                          border: '3px solid rgba(255, 255, 255, 0.3)',
-                          borderTop: '3px solid #FF0000',
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          borderTop: '2px solid #FFFFFF',
                           borderRadius: '50%',
-                          animation: 'spin 1s linear infinite',
-                          margin: '0 auto 16px'
+                          animation: 'spin 0.8s linear infinite'
                         }}></div>
                         <div style={{
-                          fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: 'clamp(12px, 1.2vw, 14px)',
-                          color: '#FFFFFF',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.15em'
-                        }}>
-                          Uploading...
-                        </div>
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid #FFFFFF',
+                          borderRadius: '50%',
+                          opacity: 0.2,
+                          animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                        }}></div>
                       </div>
+                      <span>Optimizing...</span>
                     </div>
                   )}
                 </div>

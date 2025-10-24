@@ -1,13 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import useUploadStore from '../../stores/uploadStore';
+import { uploadImage as uploadImageApi } from '../../lib/uploadApi';
 
-const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '', placeholder = "Upload Image" }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+const ImageUpload = ({ currentImage, onImageChange, className = '', placeholder = "Upload Image" }) => {
   const [dragActive, setDragActive] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [currentUploadId, setCurrentUploadId] = useState(null);
   const fileInputRef = useRef(null);
   const prevImageRef = useRef(currentImage);
+
+  // Get upload store methods
+  const { startUpload, getUpload, completeUpload, failUpload, removeUpload, getPreviewUrl } = useUploadStore();
+
+  // Get current upload state
+  const uploadState = currentUploadId ? getUpload(currentUploadId) : null;
+  const previewUrl = currentUploadId ? getPreviewUrl(currentUploadId) : currentImage;
+  const isUploading = uploadState?.status === 'uploading';
+  const uploadProgress = uploadState?.progress || 0;
 
   // Reset loading state when currentImage changes
   useEffect(() => {
@@ -18,7 +28,16 @@ const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '
     }
   }, [currentImage]);
 
-  // Handle file upload to actual backend
+  // Cleanup upload on unmount
+  useEffect(() => {
+    return () => {
+      if (currentUploadId) {
+        removeUpload(currentUploadId);
+      }
+    };
+  }, [currentUploadId, removeUpload]);
+
+  // Handle file upload to actual backend with instant preview
   const handleFileUpload = async (file) => {
     if (!file) return;
 
@@ -34,48 +53,53 @@ const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '
       return;
     }
 
-    setIsUploading(true);
+    // 1. IMMEDIATELY show preview to parent (before any state updates)
+    // This ensures the image displays instantly without waiting for React re-renders
+    const localPreview = URL.createObjectURL(file);
+    onImageChange(localPreview);
+    setImageError(false);
+
+    // 2. Start tracking upload
+    const uploadId = startUpload(file);
+    setCurrentUploadId(uploadId);
 
     try {
-      // Create FormData for upload
-      const formData = new FormData();
-      formData.append('image', file);
+      // 3. Upload with all optimizations:
+      //    - Automatic compression (60-80% smaller)
+      //    - Fake fast progress (instant 0-30%)
+      //    - Direct Cloudinary upload (if configured)
+      //    - Connection prewarming already active
+      console.log('📤 ImageUpload: Starting optimized upload...', file.name);
 
-      console.log('📤 ImageUpload: Uploading file...', file.name);
-
-      // Upload to your backend API
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          // Don't set Content-Type - let browser set it with boundary for FormData
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
+      const result = await uploadImageApi(
+        file,
+        (progressValue) => {
+          // Track progress in upload store
+          useUploadStore.getState().updateProgress(uploadId, progressValue);
+        },
+        {
+          compress: true,  // Auto compress before upload
+          direct: true,    // Use direct upload if available
         }
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
       console.log('✅ ImageUpload: Upload response:', result);
 
       if (result.success && result.data?.url) {
-        // Use the URL from your backend response
-        console.log('✅ ImageUpload: Calling onImageChange with URL:', result.data.url);
-        setImageError(false); // Reset error state
-        setImageLoading(true); // Start loading the image
+        // 4. Replace blob URL preview with Cloudinary URL
+        console.log('✅ ImageUpload: Replacing preview with Cloudinary URL:', result.data.url);
+        completeUpload(uploadId, result.data.url);
         onImageChange(result.data.url);
-        console.log('✅ ImageUpload: onImageChange called successfully');
+        console.log('✅ ImageUpload: Upload completed successfully');
       } else {
         throw new Error(result.message || 'Upload failed - no URL returned');
       }
 
     } catch (error) {
       console.error('❌ ImageUpload: Upload error:', error);
+      failUpload(uploadId, error.message);
       alert(`Failed to upload image: ${error.message}`);
-    } finally {
-      setIsUploading(false);
+      // Keep the preview so user can see what they tried to upload
     }
   };
 
@@ -128,10 +152,10 @@ const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '
       />
 
       {/* If we have an image, show preview */}
-      {currentImage ? (
+      {previewUrl ? (
         <div className="relative group">
           <img
-            src={currentImage}
+            src={previewUrl}
             alt="Current"
             className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300 cursor-pointer hover:opacity-90 transition-opacity"
             onClick={openFileDialog}
@@ -166,7 +190,7 @@ const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <p className="text-sm text-red-600 font-medium mb-2">Failed to load image</p>
-              <p className="text-xs text-red-500 px-4 text-center break-all">{currentImage}</p>
+              <p className="text-xs text-red-500 px-4 text-center break-all">{previewUrl}</p>
               <button
                 onClick={openFileDialog}
                 className="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600"
@@ -184,11 +208,52 @@ const ImageUpload = ({ currentImage, onImageChange, onImageRemove, className = '
               Change Image
             </button>
           </div>
+
+          {/* Upload progress overlay - Enhanced with smooth animations */}
           {isUploading && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Uploading...</p>
+            <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center rounded-lg backdrop-blur-sm">
+              <div className="text-center text-white">
+                {/* Animated spinner with glow effect */}
+                <div className="relative mb-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-3 border-t-orange-500 border-r-orange-500 border-b-transparent border-l-transparent mx-auto"></div>
+                  <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border-2 border-orange-500 opacity-20"></div>
+                </div>
+
+                {/* Progress status text with smooth fade */}
+                <p className="text-sm font-semibold mb-3 animate-pulse">
+                  {uploadProgress < 30
+                    ? 'Preparing image...'
+                    : uploadProgress < 50
+                    ? 'Optimizing...'
+                    : uploadProgress < 90
+                    ? 'Uploading...'
+                    : 'Almost done...'}
+                </p>
+
+                {/* Enhanced progress bar with gradient */}
+                <div className="w-56 bg-gray-800 rounded-full h-2.5 overflow-hidden shadow-inner">
+                  <div
+                    className="h-2.5 rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 shadow-lg"
+                    style={{
+                      width: `${uploadProgress}%`,
+                      boxShadow: '0 0 10px rgba(251, 146, 60, 0.5)',
+                    }}
+                  />
+                </div>
+
+                {/* Progress percentage with smooth counting */}
+                <p className="text-base font-bold mt-3 tabular-nums">
+                  {uploadProgress}%
+                </p>
+
+                {/* Helpful tip based on progress */}
+                <p className="text-xs mt-2 opacity-70">
+                  {uploadProgress < 30
+                    ? 'Compressing for faster loading'
+                    : uploadProgress < 90
+                    ? 'Uploading to cloud storage'
+                    : 'Finalizing upload'}
+                </p>
               </div>
             </div>
           )}

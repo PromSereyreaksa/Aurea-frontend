@@ -477,9 +477,9 @@ export const isValidImageUrl = (value) => {
   // Empty strings are valid (for placeholder images)
   if (trimmedValue === '') return true;
   
-  // Allow: http://, https://, data:image/, relative paths, and cloudinary/s3/etc URLs
-  const isValid = !!trimmedValue.match(/^(https?:\/\/|\/|data:image\/|\.\/)/);
-  
+  // Allow: http://, https://, blob:, data:image/, relative paths, and cloudinary/s3/etc URLs
+  const isValid = !!trimmedValue.match(/^(https?:\/\/|blob:|\/|data:image\/|\.\/)/);
+
   // Debug logging
   if (!isValid) {
     console.warn('❌ Invalid image URL detected:', {
@@ -487,11 +487,46 @@ export const isValidImageUrl = (value) => {
       length: trimmedValue.length,
       startsWithHttp: trimmedValue.startsWith('http'),
       startsWithHttps: trimmedValue.startsWith('https'),
-      regexTest: /^(https?:\/\/)/.test(trimmedValue)
+      startsWithBlob: trimmedValue.startsWith('blob:'),
+      regexTest: /^(https?:\/\/|blob:)/.test(trimmedValue)
     });
   }
-  
+
   return isValid;
+};
+
+/**
+ * Detects if portfolio data contains any blob URLs (temporary local URLs)
+ * Returns true if blob URLs are found, indicating uploads still in progress
+ */
+export const hasBlobUrls = (portfolioData) => {
+  if (!portfolioData || !portfolioData.content) return false;
+
+  const checkValue = (value) => {
+    if (typeof value === 'string') {
+      return value.startsWith('blob:');
+    }
+    if (Array.isArray(value)) {
+      return value.some(item => {
+        if (typeof item === 'string') return item.startsWith('blob:');
+        if (typeof item === 'object' && item !== null) {
+          return Object.values(item).some(checkValue);
+        }
+        return false;
+      });
+    }
+    if (typeof value === 'object' && value !== null) {
+      return Object.values(value).some(checkValue);
+    }
+    return false;
+  };
+
+  return Object.values(portfolioData.content).some(section => {
+    if (typeof section === 'object' && section !== null) {
+      return Object.values(section).some(checkValue);
+    }
+    return false;
+  });
 };
 
 /**

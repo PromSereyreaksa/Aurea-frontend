@@ -79,11 +79,27 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
       return;
     }
 
+    // 1. INSTANT PREVIEW - Show image immediately using blob URL
+    const localPreview = URL.createObjectURL(file);
+    const updatedProjects = [...projects];
+    updatedProjects[projectIndex] = {
+      ...updatedProjects[projectIndex],
+      image: localPreview
+    };
+
+    if (onContentChange) {
+      onContentChange('work', 'projects', updatedProjects);
+    }
+    console.log(`✨ Showing instant preview for Chic project ${projectIndex}:`, localPreview);
+
+    // 2. Start upload in background
     setUploadingIndex(projectIndex);
 
     try {
       const formData = new FormData();
       formData.append('image', file);
+
+      console.log(`📤 Uploading Chic project ${projectIndex} to Cloudinary in background...`);
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
         method: 'POST',
@@ -100,18 +116,21 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
       const result = await response.json();
 
       if (result.success && result.data?.url) {
-        // Update the project image
-        const updatedProjects = [...projects];
-        updatedProjects[projectIndex] = {
-          ...updatedProjects[projectIndex],
+        // 3. Replace blob URL with Cloudinary URL
+        const finalProjects = [...projects];
+        finalProjects[projectIndex] = {
+          ...finalProjects[projectIndex],
           image: result.data.url
         };
 
         if (onContentChange) {
-          onContentChange('work', 'projects', updatedProjects);
+          onContentChange('work', 'projects', finalProjects);
         }
 
-        console.log('Image uploaded successfully:', result.data.url);
+        console.log(`✅ Cloudinary upload complete for Chic project ${projectIndex}:`, result.data.url);
+
+        // Clean up blob URL to free memory
+        URL.revokeObjectURL(localPreview);
       } else {
         throw new Error(result.message || 'Upload failed - no URL returned');
       }
