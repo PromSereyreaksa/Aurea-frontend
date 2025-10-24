@@ -147,11 +147,32 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
       return;
     }
 
+    // 1. INSTANT PREVIEW - Show image immediately using blob URL
+    const localPreview = URL.createObjectURL(file);
+    const updatedProjects = [...projects];
+    const updatedImages = [...(updatedProjects[projectIndex].images || [])];
+    updatedImages[imageIndex] = {
+      ...updatedImages[imageIndex],
+      src: localPreview
+    };
+    updatedProjects[projectIndex] = {
+      ...updatedProjects[projectIndex],
+      images: updatedImages
+    };
+
+    if (onContentChange) {
+      onContentChange('work', 'projects', updatedProjects);
+    }
+    console.log(`✨ Showing instant preview for BoldFolio project ${projectIndex} image ${imageIndex}:`, localPreview);
+
+    // 2. Start upload in background
     setUploadingImage(`${projectIndex}-${imageIndex}`);
 
     try {
       const formData = new FormData();
       formData.append('image', file);
+
+      console.log(`📤 Uploading BoldFolio project ${projectIndex} image ${imageIndex} to Cloudinary in background...`);
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
         method: 'POST',
@@ -168,23 +189,26 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
       const result = await response.json();
 
       if (result.success && result.data?.url) {
-        // Update the project image
-        const updatedProjects = [...projects];
-        const updatedImages = [...(updatedProjects[projectIndex].images || [])];
-        updatedImages[imageIndex] = {
-          ...updatedImages[imageIndex],
+        // 3. Replace blob URL with Cloudinary URL
+        const finalProjects = [...projects];
+        const finalImages = [...(finalProjects[projectIndex].images || [])];
+        finalImages[imageIndex] = {
+          ...finalImages[imageIndex],
           src: result.data.url
         };
-        updatedProjects[projectIndex] = {
-          ...updatedProjects[projectIndex],
-          images: updatedImages
+        finalProjects[projectIndex] = {
+          ...finalProjects[projectIndex],
+          images: finalImages
         };
 
         if (onContentChange) {
-          onContentChange('work', 'projects', updatedProjects);
+          onContentChange('work', 'projects', finalProjects);
         }
 
-        console.log('Image uploaded successfully:', result.data.url);
+        console.log(`✅ Cloudinary upload complete for BoldFolio project ${projectIndex} image ${imageIndex}:`, result.data.url);
+
+        // Clean up blob URL to free memory
+        URL.revokeObjectURL(localPreview);
       } else {
         throw new Error(result.message || 'Upload failed - no URL returned');
       }

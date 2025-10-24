@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import BoldFolioTemplate from '../templates/BoldFolio/BoldFolioTemplate';
 import useAuthStore from '../stores/authStore';
+import usePortfolioStore from '../stores/portfolioStore';
 import { portfolioApi } from '../lib/portfolioApi';
+import { getTemplate } from '../templates';
 
 const BoldFolioPreviewPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { createPortfolio } = usePortfolioStore();
   const [searchParams] = useSearchParams();
 
   // Check for PDF mode and portfolio ID from query params
@@ -16,6 +20,7 @@ const BoldFolioPreviewPage = () => {
   // State for loading real portfolio data
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Load portfolio data if portfolioId is provided OR if data was injected
   useEffect(() => {
@@ -49,13 +54,44 @@ const BoldFolioPreviewPage = () => {
     loadPortfolioData();
   }, [portfolioId]);
 
-  const handleUseTemplate = () => {
-    if (isAuthenticated) {
-      // If logged in, go directly to portfolio builder with template pre-selected
-      navigate('/portfolio-builder/new?template=boldfolio');
-    } else {
-      // If not logged in, redirect to signup with return URL
-      navigate('/signup?return=/portfolio-builder/new&template=boldfolio');
+  const handleUseTemplate = async () => {
+    if (!isAuthenticated) {
+      navigate('/signup?return=/template-preview/boldfolio');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const template = getTemplate('boldfolio');
+      if (!template) {
+        throw new Error('BoldFolio template not found');
+      }
+
+      const initialPortfolioData = {
+        title: `${template.name} Portfolio`,
+        description: `Portfolio created with ${template.name} template`,
+        template: template.id,
+        sections: [],
+        styling: template.styling || {},
+        published: false,
+      };
+
+      const result = await createPortfolio(initialPortfolioData);
+
+      if (result && result.success && result.portfolio?._id) {
+        toast.success('Template selected! Redirecting to setup...', {
+          duration: 2000,
+          id: 'template-selected'
+        });
+        navigate(`/portfolio-builder/${result.portfolio._id}?setup=true`, { replace: true });
+      } else {
+        throw new Error(result?.error || 'Failed to create portfolio');
+      }
+    } catch (error) {
+      console.error('Failed to create portfolio:', error);
+      toast.error(`Failed to create portfolio: ${error.message || 'Please try again.'}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 

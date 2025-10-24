@@ -1,59 +1,24 @@
 /**
  * Dynamic Step Form Component
- * 
+ *
  * Renders form fields dynamically based on step configuration
  * Handles different field types: text, textarea, image, url, email, etc.
+ *
+ * Note: Image uploads now use the improved ImageUpload/MultiImageUpload components
+ * which handle instant preview and background upload to Cloudinary automatically.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ImageUpload from './ImageUpload';
 import MultiImageUpload from './MultiImageUpload';
 
-const DynamicStepForm = ({ step, data, onChange, onSkip }) => {
+const DynamicStepForm = ({ step, data, onChange }) => {
   const [localData, setLocalData] = useState(data || {});
 
   const handleFieldChange = (fieldKey, value) => {
     const newData = { ...localData, [fieldKey]: value };
     setLocalData(newData);
     onChange(newData);
-  };
-
-  const handleImageUpload = async (fieldKey, file) => {
-    if (!file) return;
-
-    try {
-      // Create FormData for upload
-      const formData = new FormData();
-      formData.append('image', file);
-
-      // Upload to backend API
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Image upload response:', result);
-
-      if (result.success && result.data?.url) {
-        // Use the URL from backend response
-        console.log('✅ Image URL received:', result.data.url);
-        handleFieldChange(fieldKey, result.data.url);
-      } else {
-        console.error('❌ Upload failed:', result);
-        alert('Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please try again.');
-    }
   };
 
   const renderField = (field) => {
@@ -86,8 +51,9 @@ const DynamicStepForm = ({ step, data, onChange, onSkip }) => {
             </label>
             <ImageUpload
               currentImage={value}
-              onImageChange={(file) => handleImageUpload(field.key, file)}
-              onImageRemove={() => handleFieldChange(field.key, '')}
+              onImageChange={(url) => handleFieldChange(field.key, url)}
+              className="max-w-md"
+              placeholder={field.placeholder || "Upload Image"}
             />
           </div>
         );

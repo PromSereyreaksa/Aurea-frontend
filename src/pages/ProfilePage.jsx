@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useAuthStore from "../stores/authStore";
 import usePortfolioStore from "../stores/portfolioStore";
+import useUploadStore from "../stores/uploadStore";
+import { uploadAvatar as uploadAvatarApi } from "../lib/uploadApi";
 import toast from "react-hot-toast";
 import {
   User,
@@ -17,8 +19,9 @@ import {
 } from "lucide-react";
 
 const ProfilePage = () => {
-  const { user: rawUser, updateProfile, uploadAvatar } = useAuthStore();
+  const { user: rawUser, updateProfile } = useAuthStore();
   const { portfolios, fetchUserPortfolios } = usePortfolioStore();
+  const { startUpload, getUpload, completeUpload, failUpload, removeUpload, getPreviewUrl } = useUploadStore();
 
   // Handle nested user object structure
   const user = rawUser?.user || rawUser;
@@ -40,10 +43,16 @@ const ProfilePage = () => {
     email: user?.email || "",
   });
   const [modifiedFields, setModifiedFields] = useState(new Set());
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(
-    user?.avatar || user?.profilePicture || null
-  );
+  const [avatarUploadId, setAvatarUploadId] = useState(null);
+  const [avatarCloudinaryUrl, setAvatarCloudinaryUrl] = useState(null);
+
+  // Get avatar upload state
+  const avatarUpload = avatarUploadId ? getUpload(avatarUploadId) : null;
+  const avatarPreview = avatarUploadId
+    ? getPreviewUrl(avatarUploadId)
+    : (avatarCloudinaryUrl || user?.avatar || user?.profilePicture || null);
+  const isUploadingAvatar = avatarUpload?.status === 'uploading';
+  const avatarUploadProgress = avatarUpload?.progress || 0;
 
   // Debug: Log user data
   useEffect(() => {
@@ -72,47 +81,66 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file");
-        return;
-      }
+    if (!file) return;
 
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB");
-        return;
-      }
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
 
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    // 1. Create instant preview and start tracking
+    const uploadId = startUpload(file);
+    setAvatarUploadId(uploadId);
+
+    // 2. Upload to Cloudinary in background
+    try {
+      const result = await uploadAvatarApi(file, (progress) => {
+        useUploadStore.getState().updateProgress(uploadId, progress);
+      });
+
+      if (result.success && result.data?.user) {
+        // 3. Complete upload and store Cloudinary URL
+        const avatarUrl = result.data.user.avatar || result.data.user.profilePicture;
+        completeUpload(uploadId, avatarUrl);
+        setAvatarCloudinaryUrl(avatarUrl);
+
+        // Update user in auth store
+        useAuthStore.setState({ user: result.data.user });
+        toast.success("Avatar uploaded successfully!");
+      } else {
+        throw new Error(result.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('❌ Avatar upload error:', error);
+      failUpload(uploadId, error.message);
+      toast.error(`Failed to upload avatar: ${error.message}`);
     }
   };
+
+  // Cleanup upload on unmount
+  useEffect(() => {
+    return () => {
+      if (avatarUploadId) {
+        removeUpload(avatarUploadId);
+      }
+    };
+  }, [avatarUploadId, removeUpload]);
 
   const handleSave = async () => {
     setIsSaving(true);
     setErrors({});
 
     try {
-      // Handle avatar upload first if there's a new file
-      if (avatarFile) {
-        const avatarResult = await uploadAvatar(avatarFile);
-
-        if (!avatarResult.success) {
-          toast.error(avatarResult.error || "Failed to upload avatar");
-          setIsSaving(false);
-          return;
-        }
-      }
-
-      // Only update fields that have been modified
+      // Avatar is now uploaded immediately, so only handle profile fields
       if (modifiedFields.size > 0) {
         const updateData = {};
         modifiedFields.forEach(field => {
@@ -129,7 +157,6 @@ const ProfilePage = () => {
           setOriginalData({ ...formData });
           setModifiedFields(new Set());
           setIsEditing(false);
-          setAvatarFile(null);
           toast.success("Profile updated successfully!");
         } else {
           // Handle validation errors
@@ -143,15 +170,10 @@ const ProfilePage = () => {
             toast.error(result.error || "Failed to update profile");
           }
         }
-      } else if (!avatarFile) {
+      } else {
         // No changes made
         toast.info("No changes to save");
         setIsEditing(false);
-      } else {
-        // Only avatar was updated
-        setIsEditing(false);
-        setAvatarFile(null);
-        toast.success("Profile updated successfully!");
       }
     } catch (error) {
       console.error("Failed to save profile:", error);
@@ -164,8 +186,11 @@ const ProfilePage = () => {
   const handleCancel = () => {
     setFormData({ ...originalData });
     setModifiedFields(new Set());
-    setAvatarPreview(user?.avatar || user?.profilePicture || null);
-    setAvatarFile(null);
+    // Reset avatar to user's current avatar (don't reset Cloudinary upload)
+    if (avatarUploadId) {
+      removeUpload(avatarUploadId);
+      setAvatarUploadId(null);
+    }
     setErrors({});
     setIsEditing(false);
   };
@@ -212,7 +237,8 @@ const ProfilePage = () => {
       setFormData(newData);
       setOriginalData(newData);
       setModifiedFields(new Set());
-      setAvatarPreview(user.avatar || user.profilePicture || null);
+      // Update Cloudinary URL when user data changes
+      setAvatarCloudinaryUrl(user.avatar || user.profilePicture || null);
     }
   }, [user]);
 
@@ -317,7 +343,19 @@ const ProfilePage = () => {
                       </span>
                     )}
                   </div>
-                  {avatarFile && (
+
+                  {/* Upload progress overlay */}
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-white border-r-white border-b-transparent border-l-transparent mx-auto"></div>
+                        <p className="text-xs text-white mt-1">{avatarUploadProgress}%</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Success indicator */}
+                  {avatarUpload?.status === 'success' && (
                     <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1">
                       <Save size={12} />
                     </div>
@@ -332,22 +370,33 @@ const ProfilePage = () => {
                   </p>
                   <label
                     htmlFor="avatar-upload"
-                    className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-xs sm:text-sm font-medium"
+                    className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg transition-colors text-xs sm:text-sm font-medium ${
+                      isUploadingAvatar
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-gray-50 cursor-pointer'
+                    }`}
                   >
                     <Upload size={14} className="sm:w-4 sm:h-4" />
-                    {avatarFile ? 'Change File' : 'Choose File'}
+                    Choose File
                     <input
                       id="avatar-upload"
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarChange}
                       className="hidden"
+                      disabled={isUploadingAvatar}
                     />
                   </label>
-                  {avatarFile && (
+                  {isUploadingAvatar && (
+                    <p className="text-xs text-orange-600 mt-2 flex items-center justify-center sm:justify-start gap-1">
+                      <AlertCircle size={12} />
+                      Uploading to Cloudinary... {avatarUploadProgress}%
+                    </p>
+                  )}
+                  {avatarUpload?.status === 'success' && (
                     <p className="text-xs text-green-600 mt-2 flex items-center justify-center sm:justify-start gap-1">
                       <AlertCircle size={12} />
-                      New image selected - click Save to upload
+                      Avatar uploaded successfully!
                     </p>
                   )}
                 </div>
