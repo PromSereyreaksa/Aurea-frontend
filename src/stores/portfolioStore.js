@@ -3,7 +3,7 @@ import { portfolioApi } from '../lib/portfolioApi';
 import api from '../lib/baseApi';
 import toast from 'react-hot-toast';
 
-const usePortfolioStore = create((set) => ({
+const usePortfolioStore = create((set, get) => ({
   // State
   portfolios: [],
   currentPortfolio: null,
@@ -11,6 +11,7 @@ const usePortfolioStore = create((set) => ({
   isLoading: false,
   isCreating: false,
   isUpdating: false,
+  lastFetchTime: null, // Track when portfolios were last fetched
 
   // Actions
   createPortfolio: async (portfolioData) => {
@@ -50,35 +51,49 @@ const usePortfolioStore = create((set) => ({
     }
   },
 
-  fetchUserPortfolios: async (published = null) => {
+  fetchUserPortfolios: async (published = null, forceRefresh = false) => {
     try {
+      const state = get();
+      const now = Date.now();
+      const CACHE_DURATION = 30000; // 30 seconds cache
+
+      // Skip fetch if data is fresh and not forcing refresh
+      if (!forceRefresh &&
+          state.portfolios.length > 0 &&
+          state.lastFetchTime &&
+          (now - state.lastFetchTime) < CACHE_DURATION) {
+        console.log('Using cached portfolios data');
+        return { success: true, portfolios: state.portfolios, cached: true };
+      }
+
       set({ isLoading: true });
-      
+
       // Build query parameters
       const params = new URLSearchParams();
       if (published !== null) {
         params.append('published', published);
       }
-      
+
       const url = `/api/portfolios/user/me${params.toString() ? `?${params.toString()}` : ''}`;
       const response = await api.get(url);
-      
+
       // Handle response - check for different structures
       const portfolios = response.data?.data || response.data?.data?.portfolios || [];
       const meta = response.data?.meta || {};
-      
+
       set({
         portfolios,
         isLoading: false,
+        lastFetchTime: now,
       });
 
       return { success: true, portfolios, meta };
-      
+
     } catch (error) {
       set({ isLoading: false });
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Failed to fetch portfolios' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch portfolios'
       };
     }
   },

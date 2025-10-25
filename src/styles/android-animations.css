@@ -1,0 +1,237 @@
+/* Android Material Design Animation Styles */
+
+/* Easing Curves */
+:root {
+  --ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-sharp: cubic-bezier(0.4, 0.0, 0.6, 1);
+
+  --duration-small: 150ms;
+  --duration-medium: 280ms;
+  --duration-large: 375ms;
+}
+
+/* Page Transitions */
+.fade-in {
+  animation: fadeIn 300ms var(--ease-decelerate);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 280ms var(--ease-decelerate);
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* List/Grid Item Stagger Animation */
+.stagger-item {
+  animation: staggerFadeIn 280ms var(--ease-decelerate) backwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-item:nth-child(7) { animation-delay: 300ms; }
+.stagger-item:nth-child(8) { animation-delay: 350ms; }
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ripple Effect */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(251, 133, 0, 0.3);
+  transform: scale(0);
+  animation: ripple-animation 600ms var(--ease-standard);
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Elevation Changes (Card Hover) */
+.elevate {
+  transition: box-shadow var(--duration-medium) var(--ease-standard),
+              transform var(--duration-medium) var(--ease-standard);
+}
+
+.elevate:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.elevate:active {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(0);
+  transition-duration: var(--duration-small);
+}
+
+/* Button Press Effect */
+.button-press {
+  transition: transform var(--duration-small) var(--ease-sharp),
+              background-color var(--duration-small) var(--ease-standard);
+}
+
+.button-press:active {
+  transform: scale(0.96);
+}
+
+/* Tab Indicator Slide */
+.tab-indicator {
+  transition: transform var(--duration-medium) var(--ease-standard),
+              width var(--duration-medium) var(--ease-standard);
+}
+
+/* Smooth Transitions for Common Properties */
+.smooth-transition {
+  transition: all var(--duration-medium) var(--ease-standard);
+}
+
+.smooth-transition-fast {
+  transition: all var(--duration-small) var(--ease-standard);
+}
+
+/* Dropdown/Menu Animations */
+.dropdown-enter {
+  animation: dropdownEnter 200ms var(--ease-decelerate);
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-exit {
+  animation: dropdownExit 150ms var(--ease-accelerate);
+}
+
+@keyframes dropdownExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+/* Modal/Dialog Animations */
+.modal-backdrop {
+  animation: backdropFadeIn 250ms var(--ease-standard);
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  animation: modalSlideIn 280ms var(--ease-decelerate);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Loading Spinner (Android style) */
+.spinner-android {
+  animation: spinnerRotate 1400ms linear infinite;
+}
+
+@keyframes spinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scale In Animation */
+.scale-in {
+  animation: scaleIn 200ms var(--ease-decelerate);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Expand Animation (for accordions, etc) */
+.expand {
+  transition: max-height var(--duration-large) var(--ease-standard),
+              opacity var(--duration-medium) var(--ease-standard);
+}
+
+/* Shared Element Transition */
+.shared-element {
+  transition: transform var(--duration-large) var(--ease-standard),
+              border-radius var(--duration-large) var(--ease-standard),
+              width var(--duration-large) var(--ease-standard),
+              height var(--duration-large) var(--ease-standard);
+}

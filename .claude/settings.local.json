@@ -5,7 +5,8 @@
       "Bash(python3 -m json.tool)",
       "Bash(npm run build)",
       "Bash(npm install react-easy-crop --save)",
-      "Bash(npm uninstall react-image-crop)"
+      "Bash(npm uninstall react-image-crop)",
+      "Read(//c/Users/ASUS/Pictures/Screenshots/**)"
     ],
     "deny": [],
     "ask": []

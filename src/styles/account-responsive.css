@@ -1,0 +1,339 @@
+/* Account Page Responsive Styles */
+
+/* Hide hamburger menu on account page since there's no sidebar */
+.account-page-no-sidebar .mobile-burger-menu {
+  display: none !important;
+}
+
+/* Desktop styles (default) */
+.account-sidebar {
+  display: block;
+}
+
+.mobile-back-button {
+  display: none !important;
+}
+
+/* Back button text - show full text on desktop */
+.back-text-full {
+  display: inline;
+}
+
+.back-text-short {
+  display: none;
+}
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .account-content {
+    padding: 32px 40px !important;
+    margin: 16px !important;
+  }
+
+  .account-page-wrapper {
+    padding-top: 56px !important;
+  }
+}
+
+/* Tablet and mobile */
+@media (max-width: 768px) {
+  /* Hide sidebar off-screen on mobile */
+  .account-sidebar {
+    position: fixed !important;
+    top: 56px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 280ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+    z-index: 1000 !important;
+    width: 250px !important;
+  }
+
+  /* Show sidebar when hamburger is clicked */
+  .account-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  /* Hide "Back to Dashboard" on mobile since hamburger serves as back */
+  .back-to-dashboard-desktop {
+    display: none !important;
+  }
+
+  /* Show mobile back button */
+  .mobile-back-button {
+    display: block !important;
+  }
+
+  /* Show short "Back" text on mobile */
+  .back-text-full {
+    display: none !important;
+  }
+
+  .back-text-short {
+    display: inline !important;
+  }
+
+  /* Adjust content padding */
+  .account-content {
+    padding: 20px 16px !important;
+    margin: 12px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Adjust back button */
+  .back-to-dashboard-btn {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* Adjust headings */
+  .account-content h1 {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .account-content h2 {
+    font-size: 16px !important;
+  }
+
+  .account-content p {
+    font-size: 13px !important;
+    margin-bottom: 32px !important;
+  }
+
+  /* Adjust section spacing */
+  .account-content > div > div {
+    margin-bottom: 32px !important;
+  }
+
+  /* Stack field labels and inputs vertically on mobile */
+  .account-content > div > div > div > div[style*="justifyContent: 'space-between'"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* Make field rows stack better */
+  .account-content > div > div > div {
+    padding: 16px 0 !important;
+  }
+
+  /* Make all field rows responsive - stack label and value */
+  .account-content > div > div > div[style*="display: flex"][style*="justifyContent: space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* Make the value and edit button container full width */
+  .account-content > div > div > div[style*="display: flex"][style*="justifyContent: space-between"] > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  /* Make field values wrap properly */
+  .account-content > div > div > div span {
+    word-break: break-word !important;
+    max-width: calc(100% - 60px) !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Make input fields full width on mobile */
+  .account-content input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Adjust button sizes */
+  .account-content button {
+    font-size: 13px !important;
+  }
+
+  /* Contact Support button responsive */
+  .account-content button[style*="Contact Support"] {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 640px) {
+  .account-content {
+    padding: 16px 12px !important;
+    margin: 8px !important;
+  }
+
+  /* Adjust back button */
+  .back-to-dashboard-btn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    gap: 6px !important;
+  }
+
+  .back-to-dashboard-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Further reduce heading sizes */
+  .account-content h1 {
+    font-size: 20px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .account-content h2 {
+    font-size: 15px !important;
+  }
+
+  .account-content p {
+    font-size: 12px !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Reduce section margins */
+  .account-content > div > div {
+    margin-bottom: 24px !important;
+  }
+
+  /* Adjust section icons */
+  .account-content h2 svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* Make field rows more compact */
+  .account-content > div > div > div {
+    padding: 14px 0 !important;
+  }
+
+  /* Reduce avatar size */
+  .account-content div[style*="width: '48px'"] {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 16px !important;
+  }
+
+  /* Stack action buttons vertically */
+  .account-content > div > div > div:last-child[style*="display: flex"] {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .account-content > div > div > div:last-child[style*="display: flex"] button {
+    width: 100% !important;
+  }
+
+  /* Footer links stack better */
+  .account-content > div > div:last-child {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 480px) {
+  .account-content {
+    padding: 12px 8px !important;
+    margin: 4px !important;
+  }
+
+  /* Back button extra compact */
+  .back-to-dashboard-btn {
+    font-size: 11px !important;
+    padding: 5px 8px !important;
+    gap: 4px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .back-to-dashboard-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* Minimal heading sizes */
+  .account-content h1 {
+    font-size: 18px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .account-content h2 {
+    font-size: 14px !important;
+  }
+
+  .account-content p {
+    font-size: 11px !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Reduce section margins */
+  .account-content > div > div {
+    margin-bottom: 20px !important;
+  }
+
+  /* Compact field rows */
+  .account-content > div > div > div {
+    padding: 12px 0 !important;
+  }
+
+  /* Reduce avatar size on mobile */
+  .account-content div[style*="width: '48px'"] {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+  }
+
+  /* Smaller font sizes */
+  .account-content div[style*="fontSize: '14px'"] {
+    font-size: 12px !important;
+  }
+
+  /* Smaller buttons */
+  .account-content button {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Delete account section - make button full width and responsive */
+  .account-content > div > div:last-child button {
+    width: 100% !important;
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+
+  /* Section icons smaller */
+  .account-content h2 svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Edit icons smaller */
+  .account-content button:not([style*="backgroundColor: '#fb8500'"]) svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* Reduce gaps */
+  .account-content div[style*="gap: '16px'"] {
+    gap: 10px !important;
+  }
+
+  /* Footer links - stack vertically and full width */
+  .account-content > div > div:last-child > div:last-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    font-size: 11px !important;
+    padding-top: 16px !important;
+    gap: 10px !important;
+  }
+
+  /* Footer links - make each link full width for easier tapping */
+  .account-content > div > div:last-child > div:last-child > span {
+    width: 100% !important;
+    padding: 8px 0 !important;
+  }
+}
