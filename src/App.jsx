@@ -25,7 +25,8 @@ const TermsPage = lazy(() => import("./pages/TermsPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const DashboardNew = lazy(() => import("./pages/DashboardNew"));
+const AccountNew = lazy(() => import("./pages/AccountNew"));
 const PortfolioBuilderPage = lazy(() => import("./pages/PortfolioBuilderPage"));
 const TemplatesShowcasePage = lazy(() =>
   import("./pages/TemplatesShowcasePage")
@@ -144,6 +145,14 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
+                  <DashboardNew />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard-old"
+              element={
+                <ProtectedRoute>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -152,7 +161,7 @@ function App() {
               path="/profile"
               element={
                 <ProtectedRoute>
-                  <ProfilePage />
+                  <AccountNew />
                 </ProtectedRoute>
               }
             />
