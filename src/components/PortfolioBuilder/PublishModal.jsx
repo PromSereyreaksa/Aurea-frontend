@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PublishModal = ({ 
-  isOpen, 
-  onClose, 
-  onPublish, 
+const PublishModal = ({
+  isOpen,
+  onClose,
+  onPublish,
   currentSlug = '',
   portfolioTitle = 'My Portfolio',
-  isPublished = false
+  isPublished = false,
+  portfolioId = null
 }) => {
   const [slug, setSlug] = useState(currentSlug);
   const [isValidating, setIsValidating] = useState(false);
@@ -79,20 +80,25 @@ const PublishModal = ({
     // Check availability with backend
     setIsValidating(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/portfolios/check-slug/${slugValue}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+      // Include portfolioId as query param to exclude current portfolio from check
+      const url = new URL(`${import.meta.env.VITE_API_BASE_URL}/api/portfolios/check-slug/${slugValue}`);
+      if (portfolioId) {
+        url.searchParams.append('portfolioId', portfolioId);
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-      );
+      });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        setIsAvailable(data.available);
-        if (!data.available) {
+        // Backend returns nested structure: { success, data: { available } }
+        const available = data.data?.available ?? data.available;
+        setIsAvailable(available);
+        if (!available) {
           setError('This slug is already taken');
         }
       }

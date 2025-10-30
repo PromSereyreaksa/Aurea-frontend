@@ -242,7 +242,7 @@ const PortfoliosSection = ({
                   {/* View Button - If Published */}
                   {portfolio.published && (
                     <Link
-                      to={`/portfolio/${portfolio.slug}`}
+                      to={`/${portfolio.slug}/html`}
                       className="bg-white border-2 border-neutral-200 text-neutral-700 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold hover:border-[#fb8500] hover:text-[#fb8500] transition-all duration-300 flex items-center justify-center gap-2 rounded-xl group"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -338,6 +338,7 @@ const PortfoliosSection = ({
         currentSlug={selectedPortfolio?.slug || ''}
         portfolioTitle={selectedPortfolio?.title || 'My Portfolio'}
         isPublished={selectedPortfolio?.published || false}
+        portfolioId={selectedPortfolio?._id}
       />
     </div>
   );
