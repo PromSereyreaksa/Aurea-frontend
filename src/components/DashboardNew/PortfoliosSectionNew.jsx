@@ -760,7 +760,7 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
                           </button>
                           {portfolio.published && (
                             <button
-                              onClick={() => window.open(`/portfolio/${portfolio.slug}`, '_blank')}
+                              onClick={() => window.open(`/${portfolio.slug}/html`, '_blank')}
                               style={{
                                 width: '100%',
                                 padding: '10px 12px',
@@ -995,7 +995,7 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
                             {portfolio.published && (
                               <>
                                 <button
-                                  onClick={() => window.open(`/portfolio/${portfolio.slug}`, '_blank')}
+                                  onClick={() => window.open(`/${portfolio.slug}/html`, '_blank')}
                                   style={{
                                     width: '100%',
                                     padding: '10px 12px',

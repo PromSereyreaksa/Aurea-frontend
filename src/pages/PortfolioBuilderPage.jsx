@@ -258,7 +258,7 @@ const PortfolioBuilderPage = () => {
         const deploymentData = result.data || result;
         const template = deploymentData.portfolio?.template || deploymentData.deployment?.template || 'your template';
         const filesCount = deploymentData.deployment?.filesGenerated?.length || 0;
-        const siteUrl = deploymentData.site?.url || `aurea.tool/${subdomain}`;
+        const siteUrl = deploymentData.site?.url || `${window.location.origin}/${subdomain}/html`;
 
         // Show detailed success message
         toast.success(
@@ -1087,6 +1087,7 @@ const PortfolioBuilderPage = () => {
         currentSlug={portfolioData?.slug || ''}
         portfolioTitle={title}
         isPublished={portfolioData?.isPublished || false}
+        portfolioId={id}
       />
 
       {/* Template Change Modal */}
