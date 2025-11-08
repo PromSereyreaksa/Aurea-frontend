@@ -323,6 +323,7 @@ const EchelonPreviewPage = () => {
           content={displayData}
           isEditing={false}
           onContentChange={() => {}}
+          pdfMode={pdfMode}
         />
       </div>
 

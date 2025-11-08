@@ -43,6 +43,9 @@ const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
 const SereneAboutPreviewPage = lazy(() => import("./pages/SereneAboutPreviewPage"));
 const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
 const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
+const EchelonCaseStudyPreview = lazy(() =>
+  import("./pages/EchelonCaseStudyPreview")
+);
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
@@ -209,6 +212,10 @@ function App() {
               path="/template-preview/boldfolio"
               element={<BoldFolioPreviewPage />}
             />
+            <Route
+              path="/template-preview/echelon/case-study"
+              element={<EchelonCaseStudyPreview />}
+            />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route
               path="/portfolio/:slug"
@@ -228,8 +235,21 @@ function App() {
               path="/:subdomain/html"
               element={<StaticHTMLViewer />}
             />
+            {/* Case study routes - handle different formats */}
             <Route
-              path="/:subdomain/case-study-:projectId.html"
+              path="/:subdomain/case-study-1.html"
+              element={<StaticCaseStudyViewer />}
+            />
+            <Route
+              path="/:subdomain/case-study-2.html"
+              element={<StaticCaseStudyViewer />}
+            />
+            <Route
+              path="/:subdomain/case-study-3.html"
+              element={<StaticCaseStudyViewer />}
+            />
+            <Route
+              path="/:subdomain/case-study-:projectId"
               element={<StaticCaseStudyViewer />}
             />
           </Routes>

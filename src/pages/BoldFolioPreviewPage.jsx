@@ -353,6 +353,7 @@ const BoldFolioPreviewPage = () => {
           }}
           isEditing={false}
           onContentChange={() => {}}
+          pdfMode={pdfMode}
         />
       </div>
 

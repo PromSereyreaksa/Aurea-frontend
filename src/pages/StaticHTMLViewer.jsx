@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { injectNavigationHandler } from '../utils/staticNavigation';
 
 /**
  * StaticHTMLViewer - Displays static HTML files from backend
@@ -38,11 +39,18 @@ const StaticHTMLViewer = () => {
       const data = await response.json();
 
       if (data.success && data.html) {
-        // Replace the entire document with the HTML content
-        // This gives a true static HTML experience
+        console.log('[StaticHTMLViewer] Enhancing HTML with navigation handler for subdomain:', subdomain);
+
+        // Use the utility function to inject navigation handler
+        const enhancedHtml = injectNavigationHandler(data.html, subdomain);
+
+        // Replace the entire document with the enhanced HTML content
+        console.log('[StaticHTMLViewer] Replacing document content');
         document.open();
-        document.write(data.html);
+        document.write(enhancedHtml);
         document.close();
+
+        console.log('[StaticHTMLViewer] Document replaced successfully');
       } else {
         setError('Invalid HTML content');
         setLoading(false);

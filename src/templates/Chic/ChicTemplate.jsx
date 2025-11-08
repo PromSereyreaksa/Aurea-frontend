@@ -17,7 +17,8 @@ const ChicTemplate = ({
   isEditing = false,
   onContentChange,
   className = '',
-  portfolioId = null
+  portfolioId = null,
+  pdfMode = false
 }) => {
   // Default styling - Chic Editorial theme
   const defaultStyling = {
@@ -159,6 +160,8 @@ const ChicTemplate = ({
             styling={mergedStyling}
             isEditing={isEditing}
             onContentChange={handleSectionContentChange}
+            portfolioId={portfolioId}
+            pdfMode={pdfMode}
           />
         )}
       </div>

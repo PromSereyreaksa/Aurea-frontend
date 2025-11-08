@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => {
+const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange, portfolioId = null, pdfMode = false }) => {
   const [visibleSections, setVisibleSections] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(null);
   const projects = content.projects || [];

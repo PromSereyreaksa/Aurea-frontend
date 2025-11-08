@@ -18,6 +18,7 @@ const SereneTemplate = ({
   onContentChange = () => {},
   className = '',
   portfolioId,
+  pdfMode = false,
 }) => {
   // Merge styling from backend with defaults - Clean Blossom color palette
   const colors = styling?.colorScheme || styling?.colors || {
@@ -84,6 +85,8 @@ const SereneTemplate = ({
           styling={{ colors, fonts }}
           isEditing={isEditing}
           onChange={(fieldId, value) => onContentChange('gallery', fieldId, value)}
+          portfolioId={portfolioId}
+          pdfMode={pdfMode}
         />
       )}
 

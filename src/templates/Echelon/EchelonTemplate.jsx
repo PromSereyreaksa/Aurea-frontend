@@ -11,7 +11,8 @@ const EchelonTemplate = ({
   onContentChange,
   className = '',
   portfolioId = null,
-  caseStudies = {}
+  caseStudies = {},
+  pdfMode = false
 }) => {
   // Navigation scroll effect
   const [isScrolled, setIsScrolled] = useState(false);
@@ -157,6 +158,7 @@ const EchelonTemplate = ({
           onContentChange={handleSectionContentChange}
           portfolioId={portfolioId}
           caseStudies={caseStudies}
+          pdfMode={pdfMode}
         />
 
         {/* Gallery Section */}

@@ -368,6 +368,7 @@ const SerenePreviewPage = () => {
           }}
           isEditing={false}
           onContentChange={() => {}}
+          pdfMode={pdfMode}
         />
       </div>
 

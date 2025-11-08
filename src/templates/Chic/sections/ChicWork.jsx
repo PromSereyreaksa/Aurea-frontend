@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
  * Exact specifications: 1024px content area, absolute positioning
  * Left column: 467px @ x:40px | Right column: 705px @ x:517px
  */
-const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange }) => {
+const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange, portfolioId = null, pdfMode = false }) => {
   const fonts = styling.fonts || {};
   const projects = content.projects || [];
   const [uploadingIndex, setUploadingIndex] = useState(null);

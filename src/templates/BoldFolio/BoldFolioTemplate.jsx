@@ -9,7 +9,8 @@ const BoldFolioTemplate = ({
   isEditing = false,
   onContentChange,
   className = '',
-  portfolioId = null
+  portfolioId = null,
+  pdfMode = false
 }) => {
   // Handle content changes
   const handleSectionContentChange = (section, field, value) => {
@@ -50,6 +51,8 @@ const BoldFolioTemplate = ({
           content={content.work || {}}
           isEditing={isEditing}
           onContentChange={handleSectionContentChange}
+          portfolioId={portfolioId}
+          pdfMode={pdfMode}
         />
       )}
 

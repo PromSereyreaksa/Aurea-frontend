@@ -358,6 +358,7 @@ const ChicPreviewPage = () => {
           }}
           isEditing={false}
           onContentChange={() => {}}
+          pdfMode={pdfMode}
         />
       </div>
 
