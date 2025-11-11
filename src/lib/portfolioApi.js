@@ -269,6 +269,34 @@ export const portfolioApi = {
         localStorage.removeItem(key);
       }
     });
+  },
+
+  // Regenerate HTML files for a published portfolio
+  regenerateHTML: async (portfolioId) => {
+    return apiRequest(
+      async () => {
+        const response = await api.post(
+          `/api/sites/${portfolioId}/regenerate`,
+          {},
+          {
+            timeout: 30000 // 30 seconds for HTML generation
+          }
+        );
+        return response.data;
+      },
+      'Failed to regenerate portfolio HTML'
+    );
+  },
+
+  // Get debug information for a published portfolio (optional, for troubleshooting)
+  getPortfolioDebug: async (subdomain) => {
+    return apiRequest(
+      async () => {
+        const response = await api.get(`/api/sites/${subdomain}/debug`);
+        return response.data;
+      },
+      'Failed to fetch portfolio debug information'
+    );
   }
 };
 

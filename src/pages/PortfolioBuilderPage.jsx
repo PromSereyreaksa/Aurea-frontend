@@ -295,7 +295,33 @@ const PortfolioBuilderPage = () => {
       }
     } catch (error) {
       console.error('Publish error:', error);
-      toast.error(error.message || 'Failed to publish portfolio');
+
+      // Enhanced error handling for validation errors
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+
+        // Check for template data validation error
+        if (errorData?.message?.includes('template placeholder data detected') ||
+            errorData?.message?.includes('placeholder')) {
+          toast.error(
+            '⚠️ Your portfolio contains placeholder text. Please update with real content before publishing.',
+            { duration: 5000 }
+          );
+        }
+        // Check for missing content structure
+        else if (errorData?.message?.includes('content') ||
+                 errorData?.message?.includes('structure')) {
+          toast.error(
+            '⚠️ Portfolio structure needs updating. Please ensure all sections have content.',
+            { duration: 5000 }
+          );
+        } else {
+          toast.error(errorData?.message || 'Validation failed. Please check your portfolio content.');
+        }
+      } else {
+        toast.error(error.message || 'Failed to publish portfolio. Please try again.');
+      }
+
       throw error;
     }
   };

@@ -139,7 +139,41 @@ const PublishModal = ({
         setPublishingProgress('');
       }, 500);
     } catch (err) {
-      setError(err.message || 'Failed to publish portfolio');
+      // Check if this is a validation error from the backend
+      if (err.response?.status === 400) {
+        const errorData = err.response.data;
+
+        // Check for template data validation error
+        if (errorData?.message?.includes('template placeholder data detected') ||
+            errorData?.message?.includes('placeholder') ||
+            errorData?.message?.includes('template data')) {
+          setError(
+            `Your portfolio contains template placeholder text. Please update your content with real information before publishing. ${errorData.message || ''}`
+          );
+        }
+        // Check for missing content structure
+        else if (errorData?.message?.includes('content') ||
+                 errorData?.message?.includes('structure')) {
+          setError(
+            `Portfolio data structure issue detected. Please ensure all required fields are filled. ${errorData.message || ''}`
+          );
+        }
+        // Check for specific field validation errors
+        else if (errorData?.invalidFields) {
+          const fields = Array.isArray(errorData.invalidFields) ? errorData.invalidFields.join(', ') : errorData.invalidFields;
+          setError(
+            `Please update these sections with real content: ${fields}`
+          );
+        }
+        // Generic validation error
+        else {
+          setError(errorData?.message || 'Validation error: Please check your portfolio content and try again.');
+        }
+      } else {
+        // Non-validation error
+        setError(err.message || 'Failed to publish portfolio. Please try again.');
+      }
+
       setPublishingProgress('');
     } finally {
       setIsPublishing(false);
@@ -289,11 +323,18 @@ const PublishModal = ({
 
                 {/* Error Message */}
                 {error && (
-                  <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+                  <div className={`flex items-start gap-2 text-sm ${
+                    error.includes('placeholder') || error.includes('template')
+                      ? 'text-amber-700 bg-amber-50 border-2 border-amber-200'
+                      : 'text-red-600 bg-red-50 border-2 border-red-200'
+                  } px-4 py-3 rounded-lg`}>
                     <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
-                    <span>{error}</span>
+                    <div>
+                      <span className="font-semibold block">{error.split('.')[0]}.</span>
+                      <span>{error.split('.').slice(1).join('.')}</span>
+                    </div>
                   </div>
                 )}
 

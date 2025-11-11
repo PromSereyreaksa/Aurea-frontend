@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import useAuthStore from "../stores/authStore";
 import usePortfolioStore from "../stores/portfolioStore";
+import portfolioApi from "../lib/portfolioApi";
 import Navbar from "../components/Shared/Navbar";
 import DashboardSidebar from "../components/Dashboard/DashboardSidebar";
 import DashboardBottomBar from "../components/Dashboard/DashboardBottomBar";
@@ -98,6 +100,28 @@ const DashboardPage = () => {
     }
   };
 
+  const handleRegenerateHTML = async (portfolio) => {
+    const toastId = toast.loading(`Regenerating HTML for ${portfolio.title}...`);
+
+    try {
+      const result = await portfolioApi.regenerateHTML(portfolio._id);
+
+      toast.success(
+        `Successfully regenerated HTML! ${result.data?.filesGenerated || ''} files updated.`,
+        { id: toastId }
+      );
+
+      // Optionally refresh portfolios to update any timestamps
+      await fetchUserPortfolios();
+    } catch (error) {
+      console.error('Error regenerating HTML:', error);
+      toast.error(
+        error.response?.data?.message || 'Failed to regenerate HTML. Please try again.',
+        { id: toastId }
+      );
+    }
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case "overview":
@@ -117,6 +141,7 @@ const DashboardPage = () => {
             isLoading={isLoading}
             handleDeletePortfolio={handleDeletePortfolio}
             handleTogglePublish={handleTogglePublish}
+            handleRegenerateHTML={handleRegenerateHTML}
           />
         );
       case "analytics":
