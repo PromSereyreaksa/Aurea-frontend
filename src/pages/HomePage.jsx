@@ -1,20 +1,15 @@
 import React, { lazy, Suspense } from "react";
-import ModernNavbar from "../components/LandingPage/ModernNavbar";
-import ModernHero from "../components/LandingPage/ModernHero";
-import ModernFooter from "../components/LandingPage/ModernFooter";
-import LazySection from "../components/LazySection";
-
-// Eagerly load sections that are in navigation for instant access
-import FeaturesGrid from "../components/LandingPage/FeaturesGrid";
-import TestimonialsSection from "../components/LandingPage/TestimonialsSection";
-
-// Lazy load other sections below the fold
-const TrustBanner = lazy(() => import("../components/LandingPage/TrustBanner"));
-const HowItWorks = lazy(() => import("../components/LandingPage/HowItWorks"));
-const StatsSection = lazy(() =>
-  import("../components/LandingPage/StatsSection")
-);
-const FinalCTA = lazy(() => import("../components/LandingPage/FinalCTA"));
+import V2Navbar from "../components/LandingPage/V2Navbar";
+import V2Hero from "../components/LandingPage/V2Hero";
+import TimelineSection from "../components/LandingPage/TimelineSection";
+import ProblemSection from "../components/LandingPage/ProblemSection";
+import TransitionSection from "../components/LandingPage/TransitionSection";
+import ImpactSection from "../components/LandingPage/ImpactSection";
+import SolutionSection from "../components/LandingPage/SolutionSection";
+import MarqueeSection from "../components/LandingPage/MarqueeSection";
+import HowItWorksSection from "../components/LandingPage/HowItWorksSection";
+import V2Footer from "../components/LandingPage/V2Footer";
+import ScrollProgress from "../components/LandingPage/ScrollProgress";
 
 // Simple loading placeholder
 const SectionSkeleton = () => (
@@ -23,40 +18,41 @@ const SectionSkeleton = () => (
 
 export default function HomePage() {
   return (
-    <div className="app-page min-h-screen bg-white">
-      <ModernNavbar />
+    <div className="app-page min-h-screen bg-[#1a1a1a]">
+      <ScrollProgress />
+      <V2Navbar />
 
       <main className="bg-white">
-        {/* Hero always loads immediately */}
-        <ModernHero />
+        {/* Hero Section - Large Typography */}
+        <div id="home">
+          <V2Hero />
+        </div>
 
-        {/* Eagerly loaded sections - in navigation, no lazy loading */}
-        <FeaturesGrid />
+        {/* Timeline Section - The Journey */}
+        <TimelineSection />
 
-        {/* Lazy load sections with aggressive preloading */}
-        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
-          <Suspense fallback={<SectionSkeleton />}>
-            <HowItWorks />
-          </Suspense>
-        </LazySection>
+        {/* Marquee Section - Visual Impact */}
+        <MarqueeSection />
 
-        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
-          <Suspense fallback={<SectionSkeleton />}>
-            <StatsSection />
-          </Suspense>
-        </LazySection>
+        {/* Problem Section - The Challenge */}
+        <ProblemSection />
 
-        {/* Testimonials - eagerly loaded for navigation */}
-        <TestimonialsSection />
+        {/* Transition Section - Before & After */}
+        <TransitionSection />
 
-        <LazySection fallback={<SectionSkeleton />} rootMargin="500px">
-          <Suspense fallback={<SectionSkeleton />}>
-            <FinalCTA />
-          </Suspense>
-        </LazySection>
+        {/* Impact Section - Why It Matters */}
+        <ImpactSection />
+
+        {/* Solution Section - Our Services */}
+        <div id="services">
+          <SolutionSection />
+        </div>
+
+        {/* How It Works - Scroll-jacking Section */}
+        <HowItWorksSection />
       </main>
 
-      <ModernFooter />
+      <V2Footer />
     </div>
   );
 }
