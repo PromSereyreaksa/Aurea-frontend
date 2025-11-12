@@ -8,8 +8,8 @@ import {
   DollarSign,
   Sparkles,
 } from "lucide-react";
-import ModernNavbar from "../components/LandingPage/ModernNavbar";
-import ModernFooter from "../components/LandingPage/ModernFooter";
+import V2Navbar from "../components/LandingPage/V2Navbar";
+import V2Footer from "../components/LandingPage/V2Footer";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -158,7 +158,7 @@ const AboutPage = () => {
 
   return (
     <div className="app-page min-h-screen bg-white text-black">
-      <ModernNavbar />
+      <V2Navbar />
 
       {/* Hero Section - Modern Style */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
@@ -479,7 +479,7 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <ModernFooter />
+      <V2Footer />
     </div>
   );
 };
