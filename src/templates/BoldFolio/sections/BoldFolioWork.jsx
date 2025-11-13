@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useImageUpload } from '../../../hooks/useImageUpload';
+import { useBreakpoints } from '../../../hooks/useMediaQuery';
 
 const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => {
   const [visibleSections, setVisibleSections] = useState([]);
-  const [uploadingImage, setUploadingImage] = useState(null);
+  const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
+  const { uploadImage } = useImageUpload();
+  const { isMobile, isTablet, isDesktop } = useBreakpoints();
   const projects = content.projects || [];
 
   useEffect(() => {
@@ -27,21 +31,20 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
     container: {
       position: 'relative',
       minHeight: '100vh',
-      minWidth: '1024px',
       background: 'none',
-      padding: '60px 40px',
+      padding: 'clamp(1.25rem, 4vw, 3.75rem) clamp(1rem, 3vw, 2.5rem)',
       fontFamily: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
       fontWeight: '500',
       fontStyle: 'normal',
     },
     projectSection: {
       maxWidth: '1400px',
-      margin: '0 auto 120px auto',
+      margin: isMobile ? '0 auto 60px auto' : '0 auto 120px auto',
       animation: 'fadeIn 0.8s ease-in forwards',
     },
     projectTitle: {
       color: '#ff0080',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 20px 0',
@@ -49,7 +52,7 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
     },
     projectDescription: {
       color: '#000000',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 30px 0',
@@ -57,7 +60,7 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
     },
     exploreLink: {
       color: '#000000',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '400',
       lineHeight: '1.3',
       margin: '0 0 40px 0',
@@ -68,31 +71,31 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
     },
     imagesContainer: {
       display: 'flex',
-      gap: '30px',
+      gap: 'clamp(1rem, 3vw, 1.875rem)',
       flexWrap: 'wrap',
       alignItems: 'flex-start',
     },
     imageBox: {
-      borderRadius: '20px',
+      borderRadius: 'clamp(0.75rem, 2vw, 1.25rem)',
       overflow: 'hidden',
       backgroundColor: '#e0e0e0',
     },
     logoText: {
-      fontSize: '120px',
+      fontSize: 'clamp(3rem, 10vw, 7.5rem)',
       fontWeight: '300',
-      letterSpacing: '8px',
+      letterSpacing: 'clamp(2px, 0.8vw, 8px)',
       color: '#a855f7',
       display: 'flex',
       flexDirection: 'column',
       lineHeight: '0.8',
-      margin: '40px 0',
+      margin: 'clamp(1.25rem, 4vw, 2.5rem) 0',
     },
     scrollTop: {
       color: '#000000',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '400',
       lineHeight: '1.3',
-      margin: '80px 0 0 0',
+      margin: 'clamp(3rem, 8vw, 5rem) 0 0 0',
       textDecoration: 'underline',
       display: 'inline-block',
       cursor: 'pointer',
@@ -132,6 +135,25 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
   };
 
   // Handle image upload
+  // Stable helper to update project image (avoids stale closure)
+  const updateProjectImage = (projectIndex, imageIndex, imageUrl) => {
+    const updatedProjects = [...projects];
+    const updatedImages = [...(updatedProjects[projectIndex].images || [])];
+    updatedImages[imageIndex] = {
+      ...updatedImages[imageIndex],
+      src: imageUrl
+    };
+    updatedProjects[projectIndex] = {
+      ...updatedProjects[projectIndex],
+      images: updatedImages
+    };
+
+    if (onContentChange) {
+      onContentChange('work', 'projects', updatedProjects);
+    }
+  };
+
+  // Handle image upload with compression and progress tracking
   const handleImageUpload = async (file, projectIndex, imageIndex) => {
     if (!file) return;
 
@@ -147,76 +169,41 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
       return;
     }
 
-    // 1. INSTANT PREVIEW - Show image immediately using blob URL
+    console.log(`📤 Starting optimized upload for BoldFolio project ${projectIndex} image ${imageIndex}...`);
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
     const localPreview = URL.createObjectURL(file);
-    const updatedProjects = [...projects];
-    const updatedImages = [...(updatedProjects[projectIndex].images || [])];
-    updatedImages[imageIndex] = {
-      ...updatedImages[imageIndex],
-      src: localPreview
-    };
-    updatedProjects[projectIndex] = {
-      ...updatedProjects[projectIndex],
-      images: updatedImages
-    };
+    updateProjectImage(projectIndex, imageIndex, localPreview);
 
-    if (onContentChange) {
-      onContentChange('work', 'projects', updatedProjects);
-    }
-    console.log(`✨ Showing instant preview for BoldFolio project ${projectIndex} image ${imageIndex}:`, localPreview);
-
-    // 2. Start upload in background
-    setUploadingImage(`${projectIndex}-${imageIndex}`);
+    // 2. Mark as uploading (use unique key for project+image combination)
+    const uploadKey = `${projectIndex}-${imageIndex}`;
+    setUploadingIndexes(prev => new Map(prev).set(uploadKey, { progress: 0 }));
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      console.log(`📤 Uploading BoldFolio project ${projectIndex} image ${imageIndex} to Cloudinary in background...`);
-
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
-        }
+      // 3. Upload with all optimizations (compression, fake progress, direct upload)
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
+      console.log(`✅ Upload complete for BoldFolio project ${projectIndex} image ${imageIndex}:`, cloudinaryUrl);
 
-      const result = await response.json();
+      // 4. Replace blob URL with final Cloudinary URL
+      updateProjectImage(projectIndex, imageIndex, cloudinaryUrl);
 
-      if (result.success && result.data?.url) {
-        // 3. Replace blob URL with Cloudinary URL
-        const finalProjects = [...projects];
-        const finalImages = [...(finalProjects[projectIndex].images || [])];
-        finalImages[imageIndex] = {
-          ...finalImages[imageIndex],
-          src: result.data.url
-        };
-        finalProjects[projectIndex] = {
-          ...finalProjects[projectIndex],
-          images: finalImages
-        };
+      // Clean up blob URL
+      URL.revokeObjectURL(localPreview);
 
-        if (onContentChange) {
-          onContentChange('work', 'projects', finalProjects);
-        }
-
-        console.log(`✅ Cloudinary upload complete for BoldFolio project ${projectIndex} image ${imageIndex}:`, result.data.url);
-
-        // Clean up blob URL to free memory
-        URL.revokeObjectURL(localPreview);
-      } else {
-        throw new Error(result.message || 'Upload failed - no URL returned');
-      }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       alert(`Failed to upload image: ${error.message}`);
     } finally {
-      setUploadingImage(null);
+      // 5. Clear uploading state
+      setUploadingIndexes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(uploadKey);
+        return newMap;
+      });
     }
   };
 
@@ -274,15 +261,22 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
           <div style={styles.imagesContainer}>
             {(project.images || []).map((img, imgIdx) => {
               const imageKey = `${idx}-${imgIdx}`;
-              const isUploading = uploadingImage === imageKey;
+              const isUploading = uploadingIndexes.has(imageKey);
+
+              // Scale image dimensions based on viewport
+              const baseWidth = parseInt(img.width) || 300;
+              const baseHeight = parseInt(img.height) || 200;
+              const scaleFactor = isMobile ? 0.65 : isTablet ? 0.8 : 1;
+              const scaledWidth = `${Math.round(baseWidth * scaleFactor)}px`;
+              const scaledHeight = `${Math.round(baseHeight * scaleFactor)}px`;
 
               return (
                 <div
                   key={imgIdx}
                   style={{
                     ...styles.imageBox,
-                    width: img.width || '300px',
-                    height: img.height || '200px',
+                    width: scaledWidth,
+                    height: scaledHeight,
                     backgroundImage: img.src ? `url(${img.src})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',

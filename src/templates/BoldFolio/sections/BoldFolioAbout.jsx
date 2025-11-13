@@ -7,8 +7,7 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
 
   const styles = {
     container: {
-      padding: '60px 40px',
-      minWidth: '1024px',
+      padding: 'clamp(1.25rem, 4vw, 3.75rem) clamp(1rem, 3vw, 2.5rem)',
       fontFamily: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
     },
     content: {
@@ -17,7 +16,7 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
     },
     heading: {
       color: '#ff0080',
-      fontSize: '52px',
+      fontSize: 'clamp(2rem, 5vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 40px 0',
@@ -25,7 +24,7 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
     },
     text: {
       color: '#000000',
-      fontSize: '52px',
+      fontSize: 'clamp(2rem, 5vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 20px 0',
@@ -33,11 +32,11 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
     },
     subtext: {
       color: '#000000',
-      fontSize: '24px',
+      fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
       fontWeight: '400',
       lineHeight: '1.5',
       margin: '0 0 20px 0',
-      maxWidth: '800px',
+      maxWidth: 'clamp(600px, 80vw, 800px)',
     },
   };
 
@@ -78,7 +77,7 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
         </p>
         {content.location && (
           <p
-            style={{...styles.subtext, fontSize: '18px'}}
+            style={{...styles.subtext, fontSize: 'clamp(0.938rem, 2vw, 1.125rem)'}}
             contentEditable={isEditing}
             suppressContentEditableWarning
             onBlur={(e) => isEditing && handleFieldChange('location', e.target.textContent)}
@@ -87,7 +86,7 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
           </p>
         )}
         {content.email && (
-          <p style={{...styles.subtext, fontSize: '18px'}}>
+          <p style={{...styles.subtext, fontSize: 'clamp(0.938rem, 2vw, 1.125rem)'}}>
             <a
               href={`mailto:${content.email}`}
               style={{ color: '#ff0080', textDecoration: 'underline' }}

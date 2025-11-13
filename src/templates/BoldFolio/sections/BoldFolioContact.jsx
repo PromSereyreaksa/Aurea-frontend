@@ -7,8 +7,7 @@ const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) 
 
   const styles = {
     container: {
-      padding: '60px 40px',
-      minWidth: '1024px',
+      padding: 'clamp(1.25rem, 4vw, 3.75rem) clamp(1rem, 3vw, 2.5rem)',
       fontFamily: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
     },
     content: {
@@ -18,7 +17,7 @@ const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) 
     },
     heading: {
       color: '#ff0080',
-      fontSize: '52px',
+      fontSize: 'clamp(2rem, 5vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 40px 0',
@@ -26,7 +25,7 @@ const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) 
     },
     text: {
       color: '#000000',
-      fontSize: '24px',
+      fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
       fontWeight: '400',
       lineHeight: '1.5',
       margin: '0 0 40px 0',
@@ -36,23 +35,27 @@ const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) 
     },
     email: {
       color: '#ff0080',
-      fontSize: '36px',
+      fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
       fontWeight: '500',
       textDecoration: 'underline',
-      margin: '20px 0',
+      margin: 'clamp(0.75rem, 2vw, 1.25rem) 0',
       display: 'inline-block',
     },
     social: {
       display: 'flex',
-      gap: '20px',
+      gap: 'clamp(1rem, 2vw, 1.25rem)',
       justifyContent: 'center',
-      marginTop: '40px',
+      marginTop: 'clamp(1.25rem, 4vw, 2.5rem)',
+      flexWrap: 'wrap',
     },
     socialLink: {
       color: '#000000',
-      fontSize: '18px',
+      fontSize: 'clamp(0.875rem, 2vw, 1.125rem)',
       textDecoration: 'underline',
       cursor: 'pointer',
+      minHeight: '44px',
+      display: 'flex',
+      alignItems: 'center',
     },
   };
 

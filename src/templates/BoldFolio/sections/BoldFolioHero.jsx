@@ -18,9 +18,8 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
     container: {
       position: 'relative',
       minHeight: '100vh',
-      minWidth: '1024px',
       background: 'none',
-      padding: '60px 40px',
+      padding: 'clamp(1.25rem, 4vw, 3.75rem) clamp(1rem, 3vw, 2.5rem)',
       fontFamily: 'Graphik, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Fira Sans", Roboto, "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif',
       fontWeight: '500',
       fontStyle: 'normal',
@@ -32,7 +31,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
       justifyContent: 'space-between',
       alignItems: 'flex-start',
       flexWrap: 'wrap',
-      gap: '40px',
+      gap: 'clamp(1.5rem, 4vw, 2.5rem)',
     },
     leftSection: {
       flex: '1 1 600px',
@@ -41,7 +40,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
     },
     magentaText: {
       color: '#ff0080',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 20px 0',
@@ -49,7 +48,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
     },
     blackText: {
       color: '#000000',
-      fontSize: '52px',
+      fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
       fontWeight: '500',
       lineHeight: '1.2',
       margin: '0 0 20px 0',
@@ -107,7 +106,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
           <p
             style={{
               ...styles.blackText,
-              fontSize: '52px',
+              fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
               margin: '0 0 20px 0',
             }}
             contentEditable={isEditing}
@@ -118,7 +117,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
           <p
             style={{
               ...styles.blackText,
-              fontSize: '52px',
+              fontSize: 'clamp(1.75rem, 6vw, 3.25rem)',
               margin: '0',
               textAlign: 'center',
             }}
