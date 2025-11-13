@@ -249,7 +249,7 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
         // Check if we have access to the save function through onContentChange
         if (onContentChange && onContentChange.onSave) {
           import('react-hot-toast').then(({ toast }) => {
-            toast.success('Saving from Design Tools... (Ctrl+S)', {
+            toast.success('Saving from Design Tools...', {
               duration: 1500,
               icon: '🎨',
             });
@@ -703,12 +703,6 @@ const DesignToolsPanel = ({ template, portfolioData, onStyleChange, onContentCha
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
               <h2 className="text-lg font-semibold text-gray-900">Design Tools</h2>
-              <div className="hidden md:flex items-center space-x-1 text-xs text-gray-500">
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd>
-                <span>+</span>
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">S</kbd>
-                <span className="text-gray-400">to save</span>
-              </div>
             </div>
           )}
           <div className="flex items-center gap-2">

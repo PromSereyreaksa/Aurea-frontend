@@ -2,6 +2,7 @@ import React from 'react';
 
 // Swiss Grid System Component
 // Implements a 12-column grid with precise spacing and baseline alignment
+// Fully responsive with mobile-first approach
 
 export const SwissGrid = ({ 
   children, 
@@ -16,10 +17,10 @@ export const SwissGrid = ({
       style={{
         maxWidth,
         margin: '0 auto',
-        padding: `0 clamp(20px, 5vw, ${margin})`,
+        padding: `0 clamp(16px, 5vw, ${margin})`, // Mobile: 16px, Desktop: margin value
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gap: `clamp(12px, 2vw, ${gutter})`,
+        gap: `clamp(8px, 2vw, ${gutter})`, // Mobile: 8px, Desktop: gutter value
         alignItems: 'start'
       }}
     >

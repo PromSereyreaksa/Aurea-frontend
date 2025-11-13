@@ -111,13 +111,12 @@ const EchelonGallery = ({
     <>
       <section
         id="gallery"
+        className="py-20 md:py-32 lg:py-48"
         style={{
           backgroundColor: '#000000',
           color: '#FFFFFF',
-          paddingTop: '200px',
-          paddingBottom: '200px',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'clip'
         }}
       >
         {/* Large Grid Decoration - Top Left */}
@@ -224,12 +223,11 @@ const EchelonGallery = ({
 
           {/* Gallery Grid - LARGER IMAGES */}
           <GridCol span={12}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '40px',
-              marginBottom: '60px'
-            }}>
+            <div
+              className="grid grid-cols-2 gap-4 md:gap-10 mb-12 md:mb-16"
+              style={{
+                marginBottom: '60px'
+              }}>
               {images.map((image, index) => (
                 <div 
                   key={image.id || index}

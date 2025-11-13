@@ -71,7 +71,7 @@ const EchelonHero = ({
         paddingTop: '0',
         paddingBottom: '0',
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'clip',
         display: 'flex',
         alignItems: 'center'
       }}
@@ -160,12 +160,12 @@ const EchelonHero = ({
         <GridCol span={12}>
           <div style={{ position: 'relative', paddingTop: '20vh', paddingBottom: '15vh', zIndex: 2 }}>
             {/* Huge Background "01" Number */}
-            <div style={{
+            <div className="hidden md:block" style={{
               position: 'absolute',
               top: '10%',
               right: '-5%',
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-              fontSize: 'clamp(200px, 30vw, 400px)',
+              fontSize: 'clamp(80px, 30vw, 400px)',
               fontWeight: 900,
               color: 'rgba(0, 0, 0, 0.02)',
               lineHeight: 1,
@@ -241,7 +241,7 @@ const EchelonHero = ({
         </GridCol>
 
         {/* Asymmetrical Layout - Subtitle positioned on grid */}
-        <GridCol span={5} offset={7}>
+        <GridCol span={12} offset={0} className="md:col-span-5 md:col-start-8">
           <div style={{
             borderLeft: '4px solid #FF0000',
             paddingLeft: '40px',

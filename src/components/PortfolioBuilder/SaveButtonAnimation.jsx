@@ -34,11 +34,11 @@ const SaveButtonAnimation = ({ isSaving, onSave, disabled = false, showSuccess =
         disabled={isDisabled}
         whileHover={!isDisabled ? { scale: 1.05 } : {}}
         whileTap={!isDisabled ? { scale: 0.95 } : {}}
-        className={`w-12 h-12 ${
+        className={`w-14 h-14 md:w-12 md:h-12 ${
           noChanges
             ? 'bg-gray-400 cursor-not-allowed opacity-60'
-            : isDisabled 
-            ? 'bg-orange-400 cursor-not-allowed' 
+            : isDisabled
+            ? 'bg-orange-400 cursor-not-allowed'
             : 'bg-orange-500 hover:bg-orange-600'
         } text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center relative overflow-hidden`}
       >
@@ -140,8 +140,8 @@ const SaveButtonAnimation = ({ isSaving, onSave, disabled = false, showSuccess =
         )}
       </motion.button>
 
-      {/* Tooltip */}
-      <div className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+      {/* Tooltip - Hidden on mobile, shown on desktop */}
+      <div className="hidden md:block absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
         {internalSuccess ? 'Saved!' : isSaving ? 'Saving...' : noChanges ? 'No changes to save' : 'Save Draft'}
       </div>
     </div>

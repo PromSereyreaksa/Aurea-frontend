@@ -278,10 +278,10 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px', flexWrap: 'nowrap' }}>
         <div style={{ minWidth: 0, flex: '1 1 auto' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '8px' }}>
-            My Portfolios
+            My site
           </h1>
           <p style={{ fontSize: '14px', color: '#666' }}>
-            {portfolios.length} {portfolios.length === 1 ? 'portfolio' : 'portfolios'}
+            {portfolios.length} {portfolios.length === 1 ? 'site' : 'sites'}
           </p>
         </div>
 

@@ -240,14 +240,13 @@ const ChicPreviewPage = () => {
     }}>
       {/* Preview Header - Hidden in PDF mode */}
       {!pdfMode && (
-        <div style={{
+        <div className="px-4 py-3 md:px-8 md:py-5" style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           backgroundColor: chicColors.surface,
           color: chicColors.text,
-          padding: '20px 40px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -255,14 +254,10 @@ const ChicPreviewPage = () => {
           borderBottom: `1px solid ${chicColors.border}`,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
         }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px'
-        }}>
+        <div className="flex items-center gap-2 md:gap-5">
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: '13px',
+            fontSize: 'clamp(12px, 3vw, 13px)',
             fontWeight: 500,
             color: chicColors.text,
             textTransform: 'uppercase',
@@ -270,9 +265,9 @@ const ChicPreviewPage = () => {
           }}>
             CHIC
           </div>
-          <div style={{
+          <div className="hidden sm:block" style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: '11px',
+            fontSize: 'clamp(9px, 2vw, 11px)',
             color: chicColors.textMuted,
             textTransform: 'uppercase',
             letterSpacing: '0.3px'
@@ -281,20 +276,15 @@ const ChicPreviewPage = () => {
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          gap: '15px',
-          alignItems: 'center'
-        }}>
+        <div className="flex gap-2 md:gap-4 items-center">
           <button
             onClick={() => window.history.back()}
+            className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm"
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '11px',
               color: chicColors.text,
               backgroundColor: 'transparent',
               border: `1px solid ${chicColors.border}`,
-              padding: '10px 20px',
               textTransform: 'uppercase',
               letterSpacing: '0.3px',
               cursor: 'pointer',
@@ -309,19 +299,18 @@ const ChicPreviewPage = () => {
               e.target.style.color = chicColors.text;
             }}
           >
-            ← BACK
+            <span className="hidden sm:inline">← </span>BACK
           </button>
 
           <button
             onClick={handleUseTemplate}
+            className="px-4 py-2 md:px-6 md:py-2.5 text-xs md:text-sm whitespace-nowrap"
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '11px',
               fontWeight: 500,
               color: chicColors.surface,
               backgroundColor: chicColors.text,
               border: `1px solid ${chicColors.text}`,
-              padding: '10px 30px',
               textTransform: 'uppercase',
               letterSpacing: '0.3px',
               cursor: 'pointer',
@@ -338,14 +327,14 @@ const ChicPreviewPage = () => {
               e.target.style.transform = 'translateY(0)';
             }}
           >
-            USE THIS TEMPLATE
+            <span className="hidden md:inline">USE THIS </span>TEMPLATE
           </button>
         </div>
         </div>
       )}
 
       {/* Template Content with margin for fixed header (no margin in PDF mode) */}
-      <div style={{ marginTop: pdfMode ? '0' : '80px' }}>
+      <div className={pdfMode ? '' : 'mt-14 md:mt-20'}>
         <ChicTemplate
           content={displayData}
           styling={{

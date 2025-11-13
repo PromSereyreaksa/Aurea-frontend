@@ -236,14 +236,13 @@ const BoldFolioPreviewPage = () => {
     }}>
       {/* Preview Header - Hidden in PDF mode */}
       {!pdfMode && (
-        <div style={{
+        <div className="px-4 py-3 md:px-8 md:py-5" style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           backgroundColor: boldFolioColors.background,
           color: boldFolioColors.text,
-          padding: '20px 40px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -251,22 +250,18 @@ const BoldFolioPreviewPage = () => {
           borderBottom: '1px solid #E5E5E5',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
         }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px'
-        }}>
+        <div className="flex items-center gap-2 md:gap-5">
           <div style={{
             fontFamily: 'Graphik, sans-serif',
-            fontSize: '20px',
+            fontSize: 'clamp(14px, 4vw, 20px)',
             fontWeight: 700,
             color: boldFolioColors.primary
           }}>
             BOLDFOLIO
           </div>
-          <div style={{
+          <div className="hidden sm:block" style={{
             fontFamily: 'Graphik, sans-serif',
-            fontSize: '12px',
+            fontSize: 'clamp(10px, 2vw, 12px)',
             color: boldFolioColors.textSecondary,
             textTransform: 'uppercase',
             letterSpacing: '0.1em'
@@ -275,20 +270,15 @@ const BoldFolioPreviewPage = () => {
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          gap: '15px',
-          alignItems: 'center'
-        }}>
+        <div className="flex gap-2 md:gap-4 items-center">
           <button
             onClick={() => window.history.back()}
+            className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm"
             style={{
               fontFamily: 'Graphik, sans-serif',
-              fontSize: '13px',
               color: boldFolioColors.text,
               backgroundColor: 'transparent',
               border: '1px solid #E5E5E5',
-              padding: '10px 20px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               cursor: 'pointer',
@@ -304,19 +294,18 @@ const BoldFolioPreviewPage = () => {
               e.target.style.color = boldFolioColors.text;
             }}
           >
-            ← BACK
+            <span className="hidden sm:inline">← </span>BACK
           </button>
 
           <button
             onClick={handleUseTemplate}
+            className="px-4 py-2 md:px-6 md:py-2.5 text-xs md:text-sm whitespace-nowrap"
             style={{
               fontFamily: 'Graphik, sans-serif',
-              fontSize: '13px',
               fontWeight: 700,
               color: boldFolioColors.background,
               backgroundColor: boldFolioColors.primary,
               border: `1px solid ${boldFolioColors.primary}`,
-              padding: '10px 30px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               cursor: 'pointer',
@@ -334,14 +323,14 @@ const BoldFolioPreviewPage = () => {
               e.target.style.boxShadow = 'none';
             }}
           >
-            USE THIS TEMPLATE
+            <span className="hidden md:inline">USE THIS </span>TEMPLATE
           </button>
         </div>
         </div>
       )}
 
       {/* Template Content with margin for fixed header (no margin in PDF mode) */}
-      <div style={{ marginTop: pdfMode ? '0' : '80px' }}>
+      <div className={pdfMode ? '' : 'mt-14 md:mt-20'}>
         <BoldFolioTemplate
           content={displayData}
           styling={{
