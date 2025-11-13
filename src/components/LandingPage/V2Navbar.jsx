@@ -21,6 +21,7 @@ const V2Navbar = () => {
   }, []);
 
   const navItems = [
+    { label: "About", link: "/about" },
     { label: "Templates", link: "/templates" },
     { label: "Contact", link: "/contact" },
   ];
@@ -110,55 +111,79 @@ const V2Navbar = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-[#1a1a1a] lg:hidden z-40"
-          >
-            <div className="flex flex-col items-center justify-center h-full space-y-8 px-6">
-              {navItems.map((item, index) => (
-                <Link
-                  key={index}
-                  to={item.link}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-3xl font-bold text-white hover:text-[#fb8500] transition-colors duration-200"
-                >
-                  {item.label}
-                </Link>
-              ))}
+          <>
+            {/* Background Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
 
-              <div className="pt-8 space-y-4 w-full max-w-xs">
-                {isAuthenticated ? (
+            {/* Menu Content */}
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-[#1a1a1a] lg:hidden z-40"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="absolute top-6 right-6 z-50 text-white hover:text-[#fb8500] transition-colors duration-200"
+                aria-label="Close menu"
+              >
+                <X className="w-8 h-8" />
+              </button>
+
+              <div className="flex flex-col items-center justify-center min-h-screen space-y-8 px-6">
+                {/* Navigation Items */}
+                {navItems.map((item, index) => (
                   <Link
-                    to="/dashboard"
+                    key={index}
+                    to={item.link}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block w-full bg-[#fb8500] hover:bg-[#ff9500] text-white px-8 py-4 rounded-full font-semibold text-center uppercase tracking-wider transition-all duration-300"
+                    className="text-3xl font-bold text-white hover:text-[#fb8500] transition-colors duration-200"
                   >
-                    Dashboard
+                    {item.label}
                   </Link>
-                ) : (
-                  <>
+                ))}
+
+                {/* Auth Buttons */}
+                <div className="pt-8 space-y-4 w-full max-w-xs">
+                  {isAuthenticated ? (
                     <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] px-8 py-4 rounded-full font-semibold text-center uppercase tracking-wider transition-all duration-300"
-                    >
-                      Log In
-                    </Link>
-                    <Link
-                      to="/signup"
+                      to="/dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="block w-full bg-[#fb8500] hover:bg-[#ff9500] text-white px-8 py-4 rounded-full font-semibold text-center uppercase tracking-wider transition-all duration-300"
                     >
-                      Sign Up
+                      Dashboard
                     </Link>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block w-full border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] px-8 py-4 rounded-full font-semibold text-center uppercase tracking-wider transition-all duration-300"
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        to="/signup"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block w-full bg-[#fb8500] hover:bg-[#ff9500] text-white px-8 py-4 rounded-full font-semibold text-center uppercase tracking-wider transition-all duration-300"
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.nav>

@@ -3,13 +3,34 @@ import { motion } from "framer-motion";
 import {
   Mail,
   MessageCircle,
-  Linkedin,
-  TrendingUp,
-  DollarSign,
   Sparkles,
 } from "lucide-react";
+
+// LinkedIn icon component (replacing deprecated lucide-react Linkedin)
+const LinkedinIcon = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect width="4" height="12" x="2" y="9" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
 import V2Navbar from "../components/LandingPage/V2Navbar";
 import V2Footer from "../components/LandingPage/V2Footer";
+import ScrollProgress from "../components/LandingPage/ScrollProgress";
+import TimelineSection from "../components/LandingPage/TimelineSection";
+import ProblemSection from "../components/LandingPage/ProblemSection";
+import ImpactSection from "../components/LandingPage/ImpactSection";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,21 +53,6 @@ const itemVariants = {
     },
   },
 };
-
-const values = [
-  {
-    title: "Prioritize designer growth",
-    description:
-      "We are committed to helping designers develop their skills, expand their portfolios, and advance their creative careers.",
-    icon: <TrendingUp className="w-8 h-8" />,
-  },
-  {
-    title: "Support fair pricing for designers",
-    description:
-      "We believe designers deserve to be compensated fairly for their creative work and expertise in the market.",
-    icon: <DollarSign className="w-8 h-8" />,
-  },
-];
 
 const teamMembers = [
   {
@@ -145,7 +151,7 @@ const getContactIcon = (platform) => {
     case "telegram":
       return <MessageCircle size={18} />;
     case "linkedin":
-      return <Linkedin size={18} />;
+      return <LinkedinIcon size={18} />;
     default:
       return null;
   }
@@ -158,6 +164,7 @@ const AboutPage = () => {
 
   return (
     <div className="app-page min-h-screen bg-white text-black">
+      <ScrollProgress />
       <V2Navbar />
 
       {/* Hero Section - Modern Style */}
@@ -220,122 +227,65 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Story Section - Modern Style */}
-      <section id="story" className="py-24 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              {/* Eyebrow */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6">
-                <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
-                  Our Story
-                </span>
-              </div>
+      {/* Storytelling Sections */}
+      <div className="bg-white">
+        {/* Timeline Section - The Journey */}
+        <TimelineSection />
 
-              <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-8">
-                Building tools that
-                <br />
-                <span className="text-[#fb8500]">designers deserve</span>
-              </h2>
-              <div className="space-y-6 text-gray-600 text-lg leading-relaxed">
-                <p>
-                  AUREA was born from a simple observation: talented designers
-                  were struggling to showcase their work effectively. Despite
-                  creating beautiful designs, many found it challenging to
-                  present their portfolios, pitch to clients, and price their
-                  services confidently.
-                </p>
-                <p>
-                  We set out to change that. Our mission is to provide designers
-                  with professional-grade tools that are as beautiful and
-                  intuitive as the work they create. Every feature is crafted
-                  with the designer's workflow in mind.
-                </p>
-                <p>
-                  Today, AUREA helps thousands of designers worldwide present
-                  their work with confidence, win more clients, and build
-                  successful creative businesses.
-                </p>
-              </div>
-            </motion.div>
+        {/* Problem Section - The Challenge */}
+        <ProblemSection />
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="bg-gradient-to-br from-[#fb8500] to-[#ff9500] h-96 w-full flex items-center justify-center rounded-2xl shadow-xl">
-                <span className="text-white text-6xl md:text-7xl font-bold tracking-wider">
-                  AUREA
-                </span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+        {/* Impact Section - Why It Matters */}
+        <ImpactSection />
+      </div>
 
-      {/* Values Section - Modern Style */}
+      {/* Mission Section - Modern Style */}
       <section
-        id="values"
-        className="py-24 px-6 bg-gradient-to-b from-white to-orange-50/30"
+        id="mission"
+        className="py-24 px-6 bg-gradient-to-br from-[#1a1a1a] via-[#1a1a1a] to-[#2a2a2a] text-white relative overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-[#fb8500] rounded-full filter blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#ff9500] rounded-full filter blur-3xl" />
+        </div>
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
             {/* Eyebrow */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full mb-6"
-            >
-              <span className="text-sm font-semibold text-[#fb8500] tracking-wide uppercase">
-                Our Values
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full mb-8">
+              <Sparkles className="w-4 h-4 text-[#fb8500]" />
+              <span className="text-sm font-semibold text-white tracking-wide uppercase">
+                Our Mission
               </span>
-            </motion.div>
+            </div>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-6"
-            >
-              Principles that
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight">
+              Empowering designers
               <br />
-              <span className="text-[#fb8500]">guide everything we build</span>
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {values.map((value, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-[#fb8500] hover:shadow-xl transition-all duration-300"
-              >
-                <div className="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-[#fb8500]">
-                  {value.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-                  {value.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {value.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+              <span className="text-[#fb8500]">
+                to build successful businesses
+              </span>
+            </h2>
+            <p className="text-xl md:text-2xl leading-relaxed mb-12 text-gray-300 max-w-3xl mx-auto">
+              To provide every designer with tools that amplify their
+              creativity, streamline their workflow, and help them build
+              successful creative businesses.
+            </p>
+            <motion.a
+              href="/signup"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              className="inline-block px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-all duration-300 shadow-lg"
+            >
+              JOIN US ON THIS JOURNEY
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 
@@ -425,56 +375,6 @@ const AboutPage = () => {
                 </div>
               </motion.div>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Mission Section - Modern Style */}
-      <section
-        id="mission"
-        className="py-24 px-6 bg-gradient-to-br from-[#1a1a1a] via-[#1a1a1a] to-[#2a2a2a] text-white relative overflow-hidden"
-      >
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-[#fb8500] rounded-full filter blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#ff9500] rounded-full filter blur-3xl" />
-        </div>
-
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full mb-8">
-              <Sparkles className="w-4 h-4 text-[#fb8500]" />
-              <span className="text-sm font-semibold text-white tracking-wide uppercase">
-                Our Mission
-              </span>
-            </div>
-
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight">
-              Empowering designers
-              <br />
-              <span className="text-[#fb8500]">
-                to build successful businesses
-              </span>
-            </h2>
-            <p className="text-xl md:text-2xl leading-relaxed mb-12 text-gray-300 max-w-3xl mx-auto">
-              To provide every designer with tools that amplify their
-              creativity, streamline their workflow, and help them build
-              successful creative businesses.
-            </p>
-            <motion.a
-              href="/signup"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-              className="inline-block px-8 py-4 bg-[#fb8500] text-white font-semibold rounded-lg hover:bg-[#ff9500] transition-all duration-300 shadow-lg"
-            >
-              JOIN US ON THIS JOURNEY
-            </motion.a>
           </motion.div>
         </div>
       </section>

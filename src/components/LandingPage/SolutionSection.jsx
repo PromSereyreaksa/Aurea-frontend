@@ -75,7 +75,7 @@ export default function SolutionSection() {
               transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
               className="group relative"
             >
-              <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-[#fb8500] transition-all duration-300 hover:shadow-xl">
+              <div className="bg-white p-8 border border-gray-200 hover:border-[#fb8500] transition-all duration-300 hover:shadow-xl">
                 <div className="mb-6">
                   <service.icon className="w-12 h-12 text-[#fb8500]" />
                 </div>
@@ -88,7 +88,7 @@ export default function SolutionSection() {
               </div>
 
               {/* Hover effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#fb8500]/0 to-[#fb8500]/0 group-hover:from-[#fb8500]/5 group-hover:to-[#fb8500]/10 rounded-2xl transition-all duration-300 -z-10"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#fb8500]/0 to-[#fb8500]/0 group-hover:from-[#fb8500]/5 group-hover:to-[#fb8500]/10 transition-all duration-300 -z-10"></div>
             </motion.div>
           ))}
         </div>

@@ -1,25 +1,25 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function MarqueeSection() {
   const words = ["BUILD", "YOUR", "PORTFOLIO", "TODAY!"];
+  const containerRef = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Transform scroll progress to horizontal movement
+  const xLeft = useTransform(scrollYProgress, [0, 1], [200, -2000]);
+  const xRight = useTransform(scrollYProgress, [0, 1], [-2000, 200]);
 
   return (
-    <section className="relative py-20 bg-[#1a1a1a] overflow-hidden">
-      {/* First Row - Moving Left */}
+    <section ref={containerRef} className="relative py-20 bg-[#1a1a1a] overflow-hidden">
+      {/* First Row - Moving Left on Scroll */}
       <div className="relative mb-8">
         <motion.div
-          animate={{
-            x: [0, -2000],
-          }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear",
-            },
-          }}
+          style={{ x: xLeft }}
           className="flex gap-12 whitespace-nowrap"
         >
           {[...Array(6)].map((_, setIndex) => (
@@ -40,20 +40,10 @@ export default function MarqueeSection() {
         </motion.div>
       </div>
 
-      {/* Second Row - Moving Right */}
+      {/* Second Row - Moving Right on Scroll */}
       <div className="relative">
         <motion.div
-          animate={{
-            x: [-2000, 0],
-          }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear",
-            },
-          }}
+          style={{ x: xRight }}
           className="flex gap-12 whitespace-nowrap"
         >
           {[...Array(6)].map((_, setIndex) => (

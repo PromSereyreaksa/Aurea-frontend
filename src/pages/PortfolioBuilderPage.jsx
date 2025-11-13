@@ -985,7 +985,7 @@ const PortfolioBuilderPage = () => {
         </div>
 
         {/* Step Indicator */}
-        <StepIndicator currentStep={step} />
+        <StepIndicator currentStep={step} onStepChange={setStep} />
       </div>
 
       {/* Main Content */}
