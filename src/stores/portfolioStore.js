@@ -7,9 +7,11 @@ const usePortfolioStore = create((set, get) => ({
   // State
   portfolios: [],
   currentPortfolio: null,
+  portfolioStats: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
+  lastFetchTime: null, // Track when portfolios were last fetched
 
   // Actions
   createPortfolio: async (portfolioData) => {
@@ -49,33 +51,87 @@ const usePortfolioStore = create((set, get) => ({
     }
   },
 
-  fetchUserPortfolios: async () => {
+  fetchUserPortfolios: async (published = null, forceRefresh = false) => {
     try {
+      const state = get();
+      const now = Date.now();
+      const CACHE_DURATION = 30000; // 30 seconds cache
+
+      // Skip fetch if data is fresh and not forcing refresh
+      if (!forceRefresh &&
+          state.portfolios.length > 0 &&
+          state.lastFetchTime &&
+          (now - state.lastFetchTime) < CACHE_DURATION) {
+        console.log('Using cached portfolios data');
+        return { success: true, portfolios: state.portfolios, cached: true };
+      }
+
       set({ isLoading: true });
-      
-      const response = await api.get('/api/portfolios/user/me');
-      const portfolios = response.data.data.portfolios;
-      
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (published !== null) {
+        params.append('published', published);
+      }
+
+      const url = `/api/portfolios/user/me${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await api.get(url);
+
+      // Handle response - check for different structures
+      const portfolios = response.data?.data || response.data?.data?.portfolios || [];
+      const meta = response.data?.meta || {};
+
       set({
         portfolios,
         isLoading: false,
+        lastFetchTime: now,
       });
 
-      return { success: true };
-      
+      return { success: true, portfolios, meta };
+
     } catch (error) {
       set({ isLoading: false });
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch portfolios'
+      };
+    }
+  },
+
+  fetchPortfolioStats: async () => {
+    try {
+      const response = await api.get('/api/portfolios/stats');
+      
+      const stats = response.data?.data || response.data;
+      
+      set({
+        portfolioStats: stats,
+      });
+
+      return { success: true, stats };
+      
+    } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to fetch portfolios' 
+        error: error.response?.data?.message || 'Failed to fetch portfolio statistics' 
       };
     }
   },
 
   fetchPortfolioById: async (id) => {
+    // Guard against undefined or invalid ID
+    if (!id || id === 'undefined') {
+      console.warn('Invalid portfolio ID:', id, '- skipping fetch');
+      set({ isLoading: false });
+      return {
+        success: false,
+        error: 'Invalid portfolio ID provided'
+      };
+    }
+
     try {
       set({ isLoading: true });
-      
+
       const response = await api.get(`/api/portfolios/${id}`);
       const portfolio = response.data.data.portfolio;
       
@@ -185,9 +241,14 @@ const usePortfolioStore = create((set, get) => ({
     }
   },
 
-  publishPortfolio: async (id) => {
+  publishPortfolio: async (id, slug = null) => {
     try {
-      const response = await api.put(`/api/portfolios/${id}`, { published: true });
+      const payload = { published: true };
+      if (slug) {
+        payload.slug = slug;
+      }
+      
+      const response = await api.put(`/api/portfolios/${id}`, payload);
       const updatedPortfolio = response.data.data.portfolio;
       
       set((state) => ({
@@ -203,6 +264,7 @@ const usePortfolioStore = create((set, get) => ({
       return { success: true, portfolio: updatedPortfolio };
       
     } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to publish portfolio');
       return { 
         success: false, 
         error: error.response?.data?.message || 'Failed to publish portfolio' 

@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
+import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const EchelonGallery = ({ 
+const EchelonGallery = ({
   content,
   isEditing = false,
-  onContentChange 
+  onContentChange
 }) => {
-  const { 
+  const {
     heading = 'GALLERY',
     images = []
   } = content;
 
   const [selectedImage, setSelectedImage] = useState(null);
+  const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
+  const { uploadImage } = useImageUpload();
 
   const handleHeadingChange = (newHeading) => {
     if (onContentChange) {
@@ -30,13 +33,55 @@ const EchelonGallery = ({
     }
   };
 
-  const handleImageUpload = (index, file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        handleImageChange(index, 'src', event.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    console.log(`📤 Starting optimized upload for gallery image ${index}...`);
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
+    const localPreview = URL.createObjectURL(file);
+    handleImageChange(index, 'src', localPreview);
+
+    // 2. Mark as uploading
+    setUploadingIndexes(prev => new Map(prev).set(index, { progress: 0 }));
+
+    try {
+      // 3. Upload with all optimizations (compression, fake progress, direct upload)
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
+      });
+
+      console.log(`✅ Upload complete for gallery image ${index}:`, cloudinaryUrl);
+
+      // 4. Replace blob URL with final Cloudinary URL
+      handleImageChange(index, 'src', cloudinaryUrl);
+
+      // Clean up blob URL
+      URL.revokeObjectURL(localPreview);
+
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      // 5. Clear uploading state
+      setUploadingIndexes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(index);
+        return newMap;
+      });
     }
   };
 
@@ -217,7 +262,7 @@ const EchelonGallery = ({
                       justifyContent: 'center',
                       height: '100%',
                       fontFamily: '"IBM Plex Mono", monospace',
-                      fontSize: '14px',
+                      fontSize: 'clamp(12px, 1.2vw, 14px)',
                       color: 'rgba(255, 255, 255, 0.3)',
                       textTransform: 'uppercase'
                     }}>
@@ -237,7 +282,7 @@ const EchelonGallery = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '20px',
+                    fontSize: 'clamp(16px, 2vw, 20px)',
                     fontWeight: 900,
                     color: '#000000',
                     zIndex: 2,
@@ -271,7 +316,7 @@ const EchelonGallery = ({
                           border: 'none',
                           padding: '12px 24px',
                           cursor: 'pointer',
-                          fontSize: '12px',
+                          fontSize: 'clamp(10px, 1vw, 12px)',
                           fontWeight: 700,
                           textTransform: 'uppercase',
                           zIndex: 3
@@ -280,6 +325,59 @@ const EchelonGallery = ({
                         UPLOAD IMAGE
                       </button>
                     </>
+                  )}
+
+                  {/* Enhanced Upload Progress Indicator */}
+                  {uploadingIndexes.has(index) && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: '#FF0000',
+                      color: '#FFFFFF',
+                      padding: '10px 18px',
+                      borderRadius: '6px',
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      zIndex: 10,
+                      boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {/* Animated spinner with glow */}
+                      <div style={{
+                        position: 'relative',
+                        width: '14px',
+                        height: '14px'
+                      }}>
+                        <div style={{
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          borderTop: '2px solid #FFFFFF',
+                          borderRadius: '50%',
+                          animation: 'spin 0.8s linear infinite'
+                        }}></div>
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid #FFFFFF',
+                          borderRadius: '50%',
+                          opacity: 0.2,
+                          animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                        }}></div>
+                      </div>
+                      <span>Optimizing...</span>
+                    </div>
                   )}
                 </div>
               ))}
@@ -297,7 +395,7 @@ const EchelonGallery = ({
                   border: '3px solid #FFFFFF',
                   padding: '16px 40px',
                   cursor: 'pointer',
-                  fontSize: '14px',
+                  fontSize: 'clamp(12px, 1.2vw, 14px)',
                   fontWeight: 700,
                   textTransform: 'uppercase',
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -359,7 +457,7 @@ const EchelonGallery = ({
               border: 'none',
               padding: '16px',
               cursor: 'pointer',
-              fontSize: '18px',
+              fontSize: 'clamp(16px, 1.8vw, 18px)',
               fontWeight: 700,
               width: '50px',
               height: '50px',

@@ -160,7 +160,7 @@ const EchelonContact = ({
             padding: '12px 24px',
             marginBottom: '60px',
             fontFamily: '"IBM Plex Mono", monospace',
-            fontSize: '14px',
+            fontSize: 'clamp(12px, 1.2vw, 14px)',
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -189,7 +189,7 @@ const EchelonContact = ({
         <GridCol span={4}>
           <div style={{
             fontFamily: '"IBM Plex Mono", monospace',
-            fontSize: '12px',
+            fontSize: 'clamp(10px, 1vw, 12px)',
             color: '#666666',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -211,7 +211,7 @@ const EchelonContact = ({
                   onChange={(e) => handleChange('email', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '18px',
+                    fontSize: 'clamp(16px, 1.8vw, 18px)',
                     fontWeight: 400,
                     color: '#FFFFFF',
                     backgroundColor: 'transparent',
@@ -225,7 +225,7 @@ const EchelonContact = ({
                   href={`mailto:${email}`}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '18px',
+                    fontSize: 'clamp(16px, 1.8vw, 18px)',
                     fontWeight: 400,
                     color: '#FFFFFF',
                     textDecoration: 'none',
@@ -254,7 +254,7 @@ const EchelonContact = ({
                   onChange={(e) => handleChange('phone', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '18px',
+                    fontSize: 'clamp(16px, 1.8vw, 18px)',
                     fontWeight: 400,
                     color: '#FFFFFF',
                     backgroundColor: 'transparent',
@@ -268,7 +268,7 @@ const EchelonContact = ({
                   href={`tel:${phone}`}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '18px',
+                    fontSize: 'clamp(16px, 1.8vw, 18px)',
                     fontWeight: 400,
                     color: '#CCCCCC',
                     textDecoration: 'none'
@@ -282,7 +282,7 @@ const EchelonContact = ({
             {/* Location */}
             <div style={{ 
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
+              fontSize: 'clamp(12px, 1.2vw, 14px)',
               color: '#666666',
               textTransform: 'uppercase',
               letterSpacing: '0.1em'
@@ -319,7 +319,7 @@ const EchelonContact = ({
           }}>
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
+              fontSize: 'clamp(12px, 1.2vw, 14px)',
               color: '#FF0000',
               textTransform: 'uppercase',
               letterSpacing: '0.2em',
@@ -345,7 +345,7 @@ const EchelonContact = ({
                   onChange={(e) => handleFormChange('name', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 1.5vw, 16px)',
                     color: '#FFFFFF',
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     border: 'none',
@@ -374,7 +374,7 @@ const EchelonContact = ({
                   onChange={(e) => handleFormChange('email', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 1.5vw, 16px)',
                     color: '#FFFFFF',
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     border: 'none',
@@ -406,7 +406,7 @@ const EchelonContact = ({
                   onChange={(e) => handleFormChange('project', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 1.5vw, 16px)',
                     color: '#FFFFFF',
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     border: 'none',
@@ -432,7 +432,7 @@ const EchelonContact = ({
                   onChange={(e) => handleFormChange('budget', e.target.value)}
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 1.5vw, 16px)',
                     color: '#FFFFFF',
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     border: 'none',
@@ -461,7 +461,7 @@ const EchelonContact = ({
                 onChange={(e) => handleFormChange('message', e.target.value)}
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '16px',
+                  fontSize: 'clamp(14px, 1.5vw, 16px)',
                   color: '#FFFFFF',
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '2px solid #333333',
@@ -489,7 +489,7 @@ const EchelonContact = ({
                   type="submit"
                   style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 1.5vw, 16px)',
                     fontWeight: 700,
                     color: '#000000',
                     backgroundColor: '#00FF41',
@@ -517,7 +517,7 @@ const EchelonContact = ({
                 
                 <div style={{
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '14px',
+                  fontSize: 'clamp(12px, 1.2vw, 14px)',
                   color: '#00FF41',
                   textTransform: 'uppercase',
                   letterSpacing: '0.15em',
@@ -554,7 +554,7 @@ const EchelonContact = ({
                         placeholder={`${platform} URL`}
                         style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#FFFFFF',
                           backgroundColor: 'transparent',
                           border: '1px dashed #666666',
@@ -569,7 +569,7 @@ const EchelonContact = ({
                         rel="noopener noreferrer"
                         style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#666666',
                           textDecoration: 'none',
                           textTransform: 'uppercase',
@@ -593,7 +593,7 @@ const EchelonContact = ({
             
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '12px',
+              fontSize: 'clamp(10px, 1vw, 12px)',
               color: '#333333',
               textTransform: 'uppercase',
               letterSpacing: '0.1em'

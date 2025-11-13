@@ -1,0 +1,228 @@
+{
+    "templateId": "boldfolio",
+    "name": "BoldFolio",
+    "slug": "boldfolio",
+    "description": "Bold, creative portfolio template with striking typography and vibrant magenta accents. Perfect for designers and creatives who want to make a statement.",
+    "thumbnail": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "category": "creative",
+    "schema": {
+        "sections": [
+            {
+                "id": "hero",
+                "name": "Hero",
+                "description": "Bold hero section",
+                "fields": [
+                    {
+                        "id": "title",
+                        "label": "Title",
+                        "type": "textarea",
+                        "placeholder": "Driven by passion—and fuelled by curiosity.",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "subtitle",
+                        "label": "Subtitle",
+                        "type": "textarea",
+                        "placeholder": "Designer and art-director based in Montreal, Quebec.",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "description",
+                        "label": "Description",
+                        "type": "textarea",
+                        "placeholder": "Think of design as a way to transform problems into empowering opportunities...",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "500" }
+                        }
+                    },
+                    {
+                        "id": "cta",
+                        "label": "Call to Action",
+                        "type": "text",
+                        "placeholder": "Open for collaborations!",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "0" }
+            },
+            {
+                "id": "work",
+                "name": "Work",
+                "description": "Project showcase with multiple editable images per project",
+                "fields": [
+                    {
+                        "id": "projects",
+                        "label": "Projects",
+                        "type": "array",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "images",
+                        "label": "Project Images",
+                        "type": "array",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "1" }
+            },
+            {
+                "id": "about",
+                "name": "About",
+                "description": "About section",
+                "fields": [
+                    {
+                        "id": "heading",
+                        "label": "Heading",
+                        "type": "text",
+                        "placeholder": "About",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "name",
+                        "label": "Name",
+                        "type": "text",
+                        "placeholder": "Your Name",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "role",
+                        "label": "Role",
+                        "type": "text",
+                        "placeholder": "Designer & Art Director",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "bio",
+                        "label": "Bio",
+                        "type": "textarea",
+                        "placeholder": "I believe in design as a transformative force...",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "500" }
+                        }
+                    },
+                    {
+                        "id": "location",
+                        "label": "Location",
+                        "type": "text",
+                        "placeholder": "Montreal, Quebec",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "email",
+                        "label": "Email",
+                        "type": "text",
+                        "placeholder": "hello@yourname.com",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "2" }
+            },
+            {
+                "id": "contact",
+                "name": "Contact",
+                "description": "Contact section",
+                "fields": [
+                    {
+                        "id": "heading",
+                        "label": "Heading",
+                        "type": "text",
+                        "placeholder": "Let's Work Together",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "text",
+                        "label": "Text",
+                        "type": "text",
+                        "placeholder": "Have a project in mind? Let's create something amazing together.",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "email",
+                        "label": "Email",
+                        "type": "text",
+                        "placeholder": "hello@yourname.com",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "3" }
+            }
+        ],
+        "styling": {
+            "colorScheme": {
+                "primary": "#ff0080",
+                "secondary": "#000000",
+                "accent": "#ff0080",
+                "background": "#FFFFFF",
+                "surface": "#FFFFFF",
+                "text": "#000000",
+                "textSecondary": "#666666",
+                "border": "#E5E5E5"
+            },
+            "typography": {
+                "headingFont": "Graphik, -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+                "bodyFont": "Graphik, -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+                "scale": "default"
+            },
+            "spacing": "default",
+            "customCSS": ""
+        }
+    },
+    "caseStudySchema": {
+        "enabled": false,
+        "fields": []
+    },
+    "version": "1.0.0",
+    "isActive": true,
+    "isDefault": false,
+    "usageCount": { "$numberInt": "0" },
+    "isPremium": false,
+    "createdBy": "Aurea",
+    "tags": ["creative", "bold", "magenta", "modern"]
+}

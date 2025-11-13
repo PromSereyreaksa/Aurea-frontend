@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
 import { SwissGrid as SwissGridDecoration } from '../components/SwissDecorations';
 import { SwissHeading, SwissBody } from '../components/SwissTypography';
+import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const EchelonAbout = ({ 
+const EchelonAbout = ({
   content,
   isEditing = false,
-  onContentChange 
+  onContentChange
 }) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const { uploadImage } = useImageUpload();
+  
   const { 
     name = 'DESIGNER NAME',
     role = 'CREATIVE DIRECTOR / DESIGNER',
@@ -36,6 +40,54 @@ const EchelonAbout = ({
   const handleImageChange = (newImage) => {
     if (onContentChange) {
       onContentChange('about', 'image', newImage);
+    }
+  };
+
+  // Upload image with all optimizations
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    console.log('📤 Starting optimized upload for about image...');
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
+    const localPreview = URL.createObjectURL(file);
+    handleImageChange(localPreview);
+
+    // 2. Mark as uploading
+    setIsUploading(true);
+
+    try {
+      // 3. Upload with all optimizations (compression, fake progress, direct upload)
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
+      });
+
+      console.log('✅ Upload complete for about image:', cloudinaryUrl);
+
+      // 4. Replace blob URL with final Cloudinary URL
+      handleImageChange(cloudinaryUrl);
+
+      // Clean up blob URL
+      URL.revokeObjectURL(localPreview);
+
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -196,7 +248,7 @@ const EchelonAbout = ({
               ) : (
                 <div style={{
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '16px',
+                  fontSize: 'clamp(14px, 1.5vw, 16px)',
                   color: 'rgba(255, 255, 255, 0.3)',
                   textAlign: 'center',
                   textTransform: 'uppercase',
@@ -210,7 +262,7 @@ const EchelonAbout = ({
             {/* Caption under image with grid */}
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
+              fontSize: 'clamp(12px, 1.2vw, 14px)',
               color: '#FFFFFF',
               textTransform: 'uppercase',
               letterSpacing: '0.15em',
@@ -234,14 +286,43 @@ const EchelonAbout = ({
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      handleImageChange(event.target.result);
-                    };
-                    reader.readAsDataURL(file);
+                    handleImageUpload(file);
                   }
                 }}
               />
+            )}
+
+            {/* Upload indicator - Small corner badge (non-blocking) */}
+            {isUploading && (
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                backgroundColor: '#FF0000',
+                color: '#FFFFFF',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                zIndex: 10,
+                boxShadow: '0 2px 8px rgba(255, 0, 0, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderTop: '2px solid #FFFFFF',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite'
+                }}></div>
+                Uploading
+              </div>
             )}
           </div>
         </GridCol>
@@ -258,7 +339,7 @@ const EchelonAbout = ({
             }}>
               <div style={{
                 fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '16px',
+                fontSize: 'clamp(14px, 1.5vw, 16px)',
                 fontWeight: 600,
                 color: '#FF0000',
                 textTransform: 'uppercase',
@@ -363,7 +444,7 @@ const EchelonAbout = ({
                 placeholder="PROFESSIONAL TITLE"
                 style={{
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '18px',
+                  fontSize: 'clamp(16px, 1.8vw, 18px)',
                   fontWeight: 600,
                   color: '#FF0000',
                   textTransform: 'uppercase',
@@ -380,7 +461,7 @@ const EchelonAbout = ({
               <div style={{
                 display: 'inline-block',
                 fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: '13px',
+                fontSize: 'clamp(11px, 1.1vw, 13px)',
                 fontWeight: 700,
                 color: '#000000',
                 backgroundColor: '#FF0000',
@@ -408,7 +489,7 @@ const EchelonAbout = ({
                 rows={6}
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '24px',
+                  fontSize: 'clamp(18px, 2.5vw, 24px)',
                   fontWeight: 400,
                   lineHeight: 1.6,
                   color: '#FFFFFF',
@@ -423,7 +504,7 @@ const EchelonAbout = ({
             ) : (
               <p style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                fontSize: '24px',
+                fontSize: 'clamp(18px, 2.5vw, 24px)',
                 fontWeight: 400,
                 lineHeight: 1.6,
                 color: 'rgba(255, 255, 255, 0.85)',

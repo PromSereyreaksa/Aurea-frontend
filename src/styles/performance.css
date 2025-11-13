@@ -1,0 +1,247 @@
+/**
+ * Performance Optimization CSS
+ * 
+ * These classes optimize rendering performance on weak devices:
+ * - Use will-change sparingly for animated elements
+ * - Enable hardware acceleration with transform3d
+ * - Optimize repaints and reflows
+ */
+
+/* Hardware acceleration for frequently animated elements */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Enable GPU acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize hover states */
+@media (hover: hover) and (pointer: fine) {
+  /* Only apply hover effects on devices with precise pointing */
+  .hover-optimized:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize animations with CSS instead of JS when possible */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-fast {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up-fast {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-down-fast {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Contain layout to prevent reflows */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Optimize image rendering */
+.image-optimize {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Content visibility for off-screen elements */
+.content-visibility-auto {
+  content-visibility: auto;
+}
+
+/* Reduce blur for weak devices */
+@media (max-width: 768px) {
+  .blur-3xl {
+    filter: blur(40px) !important;
+  }
+
+  .blur-2xl {
+    filter: blur(30px) !important;
+  }
+}
+
+/* Optimize shadows */
+.shadow-optimized {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-optimized-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Transition optimization */
+.transition-optimized {
+  transition-property: opacity, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.transition-colors-optimized {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Loading skeleton optimization */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Optimize text rendering */
+.text-optimize {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduce complexity on weak devices */
+@media (max-width: 640px) {
+  /* Simplify gradients on mobile */
+  .gradient-complex {
+    background: linear-gradient(
+      180deg,
+      var(--tw-gradient-from),
+      var(--tw-gradient-to)
+    ) !important;
+  }
+
+  /* Reduce border radius */
+  .rounded-2xl {
+    border-radius: 1rem !important;
+  }
+
+  .rounded-3xl {
+    border-radius: 1.5rem !important;
+  }
+
+  /* Disable expensive animations on mobile */
+  * {
+    animation-duration: 0.2s !important;
+  }
+
+  /* Simplify backdrop blur on mobile */
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Reduce shadow complexity */
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Disable transform animations */
+  .will-change-transform {
+    will-change: auto !important;
+  }
+
+  /* Force hardware acceleration on mobile */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+}
+
+/* Intersection observer optimization */
+.lazy-load {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.lazy-load.loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Optimize modal and overlay performance */
+.modal-optimized {
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* Defer non-critical rendering */
+.defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}

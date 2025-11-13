@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PublishModal = ({ 
-  isOpen, 
-  onClose, 
-  onPublish, 
+const PublishModal = ({
+  isOpen,
+  onClose,
+  onPublish,
   currentSlug = '',
   portfolioTitle = 'My Portfolio',
-  isPublished = false
+  isPublished = false,
+  portfolioId = null
 }) => {
   const [slug, setSlug] = useState(currentSlug);
   const [isValidating, setIsValidating] = useState(false);
   const [isAvailable, setIsAvailable] = useState(null);
   const [error, setError] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
+  const [publishingProgress, setPublishingProgress] = useState('');
 
   // Generate initial slug from portfolio title
   useEffect(() => {
@@ -78,20 +80,25 @@ const PublishModal = ({
     // Check availability with backend
     setIsValidating(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/portfolios/check-slug/${slugValue}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+      // Include portfolioId as query param to exclude current portfolio from check
+      const url = new URL(`${import.meta.env.VITE_API_BASE_URL}/api/portfolios/check-slug/${slugValue}`);
+      if (portfolioId) {
+        url.searchParams.append('portfolioId', portfolioId);
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-      );
+      });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        setIsAvailable(data.available);
-        if (!data.available) {
+        // Backend returns nested structure: { success, data: { available } }
+        const available = data.data?.available ?? data.available;
+        setIsAvailable(available);
+        if (!available) {
           setError('This slug is already taken');
         }
       }
@@ -119,11 +126,21 @@ const PublishModal = ({
     }
 
     setIsPublishing(true);
+    setPublishingProgress('Validating subdomain...');
+
     try {
+      setPublishingProgress('Generating HTML files...');
       await onPublish(slug);
-      onClose();
+      setPublishingProgress('Publishing complete!');
+
+      // Small delay to show completion message
+      setTimeout(() => {
+        onClose();
+        setPublishingProgress('');
+      }, 500);
     } catch (err) {
       setError(err.message || 'Failed to publish portfolio');
+      setPublishingProgress('');
     } finally {
       setIsPublishing(false);
     }
@@ -140,13 +157,38 @@ const PublishModal = ({
     setSlug(`${adj}-${noun}-${randomNum}`);
   };
 
-  const getFullUrl = () => {
+  const getReactUrl = () => {
+    // React app view (uses your template with React)
     return `${window.location.origin}/portfolio/${slug}`;
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(getFullUrl());
-    // Could add a toast notification here
+  const getStaticUrl = () => {
+    // Static HTML file served through frontend domain
+    // In production: https://aurea.tools/{subdomain}/html
+    // In development: http://localhost:5173/{subdomain}/html
+    return `${window.location.origin}/${slug}/html`;
+  };
+
+  const copyToClipboard = async (url, buttonId) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      // Show a brief visual feedback
+      const button = document.getElementById(buttonId);
+      if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = `
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          button.innerHTML = originalText;
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   if (!isOpen) return null;
@@ -177,9 +219,9 @@ const PublishModal = ({
                 {isPublished ? 'Update Published Portfolio' : 'Publish Your Portfolio'}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {isPublished 
-                  ? 'Update your portfolio URL or republish changes' 
-                  : 'Make your portfolio accessible to everyone'}
+                {isPublished
+                  ? 'Update your portfolio URL or republish changes'
+                  : 'Make your portfolio publicly accessible with a custom URL'}
               </p>
             </div>
             <button
@@ -197,25 +239,22 @@ const PublishModal = ({
             {/* Portfolio URL Section */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Portfolio URL Slug
+                Portfolio Slug
               </label>
               <p className="text-sm text-gray-600 mb-4">
-                Choose a unique URL for your portfolio. This is how people will find your work.
+                Choose a unique slug for your portfolio. It will be accessible at aurea.tools/portfolio/your-slug
               </p>
 
               {/* Slug Input */}
               <div className="space-y-3">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-500">
-                      /portfolio/
-                    </div>
                     <input
                       type="text"
                       value={slug}
                       onChange={handleSlugChange}
                       placeholder="your-portfolio-name"
-                      className={`w-full pl-28 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full px-4 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition-all bg-white text-gray-900 font-medium placeholder:text-gray-400 ${
                         error 
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
                           : isAvailable 
@@ -238,13 +277,13 @@ const PublishModal = ({
                   </div>
                   <button
                     onClick={generateRandomSlug}
-                    className="px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700"
+                    className="w-full sm:w-auto px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium text-gray-700"
                     title="Generate random slug"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Generate
+                    Generate Random Slug
                   </button>
                 </div>
 
@@ -272,13 +311,17 @@ const PublishModal = ({
 
             {/* URL Preview */}
             {slug && (
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border-2 border-orange-200">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-semibold text-gray-700">
-                    Your Portfolio URL
-                  </label>
+                  <div>
+                    <label className="text-sm font-bold text-orange-900">
+                      Your Portfolio URL
+                    </label>
+                    <p className="text-xs text-orange-700 mt-0.5">Shareable link to your published portfolio</p>
+                  </div>
                   <button
-                    onClick={copyToClipboard}
+                    id="copy-portfolio-url"
+                    onClick={() => copyToClipboard(getStaticUrl(), 'copy-portfolio-url')}
                     className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,28 +330,39 @@ const PublishModal = ({
                     Copy Link
                   </button>
                 </div>
-                <div className="bg-white px-4 py-3 rounded-lg border border-gray-200">
+                <div className="bg-white px-4 py-3 rounded-lg border border-orange-300">
                   <p className="text-sm font-mono text-gray-900 break-all">
-                    {getFullUrl()}
+                    {getStaticUrl()}
                   </p>
+                </div>
+                <div className="mt-3 flex items-start gap-2 text-xs text-orange-800 bg-orange-50/50 px-3 py-2 rounded-lg">
+                  <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <span>Case study links are included automatically if you have added case studies to your projects</span>
                 </div>
               </div>
             )}
 
             {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
               <div className="flex gap-3">
-                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <div className="text-sm text-blue-800 space-y-2">
-                  <p className="font-semibold">What happens when you publish?</p>
-                  <ul className="space-y-1 ml-4 list-disc">
-                    <li>Your portfolio becomes publicly accessible via the URL</li>
-                    <li>Anyone with the link can view your work</li>
-                    <li>You can share this link on social media, resumes, and more</li>
-                    <li>You can unpublish or update your portfolio anytime</li>
-                  </ul>
+                <div className="text-sm text-purple-800 space-y-2">
+                  <p className="font-semibold">Understanding Your URLs</p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="font-medium text-orange-700">🎨 React Portfolio URL:</p>
+                      <p className="text-purple-700 ml-4">Interactive version rendered in the React app - best for sharing with others to view online</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-700">📄 Static HTML URL:</p>
+                      <p className="text-purple-700 ml-4">Standalone HTML file - download and host anywhere (GitHub Pages, Netlify, your own server, or open offline)</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-purple-600 font-medium">✨ Both show the exact same design - choose based on your needs!</p>
                 </div>
               </div>
             </div>
@@ -334,7 +388,9 @@ const PublishModal = ({
               {isPublishing ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Publishing...
+                  <span className="flex flex-col items-start">
+                    <span className="text-xs opacity-80">{publishingProgress}</span>
+                  </span>
                 </>
               ) : (
                 <>

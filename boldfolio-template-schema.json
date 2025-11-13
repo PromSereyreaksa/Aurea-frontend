@@ -1,0 +1,164 @@
+{
+  "id": "boldfolio",
+  "name": "BoldFolio",
+  "description": "Bold, creative portfolio template with striking typography and vibrant magenta accents. Perfect for designers and creatives who want to make a statement.",
+  "category": "creative",
+  "preview": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "previewUrl": "/template-preview/boldfolio",
+  "structure": {
+    "hero": {
+      "type": "hero",
+      "layout": "fullscreen_bold",
+      "editable": ["title", "subtitle", "description", "cta"]
+    },
+    "work": {
+      "type": "work",
+      "layout": "project_showcase",
+      "editable": ["projects", "images"]
+    },
+    "about": {
+      "type": "about",
+      "layout": "minimal",
+      "editable": ["heading", "name", "role", "bio", "location", "email"]
+    },
+    "contact": {
+      "type": "contact",
+      "layout": "centered",
+      "editable": ["heading", "text", "email", "social"]
+    }
+  },
+  "defaultContent": {
+    "hero": {
+      "title": "Driven by passion—and<br />fuelled by curiosity.",
+      "subtitle": "Designer and art-director<br />based in Montreal, Quebec.",
+      "description": "Think of design as a way<br />to transform problems into<br />empowering opportunities<br />and create appealing visuals<br />that connect with people.",
+      "cta": "Open for collaborations!"
+    },
+    "work": {
+      "projects": [
+        {
+          "title": "Ice Peak",
+          "description": "A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.",
+          "images": [
+            {
+              "width": "580px",
+              "height": "380px",
+              "src": ""
+            },
+            {
+              "width": "450px",
+              "height": "280px",
+              "src": ""
+            }
+          ],
+          "logo": "<span>|||</span><span>|||</span><span style=\"font-size: 100px; letter-spacing: 12px\">ICE</span><span style=\"font-size: 100px; letter-spacing: 12px\">PEAK</span>",
+          "link": ""
+        },
+        {
+          "title": "The Recreationist",
+          "description": "Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.",
+          "images": [
+            {
+              "width": "250px",
+              "height": "280px",
+              "src": ""
+            },
+            {
+              "width": "580px",
+              "height": "380px",
+              "src": ""
+            }
+          ],
+          "logo": "",
+          "link": ""
+        },
+        {
+          "title": "Hyperloop",
+          "description": "Identity and store for a brand<br />selling minimalistic jewelry.",
+          "images": [
+            {
+              "width": "250px",
+              "height": "280px",
+              "src": ""
+            },
+            {
+              "width": "500px",
+              "height": "500px",
+              "src": ""
+            }
+          ],
+          "logo": "",
+          "link": ""
+        }
+      ]
+    },
+    "about": {
+      "heading": "About",
+      "name": "Your Name",
+      "role": "Designer & Art Director",
+      "bio": "I believe in design as a transformative force that turns problems into empowering opportunities. My work focuses on creating appealing visuals that connect with people on a deeper level.",
+      "location": "Montreal, Quebec",
+      "email": "hello@yourname.com"
+    },
+    "contact": {
+      "heading": "Let's Work Together",
+      "text": "Have a project in mind? Let's create something amazing together.",
+      "email": "hello@yourname.com",
+      "social": {
+        "twitter": "",
+        "linkedin": "",
+        "instagram": "",
+        "behance": "",
+        "dribbble": ""
+      }
+    }
+  },
+  "styling": {
+    "colors": {
+      "primary": "#ff0080",
+      "secondary": "#000000",
+      "accent": "#ff0080",
+      "background": "#FFFFFF",
+      "text": "#000000",
+      "textSecondary": "#666666"
+    },
+    "fonts": {
+      "heading": "Graphik, -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", Ubuntu, \"Fira Sans\", Roboto, \"Avenir Next\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+      "body": "Graphik, -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", Ubuntu, \"Fira Sans\", Roboto, \"Avenir Next\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+      "mono": "\"SF Mono\", Consolas, \"Liberation Mono\", Menlo, monospace"
+    },
+    "typography": {
+      "scale": {
+        "h1": "52px",
+        "h2": "52px",
+        "h3": "36px",
+        "h4": "24px",
+        "body": "24px",
+        "small": "18px",
+        "meta": "14px"
+      },
+      "lineHeight": {
+        "tight": 1.2,
+        "normal": 1.5,
+        "relaxed": 1.7
+      },
+      "fontWeight": {
+        "normal": 400,
+        "medium": 500,
+        "bold": 700
+      }
+    },
+    "spacing": {
+      "section": "120px",
+      "element": "60px",
+      "tight": "20px",
+      "baseline": "10px"
+    }
+  },
+  "responsive": {
+    "mobile": "640px",
+    "tablet": "768px",
+    "desktop": "1024px",
+    "wide": "1400px"
+  }
+}

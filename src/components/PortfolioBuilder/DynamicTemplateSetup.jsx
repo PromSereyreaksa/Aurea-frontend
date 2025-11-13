@@ -1,14 +1,17 @@
 /**
  * Dynamic Template Setup Component
- * 
+ *
  * Uses the new Stepper.js component to guide users through portfolio setup
- * Automatically generates steps based on the selected template structure
+ * Automatically generates steps based on the selected template SCHEMA (backend-driven)
  */
 
 import React, { useState, useEffect } from 'react';
 import Stepper, { Step } from '../Shared/Stepper';
-import DynamicStepForm from './DynamicStepForm';
+import SchemaFormGenerator from './SchemaFormGenerator';
+import ValidationDisplay from './ValidationDisplay';
+import useTemplateValidation from '../../hooks/useTemplateValidation';
 import { analyzeTemplate } from '../../utils/templateAnalyzer';
+import DynamicStepForm from './DynamicStepForm'; // Fallback for legacy templates
 
 const DynamicTemplateSetup = ({ 
   template, 
@@ -19,12 +22,37 @@ const DynamicTemplateSetup = ({
   const [steps, setSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(initialData);
+  const [useSchemaMode, setUseSchemaMode] = useState(true); // Toggle for new vs old mode
+
+  // Validation hook
+  const { valid, errors, isValidating, debouncedValidate } = useTemplateValidation(
+    template?.id || template?.templateId,
+    formData,
+    { validateOnChange: true, debounceMs: 800 }
+  );
 
   // Analyze template and generate steps
   useEffect(() => {
     if (template) {
-      const generatedSteps = analyzeTemplate(template);
-      setSteps(generatedSteps);
+      // Check if template has schema from backend
+      if (template.schema?.sections) {
+        setUseSchemaMode(true);
+        // Generate steps from schema sections
+        const schemaSteps = template.schema.sections.map((section, index) => ({
+          id: section.id,
+          name: section.name,
+          description: section.description,
+          fields: section.fields || [],
+          required: section.required,
+          order: section.order !== undefined ? section.order : index,
+        }));
+        setSteps(schemaSteps.sort((a, b) => a.order - b.order));
+      } else {
+        // Fallback to old template analyzer for static templates
+        setUseSchemaMode(false);
+        const generatedSteps = analyzeTemplate(template);
+        setSteps(generatedSteps);
+      }
     }
   }, [template]);
 
@@ -48,8 +76,15 @@ const DynamicTemplateSetup = ({
 
   // Handle completion
   const handleComplete = () => {
+    console.log('=== SETUP COMPLETE ===');
+    console.log('Template:', template);
+    console.log('Template defaultContent:', template?.defaultContent);
+    console.log('Form Data:', formData);
+
     // Convert form data to template content format
     const content = convertFormDataToContent(formData, template);
+    console.log('Converted Content:', content);
+
     onComplete(content);
   };
 
@@ -98,12 +133,48 @@ const DynamicTemplateSetup = ({
       >
         {steps.map((step, index) => (
           <Step key={step.id}>
-            <DynamicStepForm
-              step={step}
-              data={formData[step.id]}
-              onChange={(data) => handleStepDataChange(step.id, data)}
-              onSkip={handleSkip}
-            />
+            {useSchemaMode ? (
+              /* New Schema-Driven Mode */
+              <div>
+                {/* Section Header */}
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    {step.name}
+                  </h2>
+                  {step.description && (
+                    <p className="text-gray-600">{step.description}</p>
+                  )}
+                </div>
+
+                {/* Validation Display */}
+                <ValidationDisplay
+                  valid={valid}
+                  errors={errors.filter(e => e.section === step.id)}
+                  isValidating={isValidating}
+                  className="mb-6"
+                />
+
+                {/* Schema Form for this section */}
+                <SchemaFormGenerator
+                  schema={{ sections: [step] }}
+                  values={formData}
+                  onChange={(updated) => setFormData(updated)}
+                  onValidate={() => debouncedValidate()}
+                  errors={errors}
+                  showLabels={true}
+                  showHelpText={true}
+                  showValidation={true}
+                />
+              </div>
+            ) : (
+              /* Old Legacy Mode (fallback) */
+              <DynamicStepForm
+                step={step}
+                data={formData[step.id]}
+                onChange={(data) => handleStepDataChange(step.id, data)}
+                onSkip={handleSkip}
+              />
+            )}
           </Step>
         ))}
       </Stepper>
@@ -176,9 +247,22 @@ const StepIndicatorCustom = ({ step, currentStep, onStepClick, totalSteps }) => 
  * Maps the nested form data back to the template's expected structure
  */
 const convertFormDataToContent = (formData, template) => {
+  // Ensure template has defaultContent
+  if (!template || !template.defaultContent) {
+    console.error('Template or defaultContent is missing:', template);
+    return {};
+  }
+
   const content = JSON.parse(JSON.stringify(template.defaultContent)); // Deep clone
 
+  // Handle empty formData
+  if (!formData || Object.keys(formData).length === 0) {
+    return content;
+  }
+
   for (const [stepId, stepData] of Object.entries(formData)) {
+    // Skip if stepData is undefined
+    if (!stepData) continue;
     if (stepId === 'basic') {
       // Basic info goes to root level
       continue;

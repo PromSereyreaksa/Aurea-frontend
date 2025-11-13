@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { getTemplate } from '../templates';
+import { templateAdapter } from '../lib/templateAdapter';
 
 /**
  * Published Portfolio Page
@@ -25,8 +25,9 @@ const PublishedPortfolioPage = () => {
       setLoading(true);
       setError(null);
 
+      // Use the new /api/sites/:subdomain endpoint for published sites
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/portfolios/public/${slug}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/sites/${slug}`
       );
 
       if (!response.ok) {
@@ -39,7 +40,8 @@ const PublishedPortfolioPage = () => {
       }
 
       const data = await response.json();
-      
+
+      // The /api/sites/:subdomain endpoint returns the portfolio data directly
       if (data.success && data.data) {
         setPortfolio(data.data);
       } else {
@@ -123,19 +125,56 @@ const PublishedPortfolioPage = () => {
     );
   }
 
-  // Get the template component
-  const template = getTemplate(portfolio.templateId);
-  
-  if (!template) {
+  // State for template loading
+  const [template, setTemplate] = useState(null);
+  const [templateLoading, setTemplateLoading] = useState(true);
+
+  // Load template when portfolio is available
+  useEffect(() => {
+    if (portfolio?.templateId || portfolio?.template) {
+      loadTemplate();
+    }
+  }, [portfolio]);
+
+  const loadTemplate = async () => {
+    try {
+      setTemplateLoading(true);
+      const templateId = portfolio.templateId || portfolio.template || 'echelon';
+      const loadedTemplate = await templateAdapter.getTemplateWithComponent(templateId);
+      setTemplate(loadedTemplate);
+    } catch (error) {
+      console.error('Failed to load template:', error);
+      // Try fallback
+      const fallbackTemplate = await templateAdapter.getTemplateWithComponent('echelon');
+      setTemplate(fallbackTemplate);
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
+  // Loading template
+  if (templateLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading template...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Template not found
+  if (!template || !template.component) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Template Not Found
+              Template Not Available
             </h1>
             <p className="text-gray-600 mb-6">
-              The template for this portfolio is not available.
+              Unable to load the template for this portfolio.
             </p>
             <button
               onClick={() => navigate('/')}
@@ -157,10 +196,10 @@ const PublishedPortfolioPage = () => {
       {/* SEO Meta Tags - These would be set in the head */}
       <title>{portfolio.title || 'Portfolio'}</title>
       
-      {/* Render Template */}
+      {/* Render Template with merged styling */}
       <TemplateComponent
         content={portfolio.content}
-        styling={portfolio.styling}
+        styling={portfolio.styling || template.styling}
         isEditing={false}
         isPreview={false}
         portfolioId={portfolio._id}

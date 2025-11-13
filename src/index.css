@@ -1,5 +1,32 @@
-@import "./assets/poppins.css";
 @import "tailwindcss";
+@import "./styles/performance.css";
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Apply Satoshi font only to app pages - NOT templates */
+body:not(.template-page) {
+  font-family: "Satoshi", Arial, sans-serif;
+}
+
+/* Specifically target app pages */
+.app-page,
+.app-page * {
+  font-family: "Satoshi", Arial, sans-serif;
+}
+
+/* Ensure templates can override the font */
+.template-page,
+.template-page * {
+  font-family: inherit !important;
+}
 
 /* Custom animations for enhanced visual effects */
 @keyframes blob {
@@ -38,6 +65,20 @@
   line-clamp: 3;
 }
 
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 /* Fade in up animation */
 @keyframes fadeInUp {
   from {
@@ -69,4 +110,65 @@
 
 .animate-slideUp {
   animation: slideUp 0.8s ease-out forwards;
+}
+
+/* Spinner animation for loading states */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Template Responsive Styles */
+@media (max-width: 768px) {
+  /* Hide decorative elements on mobile */
+  .template-decoration {
+    display: none !important;
+  }
+
+  /* Ensure template sections have proper padding on mobile */
+  section {
+    padding-left: clamp(16px, 5vw, 24px) !important;
+    padding-right: clamp(16px, 5vw, 24px) !important;
+  }
+
+  /* Adjust minHeight for mobile */
+  section[style*="minHeight: 100vh"] {
+    min-height: auto !important;
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+  }
+}
+
+/* Safe area for bottom navigation (iOS devices) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dashboard bottom bar - show on mobile/tablet, hide on desktop */
+.dashboard-bottom-bar {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-bottom-bar {
+    display: none !important;
+  }
+}
+
+/* Ensure fixed bottom elements stay on screen */
+@supports (position: sticky) or (position: -webkit-sticky) {
+  .fixed-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 }

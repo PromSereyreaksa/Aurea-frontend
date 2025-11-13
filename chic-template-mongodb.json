@@ -1,0 +1,228 @@
+{
+    "templateId": "chic",
+    "name": "Chic",
+    "slug": "chic",
+    "description": "Editorial/Magazine-inspired portfolio with asymmetric sidebar layout and clean typography. Features a sticky left info panel and a two-column project grid with alternating layouts.",
+    "thumbnail": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "category": "editorial",
+    "schema": {
+        "sections": [
+            {
+                "id": "hero",
+                "name": "Hero",
+                "description": "Personal information sidebar",
+                "fields": [
+                    {
+                        "id": "name",
+                        "label": "Full Name",
+                        "type": "text",
+                        "placeholder": "Your Name",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "initials",
+                        "label": "Initials",
+                        "type": "text",
+                        "placeholder": "Y.N.",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "10" }
+                        }
+                    },
+                    {
+                        "id": "bio",
+                        "label": "Bio",
+                        "type": "textarea",
+                        "placeholder": "I am a designer focused on brand identity, editorial design, and typography...",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "500" }
+                        }
+                    },
+                    {
+                        "id": "instagram",
+                        "label": "Instagram URL",
+                        "type": "text",
+                        "placeholder": "https://instagram.com/yourname",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "linkedin",
+                        "label": "LinkedIn URL",
+                        "type": "text",
+                        "placeholder": "https://linkedin.com/in/yourname",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "behance",
+                        "label": "Behance URL",
+                        "type": "text",
+                        "placeholder": "https://behance.net/yourname",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "0" }
+            },
+            {
+                "id": "about",
+                "name": "About",
+                "description": "Skills and experience",
+                "fields": [
+                    {
+                        "id": "skills",
+                        "label": "Skills",
+                        "type": "text",
+                        "placeholder": "Brand Identity, Editorial Design, Typography, Art Direction",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "300" }
+                        }
+                    },
+                    {
+                        "id": "experience",
+                        "label": "Experience",
+                        "type": "text",
+                        "placeholder": "5+ years experience working with studios and agencies globally",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "300" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "1" }
+            },
+            {
+                "id": "work",
+                "name": "Work",
+                "description": "Project showcase with editable images",
+                "fields": [
+                    {
+                        "id": "projects",
+                        "label": "Projects",
+                        "type": "array",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "image",
+                        "label": "Project Images",
+                        "type": "image",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "1000" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "2" }
+            },
+            {
+                "id": "contact",
+                "name": "Contact",
+                "description": "Contact information",
+                "fields": [
+                    {
+                        "id": "email",
+                        "label": "Email",
+                        "type": "text",
+                        "placeholder": "hello@yourname.com",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "100" }
+                        }
+                    },
+                    {
+                        "id": "phone",
+                        "label": "Phone",
+                        "type": "text",
+                        "placeholder": "+1 (123) 456-7890",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "50" }
+                        }
+                    },
+                    {
+                        "id": "telegram",
+                        "label": "Telegram URL",
+                        "type": "text",
+                        "placeholder": "https://t.me/yourname",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "whatsapp",
+                        "label": "WhatsApp URL",
+                        "type": "text",
+                        "placeholder": "",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    },
+                    {
+                        "id": "availability",
+                        "label": "Availability Message",
+                        "type": "text",
+                        "placeholder": "Available for freelance work and collaborations",
+                        "required": false,
+                        "validation": {
+                            "maxLength": { "$numberInt": "200" }
+                        }
+                    }
+                ],
+                "required": true,
+                "order": { "$numberInt": "3" }
+            }
+        ],
+        "styling": {
+            "colorScheme": {
+                "primary": "#000000",
+                "secondary": "#333333",
+                "accent": "#FFD700",
+                "background": "#FFFFFF",
+                "surface": "#F8F7F5",
+                "text": "#000000",
+                "textSecondary": "#333333",
+                "border": "#E5E5E5"
+            },
+            "typography": {
+                "headingFont": "\"Helvetica Neue\", -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+                "bodyFont": "\"Helvetica Neue\", -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+                "scale": "default"
+            },
+            "spacing": "default",
+            "customCSS": ""
+        }
+    },
+    "caseStudySchema": {
+        "enabled": false,
+        "fields": []
+    },
+    "version": "1.0.0",
+    "isActive": true,
+    "isDefault": false,
+    "usageCount": { "$numberInt": "0" },
+    "isPremium": false,
+    "createdBy": "Aurea",
+    "tags": ["editorial", "chic", "magazine", "sidebar"]
+}

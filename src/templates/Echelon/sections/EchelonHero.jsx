@@ -76,12 +76,14 @@ const EchelonHero = ({
         alignItems: 'center'
       }}
     >
-      {/* Aesthetic Spirals in Corners */}
-      <SwissSpiral position="top-left" color="#000000" opacity={0.03} size={180} />
-      <SwissSpiral position="bottom-right" color="#FF0000" opacity={0.04} size={200} rotation={180} />
+      {/* Aesthetic Spirals in Corners - Hidden on mobile */}
+      <div className="hidden md:block">
+        <SwissSpiral position="top-left" color="#000000" opacity={0.03} size={180} />
+        <SwissSpiral position="bottom-right" color="#FF0000" opacity={0.04} size={200} rotation={180} />
+      </div>
       
-      {/* Diagonal Accent Line */}
-      <div style={{
+      {/* Diagonal Accent Line - Hidden on mobile */}
+      <div className="hidden lg:block" style={{
         position: 'absolute',
         top: '30%',
         right: '10%',
@@ -94,8 +96,8 @@ const EchelonHero = ({
         pointerEvents: 'none'
       }} />
       
-      {/* Large Intentional Grid - Top Right */}
-      <div style={{
+      {/* Large Intentional Grid - Top Right - Hidden on mobile */}
+      <div className="hidden lg:block" style={{
         position: 'absolute',
         top: '8%',
         right: '5%',
@@ -117,13 +119,12 @@ const EchelonHero = ({
         ))}
       </div>
 
-      {/* Vertical Red Lines - Left Side */}
-      <div style={{
+      {/* Vertical Red Lines - Left Side - Hidden on mobile */}
+      <div className="hidden md:flex" style={{
         position: 'absolute',
         left: '80px',
         top: '20%',
         bottom: '20%',
-        display: 'flex',
         gap: '60px',
         opacity: 0.15,
         zIndex: 1,
@@ -134,12 +135,11 @@ const EchelonHero = ({
         ))}
       </div>
 
-      {/* Circle Elements - Bottom */}
-      <div style={{
+      {/* Circle Elements - Bottom - Hidden on mobile */}
+      <div className="hidden md:flex" style={{
         position: 'absolute',
         bottom: '100px',
         left: '15%',
-        display: 'flex',
         gap: '30px',
         opacity: 0.08,
         zIndex: 1,
@@ -254,7 +254,7 @@ const EchelonHero = ({
               left: '-60px',
               top: '-20px',
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-              fontSize: '120px',
+              fontSize: 'clamp(40px, 10vw, 120px)',
               fontWeight: 900,
               color: 'rgba(0, 0, 0, 0.03)',
               lineHeight: 1,
@@ -266,7 +266,7 @@ const EchelonHero = ({
             {/* Year/Date */}
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '14px',
+              fontSize: 'clamp(10px, 1.2vw, 14px)',
               fontWeight: 600,
               color: '#FF0000',
               marginBottom: '24px',
@@ -285,7 +285,7 @@ const EchelonHero = ({
                 onBlur={(e) => handleSubtitleChange(e.target.value)}
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '28px',
+                  fontSize: 'clamp(18px, 2.5vw, 28px)',
                   fontWeight: 400,
                   lineHeight: 1.5,
                   color: '#000000',
@@ -302,7 +302,7 @@ const EchelonHero = ({
             ) : (
               <p style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                fontSize: '28px',
+                fontSize: 'clamp(18px, 2.5vw, 28px)',
                 fontWeight: 400,
                 lineHeight: 1.5,
                 color: '#000000',
@@ -343,7 +343,7 @@ const EchelonHero = ({
           }}>
             <div style={{
               fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '12px',
+              fontSize: 'clamp(10px, 1vw, 12px)',
               color: '#666666',
               textTransform: 'uppercase',
               letterSpacing: '0.2em'
@@ -352,7 +352,7 @@ const EchelonHero = ({
             </div>
             <div style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-              fontSize: '16px',
+              fontSize: 'clamp(12px, 1.5vw, 16px)',
               fontWeight: 700,
               color: '#000000',
               textTransform: 'uppercase',

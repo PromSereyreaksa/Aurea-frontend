@@ -1,13 +1,31 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import useUploadStore from '../../stores/uploadStore';
+import { uploadImage as uploadImageApi } from '../../lib/uploadApi';
 
-const MultiImageUpload = ({ 
-  images = [], 
-  onImagesChange, 
-  maxImages = 6, 
-  className = '' 
+const MultiImageUpload = ({
+  images = [],
+  onImagesChange,
+  maxImages = 6,
+  className = ''
 }) => {
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadIds, setUploadIds] = useState([]); // Track upload IDs for progress
   const fileInputRef = useRef(null);
+
+  // Get upload store methods
+  const { startUpload, getUpload, completeUpload, failUpload, removeUpload } = useUploadStore();
+
+  // Cleanup uploads on unmount
+  useEffect(() => {
+    return () => {
+      uploadIds.forEach(id => removeUpload(id));
+    };
+  }, [uploadIds, removeUpload]);
+
+  // Check if any uploads are in progress
+  const hasActiveUploads = uploadIds.some(id => {
+    const upload = getUpload(id);
+    return upload?.status === 'uploading';
+  });
 
   const handleFileUpload = async (files) => {
     if (!files || files.length === 0) return;
@@ -16,64 +34,91 @@ const MultiImageUpload = ({
     const remainingSlots = maxImages - currentImageCount;
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
 
-    setIsUploading(true);
-
-    try {
-      const uploadPromises = filesToUpload.map(file => uploadSingleImage(file));
-      const uploadedUrls = await Promise.all(uploadPromises);
-      
-      // Add new images to the array
-      const newImages = [...images];
-      uploadedUrls.forEach(url => {
-        const emptyIndex = newImages.findIndex(img => !img);
-        if (emptyIndex !== -1) {
-          newImages[emptyIndex] = url;
-        } else if (newImages.length < maxImages) {
-          newImages.push(url);
-        }
-      });
-      
-      onImagesChange(newImages);
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert(`Failed to upload images: ${error.message}`);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const uploadSingleImage = async (file) => {
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      throw new Error('Please select image files only');
+    // Validate all files first
+    for (const file of filesToUpload) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select image files only');
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        alert('File size must be less than 25MB');
+        return;
+      }
     }
 
-    // Validate file size (max 25MB)
-    if (file.size > 25 * 1024 * 1024) {
-      throw new Error('File size must be less than 25MB');
-    }
+    // 1. Create instant previews for all files
+    const newUploadIds = [];
+    const newImages = [...images];
 
-    const formData = new FormData();
-    formData.append('image', file);
+    filesToUpload.forEach(file => {
+      const uploadId = startUpload(file);
+      newUploadIds.push(uploadId);
 
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      // Create local preview
+      const localPreview = URL.createObjectURL(file);
+
+      // Add to images array
+      const emptyIndex = newImages.findIndex(img => !img);
+      if (emptyIndex !== -1) {
+        newImages[emptyIndex] = localPreview;
+      } else if (newImages.length < maxImages) {
+        newImages.push(localPreview);
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status}`);
-    }
+    // Track upload IDs
+    setUploadIds(prev => [...prev, ...newUploadIds]);
 
-    const result = await response.json();
-    
-    if (result.success && result.data?.url) {
-      return result.data.url;
-    } else {
-      throw new Error(result.message || 'Upload failed');
+    // 2. Show previews immediately
+    onImagesChange(newImages);
+
+    // 3. Upload all files in parallel
+    filesToUpload.forEach((file, index) => {
+      uploadSingleImage(file, newUploadIds[index], newImages, index);
+    });
+  };
+
+  const uploadSingleImage = async (file, uploadId, currentImages) => {
+    try {
+      console.log('📤 MultiImageUpload: Starting optimized upload...', file.name);
+
+      // Upload with all optimizations (compression, fake progress, direct upload)
+      const result = await uploadImageApi(
+        file,
+        (progressValue) => {
+          // Track progress in upload store
+          useUploadStore.getState().updateProgress(uploadId, progressValue);
+        },
+        {
+          compress: true,  // Auto compress before upload
+          direct: true,    // Use direct upload if available
+        }
+      );
+
+      if (result.success && result.data?.url) {
+        console.log('✅ MultiImageUpload: Upload complete:', result.data.url);
+
+        // Complete the upload in store
+        completeUpload(uploadId, result.data.url);
+
+        // Replace local preview with Cloudinary URL
+        const updatedImages = [...currentImages];
+        const previewIndex = updatedImages.findIndex((img) => {
+          const upload = getUpload(uploadId);
+          return img === upload?.preview;
+        });
+
+        if (previewIndex !== -1) {
+          updatedImages[previewIndex] = result.data.url;
+          onImagesChange(updatedImages);
+        }
+      } else {
+        throw new Error(result.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('❌ MultiImageUpload: Upload error:', error);
+      failUpload(uploadId, error.message);
+      alert(`Failed to upload ${file.name}: ${error.message}`);
     }
   };
 
@@ -124,44 +169,90 @@ const MultiImageUpload = ({
       {/* Image Grid */}
       {currentImageCount > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-          {images.map((image, index) => image && (
-            <div key={index} className="relative group">
-              <img
-                src={image}
-                alt={`Image ${index + 1}`}
-                className="w-full h-40 object-cover rounded-lg border-2 border-gray-300"
-              />
-              <button
-                onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                ×
-              </button>
-            </div>
-          ))}
+          {images.map((image, index) => {
+            if (!image) return null;
+
+            // Find upload ID for this image (if still uploading)
+            const uploadId = uploadIds.find(id => {
+              const upload = getUpload(id);
+              return upload && (upload.preview === image || upload.url === image);
+            });
+
+            const uploadState = uploadId ? getUpload(uploadId) : null;
+            const isUploading = uploadState?.status === 'uploading';
+            const progress = uploadState?.progress || 0;
+
+            return (
+              <div key={index} className="relative group">
+                <img
+                  src={image}
+                  alt={`Image ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg border-2 border-gray-300"
+                />
+
+                {/* Upload progress overlay - Enhanced */}
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black bg-opacity-70 rounded-lg flex flex-col items-center justify-center backdrop-blur-sm">
+                    <div className="text-white text-center">
+                      {/* Animated spinner with glow */}
+                      <div className="relative mb-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-orange-500 border-r-orange-500 border-b-transparent border-l-transparent mx-auto"></div>
+                        <div className="absolute inset-0 animate-ping rounded-full h-8 w-8 border border-orange-500 opacity-20"></div>
+                      </div>
+
+                      {/* Enhanced progress bar with gradient */}
+                      <div className="w-28 bg-gray-800 rounded-full h-2 overflow-hidden shadow-inner">
+                        <div
+                          className="h-2 rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-orange-500 to-yellow-400"
+                          style={{
+                            width: `${progress}%`,
+                            boxShadow: '0 0 8px rgba(251, 146, 60, 0.5)',
+                          }}
+                        />
+                      </div>
+
+                      {/* Progress percentage */}
+                      <p className="text-xs font-bold mt-2 tabular-nums">{progress}%</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Remove button - only show when not uploading */}
+                {!isUploading && (
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {/* Upload Area */}
       {canAddMore && (
         <div
-          onClick={openFileDialog}
+          onClick={hasActiveUploads ? undefined : openFileDialog}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           className={`
             w-full h-48 border-2 border-dashed rounded-lg
             flex flex-col items-center justify-center cursor-pointer
             transition-all duration-200
-            ${isUploading 
-              ? 'border-orange-500 bg-orange-50 cursor-not-allowed' 
+            ${hasActiveUploads
+              ? 'border-orange-500 bg-orange-50 cursor-not-allowed'
               : 'border-gray-300 bg-gray-50 hover:border-orange-400 hover:bg-orange-50'
             }
           `}
         >
-          {isUploading ? (
+          {hasActiveUploads ? (
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-3"></div>
-              <p className="text-sm text-gray-600">Uploading...</p>
+              <p className="text-sm text-gray-600">Uploading images...</p>
+              <p className="text-xs text-gray-500 mt-1">Please wait</p>
             </div>
           ) : (
             <>

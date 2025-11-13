@@ -1,0 +1,191 @@
+/* Dashboard Responsive Styles */
+
+/* Prevent sidebar flash on load for mobile */
+.sidebar-desktop {
+  transition: transform 280ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+/* Desktop - Show sidebar, hide burger menu */
+@media (min-width: 1024px) {
+  .mobile-burger-menu {
+    display: none !important;
+  }
+
+  .sidebar-desktop {
+    transform: translateX(0) !important;
+  }
+
+  /* Desktop - Show text logo, hide image logo */
+  .logo-image-mobile {
+    display: none !important;
+  }
+
+  .logo-text-desktop {
+    display: inline !important;
+  }
+}
+
+/* Mobile/Tablet - Hide sidebar by default, show burger menu */
+@media (max-width: 1023px) {
+  /* Hide sidebar off-screen initially on mobile */
+  .sidebar-desktop {
+    transform: translateX(-100%) !important;
+    width: 250px !important;
+  }
+
+  /* Show sidebar when open */
+  .sidebar-desktop.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  /* Hide toggle button on mobile */
+  .sidebar-desktop > div[style*="toggleButton"] {
+    display: none !important;
+  }
+
+  /* Mobile - Show image logo, hide text logo */
+  .logo-image-mobile {
+    display: block !important;
+  }
+
+  .logo-text-desktop {
+    display: none !important;
+  }
+
+  /* Adjust main content margin on mobile */
+  body .dashboard-main-content {
+    margin-left: 0 !important;
+  }
+}
+
+/* Very small mobile devices */
+@media (max-width: 640px) {
+  .sidebar-desktop {
+    width: 80% !important;
+    max-width: 280px;
+  }
+}
+
+/* Responsive Dashboard Content */
+/* Tablet and below */
+@media (max-width: 768px) {
+  /* Reduce outer padding */
+  .dashboard-content-wrapper {
+    padding: 16px !important;
+  }
+
+  /* Reduce section padding */
+  .dashboard-section {
+    padding: 20px !important;
+  }
+
+  /* Adjust discover section grid for smaller screens */
+  .discover-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 640px) {
+  /* Further reduce outer padding */
+  .dashboard-content-wrapper {
+    padding: 12px !important;
+  }
+
+  /* Further reduce section padding */
+  .dashboard-section {
+    padding: 16px !important;
+  }
+
+  /* Reduce heading font size */
+  .dashboard-section > div[style*="fontSize: '24px'"] {
+    font-size: 20px !important;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 480px) {
+  /* Minimal padding for very small screens */
+  .dashboard-content-wrapper {
+    padding: 8px !important;
+  }
+
+  /* Minimal section padding */
+  .dashboard-section {
+    padding: 12px !important;
+  }
+
+  /* Smaller heading */
+  .dashboard-section > div[style*="fontSize: '24px'"] {
+    font-size: 18px !important;
+  }
+
+  /* Reduce icon size */
+  .dashboard-section > div > div[style*="width: '48px'"] {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* Portfolio Section Responsive */
+@media (max-width: 768px) {
+  .portfolio-section-wrapper {
+    padding: 20px !important;
+  }
+
+  /* Make portfolio grid responsive on tablets */
+  .portfolio-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+  }
+
+  /* Fix three dots dropdown position on small screens */
+  .portfolio-grid > div > div:last-child {
+    overflow: visible !important;
+    position: static !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .portfolio-section-wrapper {
+    padding: 16px !important;
+  }
+
+  /* Single column on mobile */
+  .portfolio-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stack header buttons vertically on small screens */
+  .portfolio-section-wrapper > div:first-child {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .portfolio-section-wrapper > div:first-child > div:last-child {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  /* Make buttons full width on mobile */
+  .portfolio-section-wrapper select,
+  .portfolio-section-wrapper button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-section-wrapper {
+    padding: 12px !important;
+  }
+
+  /* Reduce heading size */
+  .portfolio-section-wrapper h1 {
+    font-size: 20px !important;
+  }
+
+  /* Reduce gap in header */
+  .portfolio-section-wrapper > div:first-child > div:last-child {
+    gap: 8px !important;
+  }
+}

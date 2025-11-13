@@ -10,13 +10,13 @@ const SWISS_FONTS = {
 };
 
 const SWISS_SCALE = {
-  h1: '72px',
-  h2: '48px', 
-  h3: '32px',
-  h4: '24px',
-  body: '18px',
-  small: '16px',
-  meta: '14px'
+  h1: 'clamp(32px, 8vw, 72px)',
+  h2: 'clamp(24px, 5vw, 48px)', 
+  h3: 'clamp(20px, 3vw, 32px)',
+  h4: 'clamp(18px, 2.5vw, 24px)',
+  body: 'clamp(16px, 1.5vw, 18px)',
+  small: 'clamp(14px, 1.2vw, 16px)',
+  meta: 'clamp(12px, 1vw, 14px)'
 };
 
 // Swiss Heading Component

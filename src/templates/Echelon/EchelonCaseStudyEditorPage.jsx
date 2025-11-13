@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import usePortfolioStore from '../../stores/portfolioStore';
+import caseStudyApi from '../../lib/caseStudyApi';
+import api from '../../lib/baseApi';
 import FloatingActionButtons from '../../components/PortfolioBuilder/FloatingActionButtons';
 
 const CaseStudyEditorPage = () => {
   const { portfolioId, projectId } = useParams();
   const navigate = useNavigate();
-  const { updatePortfolio, portfolios } = usePortfolioStore();
+  const { portfolios } = usePortfolioStore();
   
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [caseStudyId, setCaseStudyId] = useState(null); // Track if editing existing case study
 
   // Case study content state - matching the static template structure
   const [caseStudy, setCaseStudy] = useState({
@@ -96,13 +101,148 @@ const CaseStudyEditorPage = () => {
   });
 
   useEffect(() => {
-    // Load existing case study data from portfolio
-    const portfolio = portfolios.find(p => p.id === portfolioId);
-    if (portfolio && portfolio.caseStudies && portfolio.caseStudies[projectId]) {
-      setCaseStudy(portfolio.caseStudies[projectId]);
+    // Load existing case study data from API
+    const loadCaseStudy = async () => {
+      try {
+        setIsLoading(true);
+        
+        // ========================================
+        // 🔍 DIAGNOSTIC LOGGING
+        // ========================================
+        console.log('\n' + '='.repeat(80));
+        console.log('🔍 CASE STUDY EDITOR - DIAGNOSTIC');
+        console.log('='.repeat(80));
+        console.log('� URL Parameters:');
+        console.log('   Portfolio ID:', portfolioId);
+        console.log('   Project ID:', projectId);
+        console.log('   Project ID Type:', typeof projectId);
+        console.log('   Token exists:', !!localStorage.getItem('aurea_token'));
+        console.log('   Current URL:', window.location.pathname);
+        
+        // First, let's check what's in the portfolio
+        try {
+          console.log('\n📦 Fetching portfolio to check projects...');
+          const portfolioResponse = await api.get(`/api/portfolios/${portfolioId}`);
+          const portfolio = portfolioResponse.data.data.portfolio;
+          
+          console.log('✅ Portfolio found:', portfolio.title);
+          console.log('   Portfolio ID:', portfolio._id);
+          console.log('   Template:', portfolio.templateId);
+          
+          const projects = portfolio.content?.work?.projects || [];
+          console.log('\n📋 Projects in portfolio:', projects.length);
+          projects.forEach((p, i) => {
+            console.log(`   ${i + 1}. ID: "${p.id}" (${typeof p.id}) - ${p.title}`);
+          });
+          
+          console.log('\n⚠️ PROJECT ID TYPE CHECK:');
+          console.log('   Frontend projectId:', projectId, `(type: ${typeof projectId})`);
+          console.log('   Backend project IDs:', projects.map(p => `${p.id} (${typeof p.id})`));
+          
+          console.log('\n📚 Case Studies in portfolio:', portfolio.caseStudies?.length || 0);
+          if (portfolio.caseStudies?.length > 0) {
+            portfolio.caseStudies.forEach((csId, i) => {
+              console.log(`   ${i + 1}. Case Study ID: ${csId}`);
+            });
+          }
+          
+          // Check if the project exists
+          const projectExists = projects.some(p => String(p.id) === String(projectId));
+          console.log(`\n🎯 Looking for project with ID: "${projectId}"`);
+          console.log(`   Project exists in portfolio: ${projectExists ? '✅ YES' : '❌ NO'}`);
+          
+          if (!projectExists) {
+            console.warn('⚠️ WARNING: The project ID from URL does not match any project in the portfolio!');
+            console.warn('   Available project IDs:', projects.map(p => p.id));
+            console.warn('   Requested project ID:', projectId);
+          }
+        } catch (portfolioError) {
+          console.error('❌ Error fetching portfolio:', portfolioError);
+        }
+        
+        console.log('\n🔍 Now attempting to fetch case study...');
+        console.log('='.repeat(80) + '\n');
+        // ========================================
+        // END DIAGNOSTIC
+        // ========================================
+        
+        const response = await caseStudyApi.getByPortfolioAndProject(portfolioId, projectId);
+        
+        if (response.success && response.data?.caseStudy) {
+          const existingCaseStudy = response.data.caseStudy;
+          console.log('✅ Case study found:', existingCaseStudy);
+          
+          // Save the case study ID for updates
+          if (existingCaseStudy._id) {
+            setCaseStudyId(existingCaseStudy._id);
+            console.log('📌 Case study ID saved for updates:', existingCaseStudy._id);
+          }
+          
+          // Transform API data back to editor's expected format
+          const transformedSections = (existingCaseStudy.content?.sections || []).map((section, index) => {
+            // Parse the combined content back into subsections
+            const contentParts = section.content ? section.content.split('\n\n---\n\n') : [];
+            const subsections = contentParts.map((part, subIndex) => {
+              const lines = part.split('\n\n');
+              return {
+                id: parseInt(section.id.replace('section-', '')) * 10 + subIndex + 1,
+                title: lines[0] || 'SUBSECTION TITLE',
+                content: lines.slice(1).join('\n\n') || '',
+                image: section.images?.[subIndex] || section.image || '',
+                imageCaption: `Figure ${String(index + 2).padStart(2, '0')} — Image Caption`,
+                additionalContext: ''
+              };
+            });
+
+            // If no subsections, create a default one
+            if (subsections.length === 0) {
+              subsections.push({
+                id: (index + 1) * 10 + 1,
+                title: 'SUBSECTION TITLE',
+                content: section.content || '',
+                image: section.image || '',
+                imageCaption: `Figure ${String(index + 2).padStart(2, '0')} — Image Caption`,
+                additionalContext: ''
+              });
+            }
+
+            return {
+              id: index + 1,
+              number: String(index + 1).padStart(2, '0'),
+              title: section.heading || 'SECTION TITLE',
+              subsections
+            };
+          });
+
+          setCaseStudy({
+            title: existingCaseStudy.content?.hero?.title || 'LOGO DESIGN PROCESS',
+            category: existingCaseStudy.content?.hero?.subtitle || 'BRANDING / IDENTITY',
+            year: existingCaseStudy.content?.hero?.year || '2025',
+            intro: existingCaseStudy.content?.overview?.description || 'Project introduction...',
+            heroImage: existingCaseStudy.content?.hero?.coverImage || '',
+            heroImageCaption: 'Figure 01 — Design Process Framework',
+            steps: caseStudy.steps, // Keep default steps for now
+            sections: transformedSections.length > 0 ? transformedSections : caseStudy.sections
+          });
+          
+          console.log('✅ Case study loaded and transformed');
+        }
+      } catch (error) {
+        if (error.response?.status === 404) {
+          console.log('📝 No existing case study found, using template defaults');
+        } else {
+          console.error('❌ Error loading case study:', error);
+        }
+        // Keep default template structure
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (portfolioId && projectId) {
+      loadCaseStudy();
     }
-    // If no existing case study, keep the default template structure
-  }, [portfolioId, projectId, portfolios]);
+  }, [portfolioId, projectId]);
 
   // Keyboard shortcut for save (Ctrl+S)
   useEffect(() => {
@@ -121,36 +261,133 @@ const CaseStudyEditorPage = () => {
     try {
       setIsSaving(true);
       
-      // Get current portfolio
-      const portfolio = portfolios.find(p => p.id === portfolioId);
-      if (!portfolio) {
-        toast.error('Portfolio not found');
+      console.log('\n' + '='.repeat(80));
+      console.log('💾 CASE STUDY SAVE - DIAGNOSTIC');
+      console.log('='.repeat(80));
+      console.log('📍 Parameters:');
+      console.log('   Portfolio ID:', portfolioId, `(type: ${typeof portfolioId})`);
+      console.log('   Project ID:', projectId, `(type: ${typeof projectId})`);
+      console.log('   Case Study ID:', caseStudyId || 'None (will create new)');
+      console.log('   Operation:', caseStudyId ? 'UPDATE' : 'CREATE');
+      
+      // ⚠️ VALIDATION: Title is required and cannot be empty!
+      const title = caseStudy.title?.trim();
+      console.log('\n✅ Validation:');
+      console.log('   Title:', title || '(empty)');
+      console.log('   Title valid:', !!title);
+      
+      if (!title || title === '') {
+        console.error('❌ Validation failed: Title is required!');
+        toast.error('Case study title is required!');
         setIsSaving(false);
         return;
       }
-
-      // Update portfolio with case study data
-      // Case studies are stored in portfolio.caseStudies as an object keyed by projectId
-      const updatedPortfolio = {
-        ...portfolio,
-        caseStudies: {
-          ...(portfolio.caseStudies || {}),
-          [projectId]: caseStudy
+      
+      // Transform editor data to match backend API schema
+      const caseStudyData = {
+        portfolioId,
+        projectId,
+        content: {
+          hero: {
+            // ✅ CRITICAL: title is REQUIRED and cannot be empty!
+            title: title || 'Untitled Case Study', // Add fallback
+            subtitle: caseStudy.category?.trim() || '',
+            coverImage: caseStudy.heroImage || '',
+            client: '',
+            year: caseStudy.year || new Date().getFullYear().toString(),
+            role: '',
+            duration: ''
+          },
+          overview: {
+            heading: 'Project Overview',
+            description: caseStudy.intro?.trim() || '',
+            challenge: '',
+            solution: '',
+            results: ''
+          },
+          sections: caseStudy.sections.map((section, index) => ({
+            id: `section-${section.id || index}`,
+            type: 'text', // Default type
+            heading: section.title?.trim() || '',
+            content: section.subsections ? section.subsections.map(sub => 
+              `${sub.title?.trim() || ''}\n\n${sub.content?.trim() || ''}`
+            ).join('\n\n---\n\n') : '',
+            image: section.subsections && section.subsections[0]?.image ? section.subsections[0].image : '',
+            images: section.subsections ? section.subsections.map(sub => sub.image).filter(Boolean) : [],
+            layout: 'center'
+          })),
+          additionalContext: {
+            heading: 'Additional Context',
+            content: ''
+          },
+          nextProject: {
+            id: '',
+            title: '',
+            image: ''
+          }
         }
       };
 
-      // Save to store
-      await updatePortfolio(portfolioId, updatedPortfolio);
+      // Log transformed data for debugging
+      console.log('\n� Request Payload:');
+      console.log('   Portfolio ID:', caseStudyData.portfolioId, `(type: ${typeof caseStudyData.portfolioId})`);
+      console.log('   Project ID:', caseStudyData.projectId, `(type: ${typeof caseStudyData.projectId})`);
+      console.log('   Title:', caseStudyData.content.hero.title);
+      console.log('   Sections count:', caseStudyData.content.sections.length);
+      console.log('\n📋 Full payload structure:');
+      console.log(JSON.stringify(caseStudyData, null, 2));
       
-      setHasUnsavedChanges(false);
-      setShowSaveSuccess(true);
-      setTimeout(() => setShowSaveSuccess(false), 2000);
+      console.log('\n🚀 Sending request to backend...');
+      console.log('='.repeat(80) + '\n');
       
-      toast.success('Case study saved successfully!');
-      console.log('Case study saved:', caseStudy);
+      // Use separate case study collection API
+      let response;
+      if (caseStudyId) {
+        // Update existing case study
+        console.log('✏️ Updating existing case study:', caseStudyId);
+        response = await caseStudyApi.update(caseStudyId, caseStudyData);
+      } else {
+        // Create new case study
+        console.log('➕ Creating new case study');
+        response = await caseStudyApi.create(caseStudyData);
+        
+        // Save the case study ID for future updates
+        if (response.success && response.data?.caseStudy?._id) {
+          const newId = response.data.caseStudy._id;
+          setCaseStudyId(newId);
+          console.log('✅ Case study created with ID:', newId);
+        }
+      }
+      
+      if (response.success) {
+        setHasUnsavedChanges(false);
+        setShowSaveSuccess(true);
+        setTimeout(() => setShowSaveSuccess(false), 2000);
+        toast.success('Case study saved successfully!');
+        console.log('✅ Case study saved successfully!');
+      } else {
+        throw new Error(response.message || 'Failed to save case study');
+      }
     } catch (error) {
-      console.error('Error saving case study:', error);
-      toast.error('Failed to save case study');
+      console.error('❌ Error saving case study:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error data:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to save case study';
+      
+      // Show specific error messages
+      if (error.response?.status === 404) {
+        toast.error('Backend endpoint not found! Case study endpoints need to be implemented.');
+        console.error('🔴 BACKEND MISSING: /api/case-studies endpoints not implemented!');
+        console.error('💡 See BACKEND_NOT_IMPLEMENTED.md for details');
+      } else if (error.response?.status === 401) {
+        toast.error('Unauthorized. Please login again.');
+      } else if (error.response?.status === 403) {
+        toast.error('You do not have permission to save this case study.');
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -258,19 +495,114 @@ const CaseStudyEditorPage = () => {
     }));
   };
 
-  const handleImageUpload = (file, type, sectionIndex, subsectionIndex) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (type === 'hero') {
-          setCaseStudy(prev => ({ ...prev, heroImage: event.target.result }));
-        } else if (type === 'subsection') {
-          updateSubsection(sectionIndex, subsectionIndex, 'image', event.target.result);
+  const handleImageUpload = async (file, type, sectionIndex, subsectionIndex) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    // 1. INSTANT PREVIEW - Show image immediately using blob URL
+    const localPreview = URL.createObjectURL(file);
+
+    if (type === 'hero') {
+      setCaseStudy(prev => ({ ...prev, heroImage: localPreview }));
+      console.log('✨ Showing instant preview for hero image:', localPreview);
+    } else if (type === 'subsection') {
+      updateSubsection(sectionIndex, subsectionIndex, 'image', localPreview);
+      console.log(`✨ Showing instant preview for subsection image [${sectionIndex}][${subsectionIndex}]:`, localPreview);
+    }
+
+    // 2. Start upload in background
+    setIsUploadingImage(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      console.log(`📤 Uploading ${type} image to Cloudinary in background...`);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
         }
-      };
-      reader.readAsDataURL(file);
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        const imageUrl = result.data.url;
+
+        // 3. Replace blob URL with Cloudinary URL
+        if (type === 'hero') {
+          setCaseStudy(prev => ({ ...prev, heroImage: imageUrl }));
+        } else if (type === 'subsection') {
+          updateSubsection(sectionIndex, subsectionIndex, 'image', imageUrl);
+        }
+
+        console.log(`✅ Cloudinary upload complete for ${type}:`, imageUrl);
+
+        // Clean up blob URL to free memory
+        URL.revokeObjectURL(localPreview);
+      } else {
+        throw new Error(result.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+      // Keep the preview so user can see what they tried to upload
+    } finally {
+      setIsUploadingImage(false);
     }
   };
+
+  // Show loading state while case study is being loaded
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#FFFFFF'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid rgba(0, 0, 0, 0.1)',
+            borderTop: '4px solid #FF0000',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 24px'
+          }}></div>
+          <div style={{
+            fontFamily: '"IBM Plex Mono", monospace',
+            fontSize: '14px',
+            color: '#000000',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em'
+          }}>
+            Loading Case Study...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{

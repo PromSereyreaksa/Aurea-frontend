@@ -1,12 +1,26 @@
-import api, { apiRequest, optimisticUpdate } from './baseApi';
+import api, { apiRequest } from './baseApi';
 
 // Portfolio API functions with caching and optimization
 export const portfolioApi = {
   // Create portfolio with validation
   create: async (portfolioData) => {
+    console.log('=== portfolioApi.create ===');
+    console.log('Creating portfolio with data:', {
+      ...portfolioData,
+      content: portfolioData.content ? '[content object]' : undefined,
+      sections: portfolioData.sections ? `[${portfolioData.sections.length} sections]` : undefined
+    });
+
     return apiRequest(
       async () => {
         const response = await api.post('/api/portfolios', portfolioData);
+
+        console.log('Create response:', response.data);
+
+        // Return the portfolio data directly if it's nested in response
+        if (response.data?.data?.portfolio) {
+          return response.data.data.portfolio;
+        }
         return response.data;
       },
       'Failed to create portfolio'
@@ -105,14 +119,28 @@ export const portfolioApi = {
 
   // Update portfolio with optimistic updates
   update: async (id, updates) => {
+    console.log('=== portfolioApi.update ===');
+    console.log('Portfolio ID:', id);
+    console.log('Updates being sent:', {
+      ...updates,
+      content: updates.content ? '[content object]' : undefined,
+      sections: updates.sections ? `[${updates.sections.length} sections]` : undefined
+    });
+
     return apiRequest(
       async () => {
         const response = await api.put(`/api/portfolios/${id}`, updates);
-        
+
+        console.log('Update response:', response.data);
+
         // Invalidate related caches
         localStorage.removeItem(`aurea_portfolio_${id}`);
         localStorage.removeItem('aurea_user_portfolios');
-        
+
+        // Return the portfolio data directly if it's nested in response
+        if (response.data?.data?.portfolio) {
+          return response.data.data.portfolio;
+        }
         return response.data;
       },
       'Failed to update portfolio'
@@ -163,26 +191,50 @@ export const portfolioApi = {
     );
   },
 
-  // Publish portfolio
-  publish: async (id) => {
+  // Publish portfolio to subdomain (Gmail-style)
+  publish: async (id, subdomain) => {
     return apiRequest(
       async () => {
-        const response = await api.put(`/api/portfolios/${id}`, { published: true });
-        
+        // Use longer timeout for publish (30 seconds) since it generates HTML files
+        const response = await api.post('/api/sites/sub-publish', {
+          portfolioId: id,
+          customSubdomain: subdomain
+        }, {
+          timeout: 30000 // 30 seconds for HTML generation
+        });
+
         // Update cache
         const cacheKey = `aurea_portfolio_${id}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { data } = JSON.parse(cached);
           localStorage.setItem(cacheKey, JSON.stringify({
-            data: { ...data, published: true },
+            data: {
+              ...data,
+              isPublished: true,
+              subdomain: subdomain
+            },
             timestamp: Date.now()
           }));
         }
-        
+
+        // Clear user portfolios cache to refresh list
+        localStorage.removeItem('aurea_user_portfolios');
+
         return response.data;
       },
       'Failed to publish portfolio'
+    );
+  },
+
+  // Get published site by subdomain
+  getPublishedSite: async (subdomain) => {
+    return apiRequest(
+      async () => {
+        const response = await api.get(`/api/sites/${subdomain}`);
+        return response.data;
+      },
+      'Failed to fetch published site'
     );
   },
 

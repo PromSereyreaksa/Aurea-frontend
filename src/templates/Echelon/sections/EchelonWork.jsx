@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SwissGrid, GridCol } from '../components/SwissGrid';
 import { SwissSpiral } from '../components/SwissDecorations';
+import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const EchelonWork = ({ 
+const EchelonWork = ({
   content,
   isEditing = false,
   onContentChange,
   portfolioId = null,
   caseStudies = {}
 }) => {
+  const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
+  const { uploadImage } = useImageUpload();
+  
   const { 
     heading = 'SELECTED WORK',
     projects = []
@@ -31,13 +35,60 @@ const EchelonWork = ({
     }
   };
 
-  const handleImageUpload = (index, file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        handleProjectChange(index, 'image', event.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size must be less than 25MB');
+      return;
+    }
+
+    console.log(`📤 Starting optimized upload for project ${index}...`);
+
+    // 1. INSTANT PREVIEW - Show blob URL immediately
+    const localPreview = URL.createObjectURL(file);
+    handleProjectChange(index, 'image', localPreview);
+
+    // 2. Mark as uploading (for progress indicator)
+    setUploadingIndexes(prev => new Map(prev).set(index, { progress: 0 }));
+
+    try {
+      // 3. Upload with all optimizations:
+      //    - Automatic compression (60-80% smaller)
+      //    - Fake fast progress (instant 0-30%)
+      //    - Direct Cloudinary upload (if configured)
+      //    - Connection prewarming already active
+      const cloudinaryUrl = await uploadImage(file, {
+        compress: true,   // Auto compress before upload
+        direct: true,     // Use direct upload if available
+      });
+
+      console.log(`✅ Upload complete for project ${index}:`, cloudinaryUrl);
+
+      // 4. Replace blob URL with final Cloudinary URL
+      handleProjectChange(index, 'image', cloudinaryUrl);
+
+      // Clean up blob URL to free memory
+      URL.revokeObjectURL(localPreview);
+
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+      // Keep the preview so user can see what they tried to upload
+    } finally {
+      // 5. Clear uploading state
+      setUploadingIndexes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(index);
+        return newMap;
+      });
     }
   };
 
@@ -156,7 +207,7 @@ const EchelonWork = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontFamily: '"IBM Plex Mono", monospace',
-                    fontSize: '32px',
+                    fontSize: 'clamp(24px, 3.5vw, 32px)',
                     fontWeight: 900,
                     color: '#FFFFFF',
                     transform: 'rotate(-5deg)'
@@ -220,7 +271,7 @@ const EchelonWork = ({
                   top: '-60px',
                   left: 0,
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '120px',
+                  fontSize: 'clamp(48px, 12vw, 120px)',
                   fontWeight: 900,
                   color: 'rgba(0, 0, 0, 0.03)',
                   lineHeight: 1,
@@ -235,7 +286,7 @@ const EchelonWork = ({
                   top: '-30px',
                   right: 0,
                   fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '12px',
+                  fontSize: 'clamp(10px, 1vw, 12px)',
                   color: '#FF0000',
                   textTransform: 'uppercase',
                   letterSpacing: '0.15em',
@@ -257,7 +308,7 @@ const EchelonWork = ({
                       border: 'none',
                       padding: '10px 20px',
                       cursor: 'pointer',
-                      fontSize: '12px',
+                      fontSize: 'clamp(10px, 1vw, 12px)',
                       textTransform: 'uppercase',
                       fontWeight: 700,
                       zIndex: 3
@@ -311,7 +362,7 @@ const EchelonWork = ({
                       ) : (
                         <div style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#666666',
                           textAlign: 'center',
                           textTransform: 'uppercase'
@@ -330,6 +381,59 @@ const EchelonWork = ({
                         onChange={(e) => handleImageUpload(index, e.target.files[0])}
                       />
                     )}
+
+                    {/* Enhanced Upload Progress Indicator */}
+                    {uploadingIndexes.has(index) && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        backgroundColor: '#FF0000',
+                        color: '#FFFFFF',
+                        padding: '10px 18px',
+                        borderRadius: '6px',
+                        fontFamily: '"IBM Plex Mono", monospace',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        zIndex: 10,
+                        boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        {/* Animated spinner with glow */}
+                        <div style={{
+                          position: 'relative',
+                          width: '14px',
+                          height: '14px'
+                        }}>
+                          <div style={{
+                            width: '14px',
+                            height: '14px',
+                            border: '2px solid rgba(255, 255, 255, 0.3)',
+                            borderTop: '2px solid #FFFFFF',
+                            borderRadius: '50%',
+                            animation: 'spin 0.8s linear infinite'
+                          }}></div>
+                          <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '14px',
+                            height: '14px',
+                            border: '2px solid #FFFFFF',
+                            borderRadius: '50%',
+                            opacity: 0.2,
+                            animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                          }}></div>
+                        </div>
+                        <span>Optimizing...</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Content Section */}
@@ -343,7 +447,7 @@ const EchelonWork = ({
                         placeholder="2025 — Category"
                         style={{
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           color: '#666666',
                           backgroundColor: 'transparent',
                           border: '1px dashed #CCCCCC',
@@ -356,7 +460,7 @@ const EchelonWork = ({
                     ) : (
                       <div style={{
                         fontFamily: '"IBM Plex Mono", monospace',
-                        fontSize: '14px',
+                        fontSize: 'clamp(12px, 1.2vw, 14px)',
                         color: '#666666',
                         marginBottom: '24px',
                         textTransform: 'uppercase',
@@ -425,7 +529,7 @@ const EchelonWork = ({
                         rows={4}
                         style={{
                           fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          fontSize: '18px',
+                          fontSize: 'clamp(16px, 1.8vw, 18px)',
                           fontWeight: 400,
                           lineHeight: 1.5,
                           color: '#000000',
@@ -440,7 +544,7 @@ const EchelonWork = ({
                     ) : (
                       <p style={{
                         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        fontSize: '18px',
+                        fontSize: 'clamp(16px, 1.8vw, 18px)',
                         fontWeight: 400,
                         lineHeight: 1.5,
                         color: '#000000',
@@ -481,7 +585,7 @@ const EchelonWork = ({
                           alignItems: 'center',
                           gap: '12px',
                           fontFamily: '"IBM Plex Mono", monospace',
-                          fontSize: '14px',
+                          fontSize: 'clamp(12px, 1.2vw, 14px)',
                           fontWeight: 700,
                           color: '#FFFFFF',
                           backgroundColor: '#FF0000',
@@ -528,7 +632,7 @@ const EchelonWork = ({
               <div
                 style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: '18px',
+                  fontSize: 'clamp(16px, 1.8vw, 18px)',
                   color: '#666666',
                   textTransform: 'uppercase'
                 }}

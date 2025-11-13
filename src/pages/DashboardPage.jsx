@@ -4,6 +4,7 @@ import useAuthStore from "../stores/authStore";
 import usePortfolioStore from "../stores/portfolioStore";
 import Navbar from "../components/Shared/Navbar";
 import DashboardSidebar from "../components/Dashboard/DashboardSidebar";
+import DashboardBottomBar from "../components/Dashboard/DashboardBottomBar";
 import OverviewSection from "../components/Dashboard/OverviewSection";
 import PortfoliosSection from "../components/Dashboard/PortfoliosSection";
 import AnalyticsSection from "../components/Dashboard/AnalyticsSection";
@@ -24,6 +25,27 @@ const DashboardPage = () => {
   } = usePortfolioStore();
 
   const [activeSection, setActiveSection] = useState("overview");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Wrapper function to handle section change and close sidebar on mobile
+  const handleSetActiveSection = (section) => {
+    setActiveSection(section);
+    setIsSidebarOpen(false); // Close sidebar when switching tabs
+  };
+
+  // Close sidebar on scroll (mobile only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,7 +55,7 @@ const DashboardPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="app-page min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center">
@@ -68,11 +90,11 @@ const DashboardPage = () => {
     }
   };
 
-  const handleTogglePublish = async (portfolio) => {
+  const handleTogglePublish = async (portfolio, slug = null) => {
     if (portfolio.published) {
       await unpublishPortfolio(portfolio._id);
     } else {
-      await publishPortfolio(portfolio._id);
+      await publishPortfolio(portfolio._id, slug);
     }
   };
 
@@ -101,11 +123,11 @@ const DashboardPage = () => {
         return (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Header with gradient background */}
-            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/80 p-8 text-white">
+            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/80 p-6 md:p-8 text-white">
               <div className="flex items-center justify-center mb-4">
-                <div className="bg-white/20 p-4 rounded-full">
+                <div className="bg-white/20 p-3 md:p-4 rounded-full">
                   <svg
-                    className="w-12 h-12"
+                    className="w-8 h-8 md:w-12 md:h-12"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -119,22 +141,24 @@ const DashboardPage = () => {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-center mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
                 Analytics Dashboard
               </h2>
-              <p className="text-orange-100 text-center text-lg">Coming Soon</p>
+              <p className="text-orange-100 text-center text-base md:text-lg">
+                Coming Soon
+              </p>
             </div>
 
             {/* Content */}
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <p className="text-gray-600 text-lg mb-6">
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="text-center mb-6 md:mb-8">
+                <p className="text-gray-600 text-base md:text-lg mb-4 md:mb-6">
                   We're building powerful analytics to help you understand your
                   portfolio performance. Soon, you'll be able to:
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-[#fb8500]/10 rounded-full flex items-center justify-center">
                     <svg
@@ -276,11 +300,11 @@ const DashboardPage = () => {
         return (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Header with gradient background */}
-            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/70 p-8 text-white">
+            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/70 p-6 md:p-8 text-white">
               <div className="flex items-center justify-center mb-4">
-                <div className="bg-white/20 p-4 rounded-full">
+                <div className="bg-white/20 p-3 md:p-4 rounded-full">
                   <svg
-                    className="w-12 h-12"
+                    className="w-8 h-8 md:w-12 md:h-12"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -294,24 +318,24 @@ const DashboardPage = () => {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-center mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
                 Pricing Section
               </h2>
-              <p className="text-orange-100 text-center text-lg">
+              <p className="text-orange-100 text-center text-base md:text-lg">
                 Under Development
               </p>
             </div>
 
             {/* Content */}
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <p className="text-gray-600 text-lg mb-6">
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="text-center mb-6 md:mb-8">
+                <p className="text-gray-600 text-base md:text-lg mb-4 md:mb-6">
                   We're currently building this feature. Soon, you'll be able
                   to:
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-[#fb8500]/10 rounded-full flex items-center justify-center">
                     <svg
@@ -446,11 +470,11 @@ const DashboardPage = () => {
         return (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Header with gradient background */}
-            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/60 p-8 text-white">
+            <div className="bg-gradient-to-r from-[#fb8500] to-[#fb8500]/60 p-6 md:p-8 text-white">
               <div className="flex items-center justify-center mb-4">
-                <div className="bg-white/20 p-4 rounded-full">
+                <div className="bg-white/20 p-3 md:p-4 rounded-full">
                   <svg
-                    className="w-12 h-12"
+                    className="w-8 h-8 md:w-12 md:h-12"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -464,23 +488,25 @@ const DashboardPage = () => {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-center mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
                 Business Hub
               </h2>
-              <p className="text-orange-100 text-center text-lg">Coming Soon</p>
+              <p className="text-orange-100 text-center text-base md:text-lg">
+                Coming Soon
+              </p>
             </div>
 
             {/* Content */}
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <p className="text-gray-600 text-lg mb-6">
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="text-center mb-6 md:mb-8">
+                <p className="text-gray-600 text-base md:text-lg mb-4 md:mb-6">
                   We're building a comprehensive business hub to help you grow
                   your freelance career and win more clients. Soon, you'll have
                   access to:
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-[#fb8500]/10 rounded-full flex items-center justify-center">
                     <svg
@@ -611,67 +637,6 @@ const DashboardPage = () => {
             </div>
           </div>
         );
-      case "settings":
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Settings
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Account Settings
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={user?.name || ""}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={user?.email || ""}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Privacy Settings
-                </h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-3" defaultChecked />
-                    <span className="text-gray-700">
-                      Make my profile public
-                    </span>
-                  </label>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-3" defaultChecked />
-                    <span className="text-gray-700">
-                      Allow others to view my portfolios
-                    </span>
-                  </label>
-                </div>
-              </div>
-              <div className="pt-6 border-t border-gray-200">
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        );
       default:
         return (
           <OverviewSection
@@ -685,23 +650,82 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-      <Navbar />
+    <div className="app-page min-h-screen bg-white overflow-x-hidden">
+      {/* Mobile/Tablet Logo in Top-Center (hidden when sidebar opens on small screens) */}
+      <div 
+        className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-4 bg-white border-b border-gray-100 transition-all duration-300 ease-in-out ${
+          isSidebarOpen 
+            ? 'hidden sm:flex sm:justify-start sm:px-4' 
+            : 'flex'
+        } lg:hidden`}
+      >
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
+          <img
+            src="/AUREA - Logo.jpg"
+            alt="AUREA Logo"
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover ring-2 ring-[#fb8500]/30"
+          />
+          <span className="text-lg sm:text-xl font-black text-[#fb8500] tracking-tight">
+            AUREA
+          </span>
+        </Link>
+      </div>
 
-      <div className="flex pt-20">
-        {/* Sidebar */}
-        <div className="fixed left-0 top-20 h-[calc(100vh-5rem)] z-30">
+      {/* Mobile/Tablet Hamburger Menu Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed top-4 right-4 z-50 bg-gradient-to-r from-[#fb8500] to-[#ff9500] text-white p-2 sm:p-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+      >
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {isSidebarOpen ? (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          ) : (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          )}
+        </svg>
+      </button>
+
+      <div className="flex">
+        {/* Sidebar - Desktop (left) and Mobile/Tablet (right slide-in) */}
+        <div
+          className={`fixed top-0 h-screen w-full sm:w-80 md:w-96 lg:w-72 z-50 transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'right-0 translate-x-0' : 'right-0 translate-x-full'}
+            lg:left-0 lg:right-auto lg:translate-x-0`}
+        >
           <DashboardSidebar
             activeSection={activeSection}
-            setActiveSection={setActiveSection}
+            setActiveSection={handleSetActiveSection}
             user={user}
+            onClose={() => setIsSidebarOpen(false)}
           />
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 ml-48 lg:ml-56">
-          <div className="p-4 lg:p-8">
-            <div className="max-w-6xl mx-auto">{renderActiveSection()}</div>
+        {/* Main Content - Click to close sidebar on mobile */}
+        <div 
+          className="flex-1 w-full lg:ml-72"
+          onClick={() => {
+            if (isSidebarOpen && window.innerWidth < 1024) {
+              setIsSidebarOpen(false);
+            }
+          }}
+        >
+          <div className="p-4 pt-24 sm:pt-28 lg:pt-8 lg:p-8 xl:p-10">
+            <div className="max-w-7xl mx-auto">{renderActiveSection()}</div>
           </div>
         </div>
       </div>
