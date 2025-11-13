@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Instagram, Linkedin, Twitter, Mail } from "lucide-react";
 import aureaLogo from "../../assets/AUREA - Logo.png";
 
 export default function V2Footer() {
@@ -19,9 +18,9 @@ export default function V2Footer() {
       { label: "Documentation", link: "/docs" },
     ],
     social: [
-      { label: "Instagram", icon: Instagram, link: "https://instagram.com" },
-      { label: "LinkedIn", icon: Linkedin, link: "https://linkedin.com" },
-      { label: "Twitter", icon: Twitter, link: "https://twitter.com" },
+      { label: "Facebook", link: "https://www.facebook.com/share/1A4c5CNGSe/?mibextid=wwXIfr" },
+      { label: "TikTok", link: "https://www.tiktok.com/@aureatool?_r=1&_t=ZS-91MDnNGGcwE" },
+      { label: "Gmail", link: "mailto:aureatool@gmail.com" },
     ],
   };
 
@@ -144,9 +143,8 @@ export default function V2Footer() {
                     href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-white/60 hover:text-white transition-colors duration-200 text-sm group"
+                    className="text-white/60 hover:text-white transition-colors duration-200 text-sm"
                   >
-                    <item.icon className="w-4 h-4 group-hover:text-[#fb8500] transition-colors" />
                     {item.label}
                   </a>
                 </li>
