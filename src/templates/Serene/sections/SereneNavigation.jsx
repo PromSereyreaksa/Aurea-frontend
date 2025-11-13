@@ -29,7 +29,7 @@ const SereneNavigation = ({ content, styling, isEditing, onChange, portfolioId }
         borderColor: colors.border,
       }}
     >
-      <div className="px-8 py-4">
+      <div className="px-4 sm:px-6 md:px-8 py-4">
         <div className="flex justify-between items-center">
           {/* Logo - Blossom style - BOLD */}
           <button
@@ -42,7 +42,7 @@ const SereneNavigation = ({ content, styling, isEditing, onChange, portfolioId }
                 navigate('/template-preview/serene');
               }
             }}
-            className="text-2xl tracking-wider transition-opacity hover:opacity-70"
+            className="text-xl sm:text-2xl tracking-wider transition-opacity hover:opacity-70"
             style={{
               color: colors.text,
               fontFamily: fonts.bodyFont,
@@ -84,9 +84,10 @@ const SereneNavigation = ({ content, styling, isEditing, onChange, portfolioId }
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             style={{ color: colors.primary }}
+            aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

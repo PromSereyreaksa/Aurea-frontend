@@ -11,11 +11,11 @@ const SereneHero = ({ content, styling, isEditing, onChange }) => {
   return (
     <section
       id="home"
-      className="py-16 px-6"
+      className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8"
       style={{ backgroundColor: colors.background }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="max-w-lg">
+        <div className="max-w-lg md:max-w-xl lg:max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,7 @@ const SereneHero = ({ content, styling, isEditing, onChange }) => {
           >
             {/* Title - Left aligned, Blossom style */}
             <h1
-              className="text-3xl md:text-4xl font-serif mb-6 leading-relaxed"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif mb-4 md:mb-6 leading-relaxed"
               contentEditable={isEditing}
               suppressContentEditableWarning
               onBlur={(e) => isEditing && onChange('title', e.target.textContent)}
@@ -38,10 +38,10 @@ const SereneHero = ({ content, styling, isEditing, onChange }) => {
             </h1>
 
             {/* Description */}
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {(content.description1 || isEditing) && (
                 <p
-                  className="text-base leading-relaxed opacity-80"
+                  className="text-sm sm:text-base md:text-lg leading-relaxed opacity-80"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
                   onBlur={(e) => isEditing && onChange('description1', e.target.textContent)}
@@ -57,7 +57,7 @@ const SereneHero = ({ content, styling, isEditing, onChange }) => {
 
               {(content.description2 || isEditing) && (
                 <p
-                  className="text-base leading-relaxed opacity-80"
+                  className="text-sm sm:text-base md:text-lg leading-relaxed opacity-80"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
                   onBlur={(e) => isEditing && onChange('description2', e.target.textContent)}

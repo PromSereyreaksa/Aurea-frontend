@@ -68,8 +68,7 @@ export default function PortfolioGalleryMarquee() {
                 {row1Images.map((image, index) => (
                   <div
                     key={`${setIndex}-${index}`}
-                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
-                    className="w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
+                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
                   >
                     <img
                       src={image.url}
@@ -108,8 +107,7 @@ export default function PortfolioGalleryMarquee() {
                 {row2Images.map((image, index) => (
                   <div
                     key={`${setIndex}-${index}`}
-                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
-                    className="w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
+                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
                   >
                     <img
                       src={image.url}
@@ -145,8 +143,7 @@ export default function PortfolioGalleryMarquee() {
                 {row3Images.map((image, index) => (
                   <div
                     key={`${setIndex}-${index}`}
-                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
-                    className="w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
+                    className="relative group cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[220px] h-[140px] md:w-[380px] md:h-[240px]"
                   >
                     <img
                       src={image.url}

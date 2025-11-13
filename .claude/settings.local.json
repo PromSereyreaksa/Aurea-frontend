@@ -7,7 +7,9 @@
       "Bash(npm install react-easy-crop --save)",
       "Bash(npm uninstall react-image-crop)",
       "Read(//c/Users/ASUS/Pictures/Screenshots/**)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python3:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

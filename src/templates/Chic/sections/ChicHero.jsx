@@ -20,11 +20,11 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
       <div
         style={{
           fontFamily: fonts.inter,
-          fontSize: '13px',
+          fontSize: 'clamp(0.75rem, 1.5vw, 0.813rem)',
           fontWeight: 400,
           lineHeight: '1.2',
           color: '#000000',
-          marginBottom: '30px'
+          marginBottom: 'clamp(1rem, 3vw, 1.875rem)'
         }}
       >
         INFO  [P.P.*]
@@ -38,11 +38,11 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
           onBlur={(e) => isEditing && handleFieldChange('name', e.target.textContent)}
           style={{
             fontFamily: fonts.inter,
-            fontSize: '18px',
+            fontSize: 'clamp(1rem, 2vw, 1.125rem)',
             fontWeight: 400,
             lineHeight: '1.3',
             color: '#000000',
-            marginBottom: '20px',
+            marginBottom: 'clamp(0.75rem, 2vw, 1.25rem)',
             margin: 0,
             padding: 0
           }}
@@ -59,12 +59,12 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
           onBlur={(e) => isEditing && handleFieldChange('bio', e.target.textContent)}
           style={{
             fontFamily: fonts.inter,
-            fontSize: '18px',
+            fontSize: 'clamp(1rem, 2vw, 1.125rem)',
             fontWeight: 400,
             lineHeight: '1.3',
             color: '#000000',
             marginTop: '0',
-            marginBottom: '30px',
+            marginBottom: 'clamp(1rem, 3vw, 1.875rem)',
             whiteSpace: 'pre-line'
           }}
         >
@@ -73,7 +73,7 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
       )}
 
       {/* Social Links */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0px, 1vw, 0.5rem)', marginBottom: 'clamp(1rem, 3vw, 1.875rem)' }}>
         {(content.instagram || isEditing) && (
           <a
             href={content.instagram || '#'}
@@ -81,7 +81,7 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
             rel="noopener noreferrer"
             style={{
               fontFamily: fonts.inter,
-              fontSize: '13px',
+              fontSize: 'clamp(0.75rem, 1.5vw, 0.813rem)',
               fontWeight: 400,
               lineHeight: '1.8',
               textTransform: 'uppercase',
@@ -106,7 +106,7 @@ const ChicHero = ({ content = {}, styling = {}, isEditing = false, onContentChan
             rel="noopener noreferrer"
             style={{
               fontFamily: fonts.inter,
-              fontSize: '13px',
+              fontSize: 'clamp(0.75rem, 1.5vw, 0.813rem)',
               fontWeight: 400,
               lineHeight: '1.8',
               textTransform: 'uppercase',

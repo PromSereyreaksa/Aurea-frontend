@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useBreakpoints } from '../../hooks/useMediaQuery';
 import ChicHero from './sections/ChicHero';
 import ChicAbout from './sections/ChicAbout';
 import ChicWork from './sections/ChicWork';
@@ -19,6 +20,8 @@ const ChicTemplate = ({
   className = '',
   portfolioId = null
 }) => {
+  const { isMobile, isTablet, isDesktop } = useBreakpoints();
+
   // Default styling - Chic Editorial theme
   const defaultStyling = {
     colors: {
@@ -44,14 +47,54 @@ const ChicTemplate = ({
       body: '"Inter", -apple-system, system-ui, sans-serif'
     },
     typography: {
-      display: { fontSize: '90px', fontWeight: 400, lineHeight: '102px', letterSpacing: '-2px' },
-      h1: { fontSize: '48px', fontWeight: 700, lineHeight: '60px', letterSpacing: '-0.02em' },
-      h2Large: { fontSize: '36px', fontWeight: 500, lineHeight: 1.2, letterSpacing: '-1.2px' },
-      h2: { fontSize: '24px', fontWeight: 500, lineHeight: 1.3, letterSpacing: '-0.6px' },
-      bodyLarge: { fontSize: '19px', fontWeight: 400, lineHeight: '21px', letterSpacing: '-0.8px' },
-      body: { fontSize: '19px', fontWeight: 400, lineHeight: 1.7, letterSpacing: '-0.2px' },
-      small: { fontSize: '15px', fontWeight: 400, lineHeight: 1.5, letterSpacing: '-0.6px' },
-      micro: { fontSize: '14px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '-0.3px' }
+      display: {
+        fontSize: isDesktop ? '90px' : 'clamp(2rem, 5vw, 5.625rem)',
+        fontWeight: 400,
+        lineHeight: isDesktop ? '102px' : 'clamp(2.25rem, 5.5vw, 6.375rem)',
+        letterSpacing: isDesktop ? '-2px' : 'clamp(-1px, -0.15vw, -2px)'
+      },
+      h1: {
+        fontSize: isDesktop ? '48px' : 'clamp(1.75rem, 3.5vw, 3rem)',
+        fontWeight: 700,
+        lineHeight: isDesktop ? '60px' : 'clamp(2rem, 4vw, 3.75rem)',
+        letterSpacing: '-0.02em'
+      },
+      h2Large: {
+        fontSize: isDesktop ? '36px' : 'clamp(1.5rem, 2.8vw, 2.25rem)',
+        fontWeight: 500,
+        lineHeight: 1.2,
+        letterSpacing: isDesktop ? '-1.2px' : 'clamp(-0.6px, -0.08vw, -1.2px)'
+      },
+      h2: {
+        fontSize: isDesktop ? '24px' : 'clamp(1rem, 1.8vw, 1.5rem)',
+        fontWeight: 500,
+        lineHeight: 1.3,
+        letterSpacing: isDesktop ? '-0.6px' : 'clamp(-0.3px, -0.05vw, -0.6px)'
+      },
+      bodyLarge: {
+        fontSize: isDesktop ? '19px' : 'clamp(1rem, 1.4vw, 1.1875rem)',
+        fontWeight: 400,
+        lineHeight: isDesktop ? '21px' : 'clamp(1.125rem, 1.5vw, 1.3125rem)',
+        letterSpacing: isDesktop ? '-0.8px' : 'clamp(-0.4px, -0.06vw, -0.8px)'
+      },
+      body: {
+        fontSize: isDesktop ? '19px' : 'clamp(1rem, 1.4vw, 1.1875rem)',
+        fontWeight: 400,
+        lineHeight: 1.7,
+        letterSpacing: isDesktop ? '-0.2px' : 'clamp(-0.1px, -0.02vw, -0.2px)'
+      },
+      small: {
+        fontSize: isDesktop ? '15px' : 'clamp(0.875rem, 1.2vw, 0.9375rem)',
+        fontWeight: 400,
+        lineHeight: 1.5,
+        letterSpacing: isDesktop ? '-0.6px' : 'clamp(-0.3px, -0.05vw, -0.6px)'
+      },
+      micro: {
+        fontSize: isDesktop ? '14px' : 'clamp(0.8125rem, 1.1vw, 0.875rem)',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        letterSpacing: isDesktop ? '-0.3px' : 'clamp(-0.15px, -0.03vw, -0.3px)'
+      }
     }
   };
 
@@ -91,17 +134,21 @@ const ChicTemplate = ({
       <div
         className="fixed-position-container"
         style={{
-          position: 'sticky',
-          left: '40px',
-          top: '39px',
-          width: '467px',
-          height: 'calc(100vh - 80px)',
-          float: 'left',
+          position: isDesktop ? 'sticky' : 'relative',
+          left: isDesktop ? '40px' : '0',
+          top: isDesktop ? '39px' : '0',
+          width: isMobile ? '100%' : isTablet ? '300px' : '467px',
+          height: isDesktop ? 'calc(100vh - 80px)' : 'auto',
+          float: isDesktop ? 'left' : 'none',
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          paddingBottom: '40px'
+          justifyContent: isDesktop ? 'space-between' : 'flex-start',
+          paddingBottom: isDesktop ? '40px' : 'clamp(1rem, 3vw, 2.5rem)',
+          paddingLeft: !isDesktop ? 'clamp(1rem, 3vw, 1.5rem)' : '0',
+          paddingRight: !isDesktop ? 'clamp(1rem, 3vw, 1.5rem)' : '0',
+          paddingTop: !isDesktop ? 'clamp(1rem, 3vw, 1.5rem)' : '0',
+          overflow: 'visible'
         }}
       >
         {/* Top Section: Hero + About */}
@@ -125,30 +172,29 @@ const ChicTemplate = ({
           )}
         </div>
 
-        {/* Bottom Section: Contact */}
-        {(content.contact || isEditing) && (
-          <div>
-            <ChicContact
-              content={content.contact || {}}
-              styling={mergedStyling}
-              isEditing={isEditing}
-              onContentChange={handleSectionContentChange}
-            />
-          </div>
-        )}
+        {/* Bottom Section: Contact - Always show in edit mode or when content exists */}
+        <div style={{ marginTop: isDesktop ? '0' : 'clamp(2rem, 4vw, 3rem)' }}>
+          <ChicContact
+            content={content.contact || {}}
+            styling={mergedStyling}
+            isEditing={isEditing}
+            onContentChange={handleSectionContentChange}
+          />
+        </div>
       </div>
 
       {/* Scrollable Right Content Area - 1024px canvas */}
       <div
         className="content-scroll-wrapper"
         style={{
-          marginLeft: '547px', // 40px (left margin) + 467px (sidebar width) + 40px (gap)
-          width: '1024px',
-          maxWidth: '1024px',
+          marginLeft: isDesktop ? '547px' : '0', // 40px (left margin) + 467px (sidebar width) + 40px (gap)
+          width: isMobile || isTablet ? '100%' : '1024px',
+          maxWidth: isDesktop ? '1024px' : '100%',
           minHeight: '100vh',
           paddingTop: '0px',
-          paddingRight: '0px',
-          paddingBottom: '80px',
+          paddingRight: !isDesktop ? 'clamp(1rem, 3vw, 1.5rem)' : '0px',
+          paddingLeft: !isDesktop ? 'clamp(1rem, 3vw, 1.5rem)' : '0px',
+          paddingBottom: isDesktop ? '80px' : 'clamp(3rem, 6vw, 5rem)',
           position: 'relative'
         }}
       >

@@ -74,22 +74,22 @@ const SereneAboutPage = ({
 
       {/* About Content - 3 Column Layout */}
       <section
-        className="py-20 px-8"
+        className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8"
         style={{ backgroundColor: colors.background }}
       >
         <div>
-          <div className="grid md:grid-cols-3 gap-16">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 lg:gap-16">
             {/* Column 1 */}
             <div className="text-gray-500 leading-relaxed">
               <p
                 contentEditable={isEditing}
                 suppressContentEditableWarning
                 onBlur={(e) => isEditing && onContentChange('about', 'bio1', e.target.textContent)}
+                className="text-base md:text-lg lg:text-xl"
                 style={{
                   color: colors.text,
                   fontFamily: fonts.bodyFont,
                   fontWeight: 600,
-                  fontSize: '21px',
                   lineHeight: '1.7'
                 }}
               >
@@ -101,10 +101,10 @@ const SereneAboutPage = ({
                   contentEditable={isEditing}
                   suppressContentEditableWarning
                   onBlur={(e) => isEditing && onContentChange('about', 'tagline', e.target.textContent)}
+                  className="text-base md:text-lg lg:text-xl"
                   style={{
                     color: colors.text,
                     fontFamily: fonts.bodyFont,
-                    fontSize: '21px',
                     fontWeight: 600,
                     lineHeight: '1.7'
                   }}
@@ -120,11 +120,11 @@ const SereneAboutPage = ({
                 contentEditable={isEditing}
                 suppressContentEditableWarning
                 onBlur={(e) => isEditing && onContentChange('about', 'bio2', e.target.textContent)}
+                className="text-base md:text-lg lg:text-xl"
                 style={{
                   color: colors.text,
                   fontFamily: fonts.bodyFont,
                   fontWeight: 600,
-                  fontSize: '21px',
                   lineHeight: '1.7'
                 }}
               >
@@ -138,11 +138,11 @@ const SereneAboutPage = ({
                 contentEditable={isEditing}
                 suppressContentEditableWarning
                 onBlur={(e) => isEditing && onContentChange('about', 'bio3', e.target.textContent)}
+                className="text-base md:text-lg lg:text-xl"
                 style={{
                   color: colors.text,
                   fontFamily: fonts.bodyFont,
                   fontWeight: 600,
-                  fontSize: '21px',
                   lineHeight: '1.7'
                 }}
               >

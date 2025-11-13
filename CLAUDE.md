@@ -77,14 +77,28 @@ All routes are defined in `src/App.jsx`. Protected routes require authentication
 
 Key routes:
 - `/` - HomePage (eager loaded)
-- `/dashboard` - User dashboard (protected)
+- `/dashboard` - User dashboard (protected, uses DashboardNew)
+- `/dashboard-old` - Legacy dashboard (protected)
+- `/profile` - User profile/account page (protected, uses AccountNew)
 - `/portfolio-builder/:id` - Portfolio editor (protected)
-- `/portfolio/:slug` - Published portfolio view
+- `/portfolio-builder/:portfolioId/case-study/:projectId` - Case study editor (protected)
+- `/portfolio-builder/:portfolioId/about` - Serene template about page editor (protected)
+- `/portfolio/:slug` - Published portfolio view (public)
+- `/template-preview/echelon` - Echelon template preview
+- `/template-preview/serene` - Serene template preview
+- `/template-preview/chic` - Chic template preview
+- `/template-preview/boldfolio` - BoldFolio template preview
+- `/templates` - Template showcase page
 - `/login`, `/signup` - Authentication pages
+- `/about`, `/contact`, `/events`, `/terms` - Public pages
+
+**Static HTML Routes** (for subdomain hosting):
+- `/:subdomain/html` - Serve static HTML for published portfolio
+- `/:subdomain/case-study-:projectId.html` - Serve static case study HTML
 
 ### State Management
 
-The application uses Zustand for state management with two main stores:
+The application uses Zustand for state management with four main stores:
 
 **authStore** (`src/stores/authStore.js`):
 - Manages user authentication, JWT tokens, and profile
@@ -95,6 +109,21 @@ The application uses Zustand for state management with two main stores:
 - Manages portfolio CRUD operations
 - Tracks current portfolio and statistics
 - Handles loading states
+
+**templateStore** (`src/stores/templateStore.js`):
+- Fetches and caches templates from backend
+- Template and schema caching with Map objects
+- Template validation against schemas
+- Default template management
+- Fallback template logic for error scenarios
+
+**uploadStore** (`src/stores/uploadStore.js`):
+- Centralized image upload state management
+- Instant local preview via blob URLs (before Cloudinary upload)
+- Background upload progress tracking (0-100%)
+- Fake fast progress (0-30%) for perceived performance
+- Memory management with automatic blob URL cleanup
+- Retry logic for failed uploads
 
 ### API Integration
 
@@ -131,12 +160,27 @@ The portfolio builder (`/portfolio-builder/:id`) provides:
 
 ### Template System
 
-Templates are located in `src/templates/`. The Echelon template provides:
+Templates are located in `src/templates/`. Available templates:
+
+**Echelon** (`src/templates/Echelon/`):
 - Swiss-style minimalist design
 - Customizable sections
 - Case study support
 - Animated backgrounds (Aurora, Plasma, Prism, Silk)
 - Responsive layout
+
+**Serene** (`src/templates/Serene/`):
+- Botanical-style elegant template
+- Separate about page editor
+- Gallery and bio sections
+
+**Chic** (`src/templates/Chic/`):
+- Modern chic design template
+
+**BoldFolio** (`src/templates/BoldFolio/`):
+- Bold portfolio template
+
+Templates are synced between frontend definitions (`src/templates/`) and backend database. Use the template migration utilities in `src/utils/templateMigration.js` to sync changes.
 
 ## Code Patterns
 
@@ -172,6 +216,25 @@ All pages except HomePage use lazy loading:
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 ```
 
+### Upload Pattern (with instant preview)
+```javascript
+import useUploadStore from '@/stores/uploadStore';
+
+const Component = () => {
+  const { startUpload, getPreviewUrl, getFinalUrl } = useUploadStore();
+
+  const handleUpload = async (file) => {
+    const uploadId = startUpload(file); // Creates instant preview
+    const previewUrl = getPreviewUrl(uploadId); // Use immediately
+
+    // Upload to Cloudinary in background
+    await uploadToCloudinary(file, uploadId);
+
+    const finalUrl = getFinalUrl(uploadId); // Get Cloudinary URL
+  };
+};
+```
+
 ## Performance Optimizations
 
 - **Code Splitting**: All pages lazy-loaded except HomePage
@@ -179,6 +242,9 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 - **CSS**: Tailwind with content purging in production
 - **Animations**: GSAP with optimized configurations
 - **Bundle Size**: Vite tree-shaking enabled
+- **Console Removal**: Production builds automatically strip `console.*` and `debugger` statements (configured in `vite.config.js`)
+- **Upload UX**: Instant local previews via blob URLs while uploading to Cloudinary in background
+- **Template Caching**: Templates and schemas cached in memory with Map objects
 
 ## Deployment
 
@@ -188,13 +254,70 @@ The application deploys to Vercel with:
 - Automatic deploys from main branch
 - Production build created via `npm run build`
 
+## Debugging Utilities
+
+### Console Functions
+The app exposes debugging functions on the window object (available in browser console):
+
+```javascript
+// Re-sync all templates from frontend to backend
+window.resyncTemplates()
+
+// Re-sync just the Echelon template
+window.resyncEchelon()
+```
+
+These functions are useful when:
+- Template definitions change in `src/templates/`
+- Backend template data gets out of sync
+- Testing template migration logic
+
+### Important Notes
+- Console logs are stripped in production builds
+- Use browser DevTools to access window functions
+- Template changes require page refresh after sync
+
 ## Important Documentation
 
-The project includes extensive documentation:
+The project includes extensive documentation in `/docs`:
 - `UPDATES.md` - Modern design system and component details
 - `BACKEND_INTEGRATION.md` - API specifications and endpoints
 - `TEMPLATE_EXPORT_GUIDE.md` - PDF export functionality
 - `INTEGRATION_TESTING_GUIDE.md` - Testing procedures
+- `TEMPLATE_SYNC_GUIDE.md` - Template synchronization between frontend/backend
+- `TEMPLATE_CREATION_GUIDE.md` - Creating new templates
+- `FRONTEND_DYNAMIC_TEMPLATE_SYSTEM.md` - Dynamic template architecture
+- `BACKEND_DYNAMIC_TEMPLATE_SYSTEM.md` - Backend template system details
+
+## Common Development Workflows
+
+### Adding a New Template
+1. Create template directory: `src/templates/YourTemplate/`
+2. Create template component with schema definition
+3. Add template export to `src/templates/index.js`
+4. Run `window.resyncTemplates()` in browser console to sync to backend
+5. Add preview route in `src/App.jsx`
+6. Test template preview at `/template-preview/yourtemplate`
+
+### Working with Images
+1. Images upload through Cloudinary (backend proxy)
+2. Use `uploadStore` for instant local previews
+3. Final Cloudinary URLs stored in portfolio data
+4. Upload progress tracked automatically (0-100%)
+
+### Debugging API Issues
+1. Check Network tab in DevTools for request/response
+2. Verify JWT token in localStorage: `localStorage.getItem('aurea-auth-storage')`
+3. Check `authStore` state: `useAuthStore.getState()`
+4. Backend URL is in `VITE_API_BASE_URL` env variable
+5. All API calls go through `lib/baseApi.js` interceptor
+
+### Testing Portfolio Publishing
+1. Create portfolio in dashboard
+2. Edit portfolio content
+3. Publish to Vercel or custom subdomain
+4. For subdomain: Access at `/{subdomain}/html`
+5. Case studies at `/{subdomain}/case-study-{projectId}.html`
 
 ## Known Limitations
 
@@ -202,3 +325,5 @@ The project includes extensive documentation:
 - No testing framework configured
 - Authentication uses localStorage (consider httpOnly cookies for production)
 - No pre-commit hooks or CI/CD pipeline
+- Template auto-migration disabled (use manual console functions)
+- Environment variables prefixed with `VITE_` are publicly visible in browser bundle

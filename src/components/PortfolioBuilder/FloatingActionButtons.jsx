@@ -25,7 +25,7 @@ const FloatingActionButtons = ({
   // Preview mode - only show back button
   if (step === 'preview') {
     return (
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50">
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-[150]">
         <div className="group relative">
           <button
             onClick={onBackToEdit}
@@ -46,7 +46,7 @@ const FloatingActionButtons = ({
   // Customize mode - show all buttons
   if (step === 'customize') {
     return (
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-3">
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-[150] flex flex-col space-y-3">
         {/* Change Template */}
         <ActionButton
           icon={
