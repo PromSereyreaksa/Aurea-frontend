@@ -57,7 +57,7 @@ const EchelonTemplate = ({
         lineHeight: 1.4,
         minHeight: '100vh',
         position: 'relative',
-        overflowX: 'hidden',
+        maxWidth: '100vw',
         width: '100%'
       }}
     >
@@ -250,7 +250,7 @@ const EchelonTemplate = ({
           letter-spacing: 0.02em;
         }
 
-        /* Responsive Typography */
+        /* Responsive Typography & Spacing */
         @media (max-width: 1024px) {
           .swiss-container {
             padding: 0 40px;
@@ -259,7 +259,25 @@ const EchelonTemplate = ({
 
         @media (max-width: 768px) {
           .swiss-container {
-            padding: 0 24px;
+            padding: 0 20px;
+          }
+          
+          /* Reduce section padding on mobile */
+          section {
+            padding-top: clamp(40px, 8vh, 80px) !important;
+            padding-bottom: clamp(40px, 8vh, 80px) !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .swiss-container {
+            padding: 0 16px;
+          }
+          
+          /* Even smaller padding on very small screens */
+          section {
+            padding-top: clamp(30px, 6vh, 60px) !important;
+            padding-bottom: clamp(30px, 6vh, 60px) !important;
           }
         }
 
@@ -267,7 +285,7 @@ const EchelonTemplate = ({
         .swiss-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 80px;
+          padding: 0 clamp(16px, 5vw, 80px);
         }
 
         /* Swiss Animations */

@@ -244,14 +244,13 @@ const SerenePreviewPage = () => {
     }}>
       {/* Preview Header - Hidden in PDF mode */}
       {!pdfMode && (
-        <div style={{
+        <div className="px-4 py-3 md:px-8 md:py-5" style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           backgroundColor: sereneColors.surface,
           color: sereneColors.text,
-          padding: '20px 40px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -259,22 +258,18 @@ const SerenePreviewPage = () => {
           borderBottom: `1px solid ${sereneColors.border}`,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
         }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px'
-        }}>
+        <div className="flex items-center gap-2 md:gap-5">
           <div style={{
             fontFamily: "'Crimson Text', serif",
-            fontSize: '24px',
+            fontSize: 'clamp(16px, 4vw, 24px)',
             fontWeight: 600,
             color: sereneColors.primary
           }}>
             SERENE
           </div>
-          <div style={{
+          <div className="hidden sm:block" style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: '12px',
+            fontSize: 'clamp(10px, 2vw, 12px)',
             color: sereneColors.secondary,
             textTransform: 'uppercase',
             letterSpacing: '0.1em'
@@ -283,20 +278,15 @@ const SerenePreviewPage = () => {
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          gap: '15px',
-          alignItems: 'center'
-        }}>
+        <div className="flex gap-2 md:gap-4 items-center">
           <button
             onClick={() => window.history.back()}
+            className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm"
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '13px',
               color: sereneColors.text,
               backgroundColor: 'transparent',
               border: `1px solid ${sereneColors.border}`,
-              padding: '10px 20px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               cursor: 'pointer',
@@ -312,20 +302,19 @@ const SerenePreviewPage = () => {
               e.target.style.color = sereneColors.text;
             }}
           >
-            ← BACK
+            <span className="hidden sm:inline">← </span>BACK
           </button>
 
           <button
             onClick={handleUseTemplate}
             disabled={isCreating}
+            className="px-4 py-2 md:px-6 md:py-2.5 text-xs md:text-sm whitespace-nowrap"
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '13px',
               fontWeight: 500,
               color: sereneColors.surface,
               backgroundColor: isCreating ? '#999999' : sereneColors.primary,
               border: `1px solid ${isCreating ? '#999999' : sereneColors.primary}`,
-              padding: '10px 30px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               cursor: isCreating ? 'not-allowed' : 'pointer',
@@ -348,14 +337,14 @@ const SerenePreviewPage = () => {
               }
             }}
           >
-            {isCreating ? 'CREATING...' : 'USE THIS TEMPLATE'}
+            {isCreating ? 'CREATING...' : <><span className="hidden md:inline">USE THIS </span>TEMPLATE</>}
           </button>
         </div>
         </div>
       )}
 
       {/* Template Content with margin for fixed header (no margin in PDF mode) */}
-      <div style={{ marginTop: pdfMode ? '0' : '80px' }}>
+      <div className={pdfMode ? '' : 'mt-14 md:mt-20'}>
         <SereneTemplate
           content={displayData}
           styling={{

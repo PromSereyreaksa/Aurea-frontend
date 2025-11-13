@@ -18,6 +18,7 @@ const CaseStudyEditorPage = () => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [caseStudyId, setCaseStudyId] = useState(null); // Track if editing existing case study
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Case study content state - matching the static template structure
   const [caseStudy, setCaseStudy] = useState({
@@ -611,15 +612,35 @@ const CaseStudyEditorPage = () => {
       color: '#000000',
       minHeight: '100vh'
     }}>
-      {/* Fixed Header */}
-      <header style={{
+      {/* Mobile-responsive styles */}
+      <style>{`
+        @media (max-width: 768px) {
+          .case-study-header {
+            padding: 16px 20px !important;
+            flex-wrap: wrap !important;
+            gap: 12px !important;
+          }
+          .case-study-header button {
+            padding: 10px 20px !important;
+            font-size: 11px !important;
+          }
+          .case-study-header > div {
+            font-size: 10px !important;
+            flex: 1 1 100% !important;
+            text-align: center !important;
+          }
+        }
+      `}</style>
+
+      {/* Fixed Header - Mobile Responsive */}
+      <header className="case-study-header" style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         backgroundColor: '#000000',
         color: '#FFFFFF',
-        padding: '24px 60px',
+        padding: 'clamp(12px, 3vw, 24px) clamp(16px, 4vw, 60px)',
         zIndex: 1000,
         borderBottom: '3px solid #FF0000',
         display: 'flex',
@@ -630,11 +651,11 @@ const CaseStudyEditorPage = () => {
           onClick={handleBack}
           style={{
             fontFamily: '"IBM Plex Mono", monospace',
-            fontSize: '13px',
+            fontSize: 'clamp(11px, 1.2vw, 13px)',
             color: '#FFFFFF',
             backgroundColor: 'transparent',
             border: '2px solid #FFFFFF',
-            padding: '12px 24px',
+            padding: 'clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 24px)',
             cursor: 'pointer',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -654,15 +675,17 @@ const CaseStudyEditorPage = () => {
 
         <div style={{
           fontFamily: '"IBM Plex Mono", monospace',
-          fontSize: '12px',
+          fontSize: 'clamp(10px, 1.1vw, 12px)',
           color: '#FF0000',
           textTransform: 'uppercase',
           letterSpacing: '0.15em'
         }}>
-          {isPreviewMode ? 'PREVIEW MODE' : 'CASE STUDY EDITOR'}
+          {isPreviewMode ? 'PREVIEW' : 'EDITOR'}
         </div>
         
+        {/* Desktop Save Button */}
         <button
+          className="hidden md:block"
           onClick={() => {
             if (isPreviewMode) {
               navigate(`/portfolio/${portfolioId}/project/${projectId}`);
@@ -704,16 +727,209 @@ const CaseStudyEditorPage = () => {
         >
           {isPreviewMode ? 'VIEW CASE STUDY →' : 'SAVE'}
         </button>
+        
+        {/* Mobile spacer */}
+        <div className="md:hidden" style={{ width: '40px' }}></div>
       </header>
 
+      {/* Mobile Floating Action Button */}
+      {!isPreviewMode && (
+        <>
+          {/* Overlay */}
+          {isMobileMenuOpen && (
+            <div 
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 999998
+              }}
+            />
+          )}
+
+          {/* FAB Container */}
+          <div 
+            className="md:hidden"
+            style={{
+              position: 'fixed',
+              right: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 999999
+            }}
+          >
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{
+                width: '56px',
+                height: '56px',
+                backgroundColor: isMobileMenuOpen ? '#CC0000' : '#FF0000',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '50%',
+                boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <svg 
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  transition: 'transform 0.2s ease',
+                  transform: isMobileMenuOpen ? 'rotate(45deg)' : 'rotate(0)'
+                }}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+              <div style={{
+                position: 'absolute',
+                bottom: '70px',
+                right: 0,
+                backgroundColor: '#FFFFFF',
+                borderRadius: '16px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                padding: '12px',
+                minWidth: '200px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                <button
+                  onClick={() => {
+                    setIsPreviewMode(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#000000',
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '13px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseDown={(e) => e.target.style.backgroundColor = '#F5F5F5'}
+                  onMouseUp={(e) => e.target.style.backgroundColor = 'transparent'}
+                  onTouchStart={(e) => e.target.style.backgroundColor = '#F5F5F5'}
+                  onTouchEnd={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                  <svg style={{ width: '20px', height: '20px', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>Preview</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (!isSaving && hasUnsavedChanges) {
+                      handleSave();
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  disabled={isSaving || !hasUnsavedChanges}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: (isSaving || !hasUnsavedChanges) ? '#999999' : '#000000',
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '13px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: (isSaving || !hasUnsavedChanges) ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    opacity: (isSaving || !hasUnsavedChanges) ? 0.5 : 1
+                  }}
+                  onMouseDown={(e) => !isSaving && hasUnsavedChanges && (e.target.style.backgroundColor = '#F5F5F5')}
+                  onMouseUp={(e) => e.target.style.backgroundColor = 'transparent'}
+                  onTouchStart={(e) => !isSaving && hasUnsavedChanges && (e.target.style.backgroundColor = '#F5F5F5')}
+                  onTouchEnd={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                  <svg style={{ width: '20px', height: '20px', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  <span>{isSaving ? 'Saving...' : showSaveSuccess ? '✓ Saved!' : hasUnsavedChanges ? 'Save' : 'No Changes'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Preview Mode: Back Button */}
+      {isPreviewMode && (
+        <div 
+          className="md:hidden"
+          style={{
+            position: 'fixed',
+            right: '16px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 999999
+          }}
+        >
+          <button
+            onClick={() => setIsPreviewMode(false)}
+            style={{
+              width: '56px',
+              height: '56px',
+              backgroundColor: '#FF0000',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '50%',
+              boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main style={{ paddingTop: isPreviewMode ? '60px' : '120px', paddingBottom: '120px' }}>
+      <main style={{ paddingTop: isPreviewMode ? 'clamp(60px, 10vh, 80px)' : 'clamp(100px, 15vh, 140px)', paddingBottom: 'clamp(60px, 10vh, 120px)' }}>
         {/* Hero Section */}
         <section style={{
           maxWidth: '1400px',
           margin: '0 auto',
-          padding: '0 60px',
-          marginBottom: '180px'
+          padding: '0 clamp(20px, 4vw, 60px)',
+          marginBottom: 'clamp(80px, 15vh, 180px)'
         }}>
           {/* Category */}
           {isPreviewMode ? (
@@ -954,12 +1170,11 @@ const CaseStudyEditorPage = () => {
           </p>
 
           {/* Steps Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '30px',
-            marginTop: '60px'
-          }}>
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-12 md:mt-16"
+            style={{
+              marginTop: '60px'
+            }}>
             {caseStudy.steps.map((step, i) => (
               <div key={i} style={{
                 border: '2px solid #000000',

@@ -60,13 +60,12 @@ const EchelonContact = ({
   return (
     <section
       id="contact"
+      className="py-16 md:py-24 lg:py-32"
       style={{
         backgroundColor: '#000000',
         color: '#FFFFFF',
-        paddingTop: '120px',
-        paddingBottom: '120px',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'clip'
       }}
     >
       {/* Decorative Elements */}
@@ -186,7 +185,7 @@ const EchelonContact = ({
         </GridCol>
 
         {/* Contact Information - Asymmetrical positioning */}
-        <GridCol span={4}>
+        <GridCol span={12} className="md:col-span-4">
           <div style={{
             fontFamily: '"IBM Plex Mono", monospace',
             fontSize: 'clamp(10px, 1vw, 12px)',
@@ -308,13 +307,11 @@ const EchelonContact = ({
         </GridCol>
 
         {/* Compact Contact Form - Asymmetrical positioning */}
-        <GridCol span={7} offset={1}>
-          <div style={{
+        <GridCol span={12} offset={0} className="md:col-span-7 md:col-start-6 mt-8 md:mt-20">
+          <div className="p-6 md:p-12" style={{
             backgroundColor: 'transparent',
             border: '3px solid #FF0000',
-            padding: '50px',
             transform: 'rotate(1deg)',
-            marginTop: '80px',
             position: 'relative'
           }}>
             <div style={{
@@ -336,7 +333,7 @@ const EchelonContact = ({
               transform: 'rotate(-1deg)'
             }}>
               {/* Name and Email - Inline */}
-              <div style={{ display: 'flex', gap: '20px' }}>
+              <div className="flex flex-col md:flex-row gap-5">
                 <input
                   type="text"
                   required
@@ -398,7 +395,7 @@ const EchelonContact = ({
               </div>
 
               {/* Project Type and Budget */}
-              <div style={{ display: 'flex', gap: '20px' }}>
+              <div className="flex flex-col md:flex-row gap-5">
                 <input
                   type="text"
                   placeholder="PROJECT TYPE"

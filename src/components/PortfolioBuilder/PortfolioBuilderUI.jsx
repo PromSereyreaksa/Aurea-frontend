@@ -88,12 +88,6 @@ export const HelpTooltip = ({ isVisible }) => {
         </svg>
         <div className="text-sm">
           <div>Click on any text to edit it. Use the floating buttons on the right to manage your portfolio.</div>
-          <div className="flex items-center space-x-1 mt-1 text-orange-200">
-            <kbd className="px-1 py-0.5 bg-orange-600 rounded text-xs">Ctrl</kbd>
-            <span>+</span>
-            <kbd className="px-1 py-0.5 bg-orange-600 rounded text-xs">S</kbd>
-            <span>to save quickly</span>
-          </div>
         </div>
       </div>
     </div>

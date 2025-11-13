@@ -69,9 +69,9 @@ export const useKeyboardShortcuts = (onSave, canSave) => {
       // Ctrl+S or Cmd+S - Save
       if ((event.ctrlKey || event.metaKey) && event.key === 's') {
         event.preventDefault();
-        
+
         if (canSave) {
-          toast.success('Saving portfolio... (Ctrl+S)', {
+          toast.success('Saving portfolio...', {
             duration: 1500,
             icon: '💾',
           });

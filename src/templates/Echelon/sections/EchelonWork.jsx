@@ -116,12 +116,11 @@ const EchelonWork = ({
   return (
     <section
       id="work"
+      className="py-20 md:py-32 lg:py-48"
       style={{
         backgroundColor: '#FFFFFF',
-        paddingTop: '200px',
-        paddingBottom: '200px',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'clip'
       }}
     >
       {/* Aesthetic Spirals in Corners */}
@@ -156,9 +155,9 @@ const EchelonWork = ({
         <GridCol span={12}>
           <div style={{ marginBottom: '140px', position: 'relative' }}>
             {/* Huge Background Text */}
-            <div style={{
+            <div className="hidden md:block" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-              fontSize: 'clamp(150px, 20vw, 300px)',
+              fontSize: 'clamp(80px, 20vw, 300px)',
               fontWeight: 900,
               lineHeight: 0.8,
               color: 'rgba(0, 0, 0, 0.03)',
@@ -197,9 +196,9 @@ const EchelonWork = ({
                   }}
                 />
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                <div className="flex items-center gap-4 md:gap-10 px-2 md:px-0">
                   {/* Section number badge */}
-                  <div style={{
+                  <div className="hidden sm:block" style={{
                     width: '80px',
                     height: '80px',
                     backgroundColor: '#FF0000',
@@ -217,7 +216,7 @@ const EchelonWork = ({
 
                   <h2 style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    fontSize: 'clamp(60px, 10vw, 100px)',
+                    fontSize: 'clamp(36px, 10vw, 100px)',
                     fontWeight: 900,
                     lineHeight: 0.9,
                     color: '#000000',
@@ -318,18 +317,16 @@ const EchelonWork = ({
                   </button>
                 )}
 
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isEven ? '4fr 8fr' : '8fr 4fr',
-                  gap: '60px',
-                  position: 'relative',
-                  zIndex: 1,
-                  alignItems: 'center'
-                }}>
+                <div
+                  className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-16 items-center"
+                  style={{
+                    position: 'relative',
+                    zIndex: 1
+                  }}>
                   {/* Image Section - LARGER */}
-                  <div 
-                    style={{ 
-                      order: isEven ? 1 : 2,
+                  <div
+                    className={`md:col-span-${isEven ? '4' : '8'} ${isEven ? 'md:order-1' : 'md:order-2'}`}
+                    style={{
                       position: 'relative'
                     }}
                   >
@@ -437,7 +434,7 @@ const EchelonWork = ({
                   </div>
 
                   {/* Content Section */}
-                  <div style={{ order: isEven ? 2 : 1, paddingTop: '40px' }}>
+                  <div className={`md:col-span-${isEven ? '8' : '4'} ${isEven ? 'md:order-2' : 'md:order-1'} pt-8 md:pt-10`}>
                     {/* Meta Info */}
                     {isEditing ? (
                       <input

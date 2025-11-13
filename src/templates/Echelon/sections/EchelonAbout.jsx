@@ -136,13 +136,12 @@ const EchelonAbout = ({
   return (
     <section
       id="about"
+      className="py-20 md:py-32 lg:py-48"
       style={{
         backgroundColor: '#000000',
         color: '#FFFFFF',
-        paddingTop: '200px',
-        paddingBottom: '200px',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'clip'
       }}
     >
       {/* Large Grid Overlay - Top Left */}
@@ -203,7 +202,7 @@ const EchelonAbout = ({
         <GridCol span={12}>
           <div style={{
             fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-            fontSize: 'clamp(150px, 20vw, 280px)',
+            fontSize: 'clamp(60px, 20vw, 280px)',
             fontWeight: 900,
             lineHeight: 0.8,
             color: 'rgba(255, 255, 255, 0.08)',
@@ -217,7 +216,7 @@ const EchelonAbout = ({
         </GridCol>
 
         {/* Large Portrait Image - More screen space */}
-        <GridCol span={5}>
+        <GridCol span={12} className="md:col-span-5">
           <div style={{ position: 'relative' }}>
             {/* Image Container - BIGGER */}
             <div
@@ -328,8 +327,8 @@ const EchelonAbout = ({
         </GridCol>
 
         {/* Bio Content - Swiss asymmetrical layout */}
-        <GridCol span={7}>
-          <div style={{ marginLeft: '60px', position: 'relative', zIndex: 2, maxWidth: '100%', overflow: 'hidden' }}>
+        <GridCol span={12} className="md:col-span-7">
+          <div className="mt-8 md:mt-0 md:ml-16" style={{ position: 'relative', zIndex: 2, maxWidth: '100%', overflow: 'hidden' }}>
             {/* Section Label with Grid */}
             <div style={{
               display: 'flex',
