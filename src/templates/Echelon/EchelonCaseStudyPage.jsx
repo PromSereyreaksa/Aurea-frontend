@@ -7,7 +7,7 @@ const CaseStudyPage = () => {
   const { portfolioId, projectId } = useParams();
   const { portfolios } = usePortfolioStore();
   const [caseStudy, setCaseStudy] = useState(null);
-  
+
   // Load case study data if portfolioId and projectId are provided
   useEffect(() => {
     if (portfolioId && projectId) {
@@ -23,14 +23,120 @@ const CaseStudyPage = () => {
   }, []);
 
   return (
-    <div style={{
-      fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
-      backgroundColor: '#FFFFFF',
-      color: '#000000',
-      minHeight: '100vh'
-    }}>
+    <>
+      <style>{`
+        @media (max-width: 768px) {
+          .cs-header {
+            padding: 16px 20px !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+          }
+          .cs-header-back {
+            width: 100%;
+            text-align: center;
+          }
+          .cs-header-title {
+            font-size: 10px !important;
+          }
+          .cs-header-edit {
+            width: 100%;
+            padding: 12px 24px !important;
+          }
+          .cs-main {
+            padding-top: 180px !important;
+            padding-bottom: 60px !important;
+          }
+          .cs-section {
+            padding: 0 20px !important;
+            margin-bottom: 80px !important;
+          }
+          .cs-section-lg {
+            margin-bottom: 80px !important;
+          }
+          .cs-hero-category {
+            font-size: 11px !important;
+            margin-bottom: 24px !important;
+          }
+          .cs-hero-title {
+            font-size: clamp(36px, 12vw, 60px) !important;
+            margin-bottom: 32px !important;
+          }
+          .cs-hero-intro {
+            font-size: 18px !important;
+            margin-bottom: 40px !important;
+          }
+          .cs-steps-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+          }
+          .cs-step-box {
+            padding: 30px !important;
+          }
+          .cs-step-num {
+            font-size: 36px !important;
+          }
+          .cs-step-title {
+            font-size: 20px !important;
+          }
+          .cs-section-header {
+            flex-direction: column !important;
+            gap: 20px !important;
+            margin-bottom: 40px !important;
+            align-items: flex-start !important;
+          }
+          .cs-section-num {
+            font-size: 60px !important;
+          }
+          .cs-section-title {
+            font-size: 42px !important;
+          }
+          .cs-2col-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+          .cs-3col-grid {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+          }
+          .cs-2fr-1fr-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+          .cs-content-box {
+            padding: 40px 30px !important;
+          }
+          .cs-subsection-title {
+            font-size: 24px !important;
+          }
+          .cs-text-lg {
+            font-size: 16px !important;
+          }
+          .cs-text-md {
+            font-size: 15px !important;
+          }
+          .cs-conclusion {
+            padding: 40px 30px !important;
+          }
+          .cs-conclusion-title {
+            font-size: 32px !important;
+            margin-bottom: 24px !important;
+          }
+          .cs-conclusion-text {
+            font-size: 16px !important;
+          }
+          .cs-footer {
+            padding: 30px 20px !important;
+          }
+        }
+      `}</style>
+      <div style={{
+        fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+        backgroundColor: '#FFFFFF',
+        color: '#000000',
+        minHeight: '100vh'
+      }}>
       {/* Fixed Header */}
-      <header style={{
+      <header className="cs-header" style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -45,6 +151,7 @@ const CaseStudyPage = () => {
         alignItems: 'center'
       }}>
         <button
+          className="cs-header-back"
           onClick={() => navigate(-1)}
           style={{
             fontFamily: '"IBM Plex Mono", monospace',
@@ -69,8 +176,8 @@ const CaseStudyPage = () => {
         >
           ← BACK
         </button>
-        
-        <div style={{
+
+        <div className="cs-header-title" style={{
           fontFamily: '"IBM Plex Mono", monospace',
           fontSize: '12px',
           color: '#FF0000',
@@ -79,9 +186,10 @@ const CaseStudyPage = () => {
         }}>
           VIEW CASE STUDY
         </div>
-        
+
         {portfolioId && projectId && (
           <button
+            className="cs-header-edit"
             onClick={() => navigate(`/portfolio-builder/${portfolioId}/case-study/${projectId}`)}
             style={{
               fontFamily: '"IBM Plex Mono", monospace',
@@ -111,16 +219,16 @@ const CaseStudyPage = () => {
       </header>
 
       {/* Main Content */}
-      <main style={{ paddingTop: '120px', paddingBottom: '120px' }}>
+      <main className="cs-main" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
         {/* Hero Section */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '180px'
         }}>
           {/* Category */}
-          <div style={{
+          <div className="cs-hero-category" style={{
             fontFamily: '"IBM Plex Mono", monospace',
             fontSize: '14px',
             color: '#FF0000',
@@ -132,7 +240,7 @@ const CaseStudyPage = () => {
           </div>
 
           {/* Main Title */}
-          <h1 style={{
+          <h1 className="cs-hero-title" style={{
             fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
             fontSize: 'clamp(60px, 10vw, 140px)',
             fontWeight: 900,
@@ -146,13 +254,13 @@ const CaseStudyPage = () => {
           </h1>
 
           {/* Intro Text */}
-          <div style={{
+          <div className="cs-hero-intro" style={{
             maxWidth: '900px',
             fontSize: '24px',
             lineHeight: 1.6,
             marginBottom: '80px'
           }}>
-            In this article I will share my logo design process from start to finish, 
+            In this article I will share my logo design process from start to finish,
             that I have built in 8 years as a graphic designer.
           </div>
 
@@ -188,23 +296,23 @@ const CaseStudyPage = () => {
         </section>
 
         {/* Introduction */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '900px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '160px'
         }}>
-          <p style={{
+          <p className="cs-text-lg" style={{
             fontSize: '20px',
             lineHeight: 1.8,
             marginBottom: '30px'
           }}>
-            The reasons why I am doing this is mostly because I get asked a lot by clients 
-            and other designers — how do I go around my process of creating logos, and of course 
+            The reasons why I am doing this is mostly because I get asked a lot by clients
+            and other designers — how do I go around my process of creating logos, and of course
             because I want to share some of my knowledge.
           </p>
-          
-          <p style={{
+
+          <p className="cs-text-lg" style={{
             fontSize: '20px',
             lineHeight: 1.8,
             marginBottom: '30px'
@@ -213,7 +321,7 @@ const CaseStudyPage = () => {
           </p>
 
           {/* Steps List */}
-          <div style={{
+          <div className="cs-steps-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '30px',
@@ -225,13 +333,13 @@ const CaseStudyPage = () => {
               { num: '03', title: 'DIGITAL', desc: 'Refining and digitizing' },
               { num: '04', title: 'SOURCE FILES', desc: 'Delivering final assets' }
             ].map((step, i) => (
-              <div key={i} style={{
+              <div key={i} className="cs-step-box" style={{
                 border: '2px solid #000000',
                 padding: '40px',
                 backgroundColor: i === 0 ? '#FF0000' : 'transparent',
                 color: i === 0 ? '#FFFFFF' : '#000000'
               }}>
-                <div style={{
+                <div className="cs-step-num" style={{
                   fontFamily: '"IBM Plex Mono", monospace',
                   fontSize: '48px',
                   fontWeight: 900,
@@ -239,7 +347,7 @@ const CaseStudyPage = () => {
                 }}>
                   {step.num}
                 </div>
-                <div style={{
+                <div className="cs-step-title" style={{
                   fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                   fontSize: '24px',
                   fontWeight: 900,
@@ -260,20 +368,20 @@ const CaseStudyPage = () => {
         </section>
 
         {/* Section 01: Research */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '160px'
         }}>
           {/* Section Header */}
-          <div style={{
+          <div className="cs-section-header" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '40px',
             marginBottom: '80px'
           }}>
-            <div style={{
+            <div className="cs-section-num" style={{
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '100px',
               fontWeight: 900,
@@ -283,7 +391,7 @@ const CaseStudyPage = () => {
               01
             </div>
             <div>
-              <h2 style={{
+              <h2 className="cs-section-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '72px',
                 fontWeight: 900,
@@ -297,14 +405,14 @@ const CaseStudyPage = () => {
           </div>
 
           {/* Research Content */}
-          <div style={{
+          <div className="cs-2col-grid" style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '80px',
             marginBottom: '80px'
           }}>
             <div>
-              <h3 style={{
+              <h3 className="cs-subsection-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '32px',
                 fontWeight: 900,
@@ -313,20 +421,20 @@ const CaseStudyPage = () => {
               }}>
                 01.1 QUESTIONNAIRE
               </h3>
-              <p style={{
+              <p className="cs-text-md" style={{
                 fontSize: '18px',
                 lineHeight: 1.8,
                 marginBottom: '20px'
               }}>
-                After receiving an email and discussing terms and price with the client, getting paid 
-                with 50% payment I send them a Google Form Questionnaire that gets completed with the 
+                After receiving an email and discussing terms and price with the client, getting paid
+                with 50% payment I send them a Google Form Questionnaire that gets completed with the
                 relevant info about their brand, vision and needs.
               </p>
-              <p style={{
+              <p className="cs-text-md" style={{
                 fontSize: '18px',
                 lineHeight: 1.8
               }}>
-                This is a crucial part of the research process because it eliminates a lot of guesses 
+                This is a crucial part of the research process because it eliminates a lot of guesses
                 and it helps you better understand, what is it that the client wants and what should you do about it.
               </p>
             </div>
@@ -359,12 +467,12 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-content-box" style={{
             backgroundColor: '#F5F5F5',
             padding: '60px',
             marginTop: '60px'
           }}>
-            <h3 style={{
+            <h3 className="cs-subsection-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '32px',
               fontWeight: 900,
@@ -373,31 +481,31 @@ const CaseStudyPage = () => {
             }}>
               01.2 DIG DEEP
             </h3>
-            <p style={{
+            <p className="cs-text-md" style={{
               fontSize: '18px',
               lineHeight: 1.8
             }}>
-              With the form printed I start to read it and mark keywords that would help in narrowing 
-              down possible ideas / concepts for the logo. I also do competitor analysis and try to 
+              With the form printed I start to read it and mark keywords that would help in narrowing
+              down possible ideas / concepts for the logo. I also do competitor analysis and try to
               gather as much info about the brand as I can.
             </p>
           </div>
         </section>
 
         {/* Section 02: Sketch */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '160px'
         }}>
-          <div style={{
+          <div className="cs-section-header" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '40px',
             marginBottom: '80px'
           }}>
-            <div style={{
+            <div className="cs-section-num" style={{
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '100px',
               fontWeight: 900,
@@ -407,7 +515,7 @@ const CaseStudyPage = () => {
               02
             </div>
             <div>
-              <h2 style={{
+              <h2 className="cs-section-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '72px',
                 fontWeight: 900,
@@ -420,7 +528,7 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-2fr-1fr-grid" style={{
             display: 'grid',
             gridTemplateColumns: '2fr 1fr',
             gap: '60px',
@@ -433,8 +541,8 @@ const CaseStudyPage = () => {
                 marginBottom: '24px',
                 overflow: 'hidden'
               }}>
-                <img 
-                  src="/case-study/mihai/pic3.jpg" 
+                <img
+                  src="/case-study/mihai/pic3.jpg"
                   alt="Sketch Process"
                   style={{
                     width: '100%',
@@ -454,7 +562,7 @@ const CaseStudyPage = () => {
             </div>
 
             <div>
-              <h3 style={{
+              <h3 className="cs-subsection-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '28px',
                 fontWeight: 900,
@@ -463,31 +571,31 @@ const CaseStudyPage = () => {
               }}>
                 02.1 SKETCHING IDEAS
               </h3>
-              <p style={{
+              <p className="cs-text-md" style={{
                 fontSize: '16px',
                 lineHeight: 1.7,
                 marginBottom: '30px'
               }}>
-                This is by far my favourite part of the whole process because it is where my creativity 
+                This is by far my favourite part of the whole process because it is where my creativity
                 goes wild and I am free to experiment with various ideas I had in mind.
               </p>
-              <p style={{
+              <p className="cs-text-md" style={{
                 fontSize: '16px',
                 lineHeight: 1.7
               }}>
-                It usually starts by having the form in front of me and by associating keywords with 
+                It usually starts by having the form in front of me and by associating keywords with
                 very simple graphical forms. I try to roughly sketch them without being too detailed.
               </p>
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-content-box" style={{
             backgroundColor: '#000000',
             color: '#FFFFFF',
             padding: '60px',
             marginTop: '60px'
           }}>
-            <h3 style={{
+            <h3 className="cs-subsection-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '32px',
               fontWeight: 900,
@@ -497,23 +605,23 @@ const CaseStudyPage = () => {
             }}>
               02.2 NARROWING DOWN
             </h3>
-            <p style={{
+            <p className="cs-text-md" style={{
               fontSize: '18px',
               lineHeight: 1.8,
               marginBottom: '30px'
             }}>
-              After having a couple of pages of sketches I can already see which of them are good 
-              enough to make it to the client as concepts because while sketching simultaneously I 
+              After having a couple of pages of sketches I can already see which of them are good
+              enough to make it to the client as concepts because while sketching simultaneously I
               test the ideas digitally to ensure they work and are not busy or irrelevant.
             </p>
-            <div style={{
+            <div className="cs-2col-grid" style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '40px',
               marginTop: '60px'
             }}>
-              <img 
-                src="/case-study/mihai/pic4.png" 
+              <img
+                src="/case-study/mihai/pic4.png"
                 alt="Narrowed Directions"
                 style={{
                   width: '100%',
@@ -521,19 +629,19 @@ const CaseStudyPage = () => {
                 }}
               />
               <div>
-                <p style={{
+                <p className="cs-text-md" style={{
                   fontSize: '16px',
                   lineHeight: 1.7,
                   marginBottom: '20px'
                 }}>
-                  My number one tip when sketching is to go fast and don't strive to make perfect 
+                  My number one tip when sketching is to go fast and don't strive to make perfect
                   sketches as that tends to break the flow of whole process.
                 </p>
-                <p style={{
+                <p className="cs-text-md" style={{
                   fontSize: '16px',
                   lineHeight: 1.7
                 }}>
-                  Sketch rough and fast, and always work with copies. Lay down a shape and then 
+                  Sketch rough and fast, and always work with copies. Lay down a shape and then
                   try to improve it by drawing the same one but with an update.
                 </p>
               </div>
@@ -542,19 +650,19 @@ const CaseStudyPage = () => {
         </section>
 
         {/* Section 03: Digital */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '160px'
         }}>
-          <div style={{
+          <div className="cs-section-header" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '40px',
             marginBottom: '80px'
           }}>
-            <div style={{
+            <div className="cs-section-num" style={{
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '100px',
               fontWeight: 900,
@@ -564,7 +672,7 @@ const CaseStudyPage = () => {
               03
             </div>
             <div>
-              <h2 style={{
+              <h2 className="cs-section-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '72px',
                 fontWeight: 900,
@@ -577,14 +685,14 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-2col-grid" style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '60px',
             marginBottom: '60px'
           }}>
             <div>
-              <h3 style={{
+              <h3 className="cs-subsection-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '28px',
                 fontWeight: 900,
@@ -593,12 +701,12 @@ const CaseStudyPage = () => {
               }}>
                 03.1 DIGITIZING DIRECTIONS
               </h3>
-              <p style={{
+              <p className="cs-text-md" style={{
                 fontSize: '16px',
                 lineHeight: 1.7
               }}>
-                Once we have approved the scanned directions I take them and start on the digital process. 
-                I use them only as a guidance, because my best ideas usually come when working in front 
+                Once we have approved the scanned directions I take them and start on the digital process.
+                I use them only as a guidance, because my best ideas usually come when working in front
                 of the computer.
               </p>
             </div>
@@ -614,12 +722,12 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-content-box" style={{
             border: '3px solid #FF0000',
             padding: '60px',
             marginTop: '80px'
           }}>
-            <h3 style={{
+            <h3 className="cs-subsection-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '32px',
               fontWeight: 900,
@@ -628,16 +736,16 @@ const CaseStudyPage = () => {
             }}>
               03.2 PRESENTATIONS & MOCKUPS
             </h3>
-            <p style={{
+            <p className="cs-text-md" style={{
               fontSize: '18px',
               lineHeight: 1.8,
               marginBottom: '40px'
             }}>
-              After a lot of experimenting and trying to make things look good I take 3 of my best 
+              After a lot of experimenting and trying to make things look good I take 3 of my best
               directions and craft 3 presentations in which I present the logo in various scenarios:
             </p>
-            
-            <div style={{
+
+            <div className="cs-3col-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '30px'
@@ -698,19 +806,19 @@ const CaseStudyPage = () => {
         </section>
 
         {/* Section 04: Source Files */}
-        <section style={{
+        <section className="cs-section cs-section-lg" style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '160px'
         }}>
-          <div style={{
+          <div className="cs-section-header" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '40px',
             marginBottom: '80px'
           }}>
-            <div style={{
+            <div className="cs-section-num" style={{
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: '100px',
               fontWeight: 900,
@@ -720,7 +828,7 @@ const CaseStudyPage = () => {
               04
             </div>
             <div>
-              <h2 style={{
+              <h2 className="cs-section-title" style={{
                 fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: '72px',
                 fontWeight: 900,
@@ -733,11 +841,11 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-content-box" style={{
             backgroundColor: '#F5F5F5',
             padding: '80px 60px'
           }}>
-            <h3 style={{
+            <h3 className="cs-subsection-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '32px',
               fontWeight: 900,
@@ -746,17 +854,17 @@ const CaseStudyPage = () => {
             }}>
               04.1 PREPARING SOURCE FILES
             </h3>
-            
-            <p style={{
+
+            <p className="cs-text-md" style={{
               fontSize: '18px',
               lineHeight: 1.8,
               marginBottom: '40px'
             }}>
-              Now that the final logo has been approved and there are no more changes I proceed 
+              Now that the final logo has been approved and there are no more changes I proceed
               to creating the source files.
             </p>
 
-            <div style={{
+            <div className="cs-2col-grid" style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '40px',
@@ -807,12 +915,12 @@ const CaseStudyPage = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="cs-content-box" style={{
             marginTop: '80px',
             border: '3px solid #000000',
             padding: '60px'
           }}>
-            <h3 style={{
+            <h3 className="cs-subsection-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '32px',
               fontWeight: 900,
@@ -821,17 +929,17 @@ const CaseStudyPage = () => {
             }}>
               04.2 LOGO AND/OR BRAND GUIDELINES
             </h3>
-            
-            <p style={{
+
+            <p className="cs-text-md" style={{
               fontSize: '18px',
               lineHeight: 1.8,
               marginBottom: '40px'
             }}>
-              Along with the source files I offer a PDF guideline where I demonstrate logo usage 
+              Along with the source files I offer a PDF guideline where I demonstrate logo usage
               to ensure that everything is used accordingly to the rules I have set.
             </p>
 
-            <div style={{
+            <div className="cs-2col-grid" style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '30px',
@@ -858,19 +966,19 @@ const CaseStudyPage = () => {
         </section>
 
         {/* Conclusion */}
-        <section style={{
+        <section className="cs-section" style={{
           maxWidth: '900px',
           margin: '0 auto',
           padding: '0 60px',
           marginBottom: '80px'
         }}>
-          <div style={{
+          <div className="cs-conclusion" style={{
             backgroundColor: '#FF0000',
             color: '#FFFFFF',
             padding: '80px 60px',
             textAlign: 'center'
           }}>
-            <h2 style={{
+            <h2 className="cs-conclusion-title" style={{
               fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
               fontSize: '48px',
               fontWeight: 900,
@@ -880,20 +988,20 @@ const CaseStudyPage = () => {
             }}>
               BOTTOM LINE
             </h2>
-            <p style={{
+            <p className="cs-conclusion-text" style={{
               fontSize: '20px',
               lineHeight: 1.8
             }}>
-              Having a process and sticking to it, will definitely give you and your work a sense 
-              of ownership. You will position yourself as an expert and people will be most likely 
-              to trust you and hand over their projects and ideas so you can convert them into 
+              Having a process and sticking to it, will definitely give you and your work a sense
+              of ownership. You will position yourself as an expert and people will be most likely
+              to trust you and hand over their projects and ideas so you can convert them into
               useful graphical solutions.
             </p>
           </div>
         </section>
 
         {/* Author */}
-        <section style={{
+        <section className="cs-section" style={{
           maxWidth: '900px',
           margin: '0 auto',
           padding: '0 60px',
@@ -919,7 +1027,7 @@ const CaseStudyPage = () => {
       </main>
 
       {/* Footer */}
-      <footer style={{
+      <footer className="cs-footer" style={{
         backgroundColor: '#000000',
         color: '#FFFFFF',
         padding: '40px 60px',
@@ -936,6 +1044,7 @@ const CaseStudyPage = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 
