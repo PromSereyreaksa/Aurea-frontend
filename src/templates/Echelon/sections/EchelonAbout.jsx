@@ -216,9 +216,9 @@ const EchelonAbout = ({
         </GridCol>
 
         {/* Large Portrait Image - More screen space */}
-        <GridCol span={12} className="md:col-span-5">
+        <GridCol span={12} className="md:col-span-3">
           <div style={{ position: 'relative' }}>
-            {/* Image Container - BIGGER */}
+            {/* Image Container */}
             <div
               style={{
                 aspectRatio: '3/4',
@@ -230,7 +230,8 @@ const EchelonAbout = ({
                 position: 'relative',
                 zIndex: 2,
                 overflow: 'hidden',
-                cursor: isEditing ? 'pointer' : 'default'
+                cursor: isEditing ? 'pointer' : 'default',
+                maxWidth: '350px'
               }}
               onClick={() => isEditing && document.getElementById('about-image-input').click()}
             >
@@ -327,7 +328,7 @@ const EchelonAbout = ({
         </GridCol>
 
         {/* Bio Content - Swiss asymmetrical layout */}
-        <GridCol span={12} className="md:col-span-7">
+        <GridCol span={12} className="md:col-span-9">
           <div className="mt-8 md:mt-0 md:ml-16" style={{ position: 'relative', zIndex: 2, maxWidth: '100%', overflow: 'hidden' }}>
             {/* Section Label with Grid */}
             <div style={{

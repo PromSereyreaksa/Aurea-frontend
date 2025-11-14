@@ -25,7 +25,7 @@ const CaseStudyPage = () => {
   return (
     <>
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .cs-header {
             padding: 16px 20px !important;
             flex-direction: column !important;

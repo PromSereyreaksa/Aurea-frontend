@@ -114,15 +114,35 @@ const EchelonWork = ({
   };
 
   return (
-    <section
-      id="work"
-      className="py-20 md:py-32 lg:py-48"
-      style={{
-        backgroundColor: '#FFFFFF',
-        position: 'relative',
-        overflow: 'clip'
-      }}
-    >
+    <>
+      <style>{`
+        /* Large screen optimizations */
+        @media (min-width: 1400px) {
+          .work-project-grid {
+            max-width: 1600px;
+            margin: 0 auto;
+          }
+        }
+
+        @media (min-width: 1920px) {
+          .work-section-title {
+            font-size: 120px !important;
+          }
+          .work-project-title {
+            font-size: 72px !important;
+          }
+        }
+      `}</style>
+
+      <section
+        id="work"
+        className="py-20 md:py-32 lg:py-48"
+        style={{
+          backgroundColor: '#FFFFFF',
+          position: 'relative',
+          overflow: 'clip'
+        }}
+      >
       {/* Aesthetic Spirals in Corners */}
       <SwissSpiral position="top-right" color="#000000" opacity={0.025} size={160} rotation={90} />
       <SwissSpiral position="bottom-left" color="#FF0000" opacity={0.035} size={180} rotation={270} />
@@ -150,7 +170,7 @@ const EchelonWork = ({
         ))}
       </div>
 
-      <SwissGrid>
+      <SwissGrid maxWidth="1600px">
         {/* Massive Section Title */}
         <GridCol span={12}>
           <div style={{ marginBottom: '140px', position: 'relative' }}>
@@ -214,7 +234,7 @@ const EchelonWork = ({
                     02
                   </div>
 
-                  <h2 style={{
+                  <h2 className="work-section-title" style={{
                     fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                     fontSize: 'clamp(36px, 10vw, 100px)',
                     fontWeight: 900,
@@ -318,14 +338,14 @@ const EchelonWork = ({
                 )}
 
                 <div
-                  className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-16 items-center"
+                  className="work-project-grid grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-16 lg:gap-20 xl:gap-24 items-center"
                   style={{
                     position: 'relative',
                     zIndex: 1
                   }}>
                   {/* Image Section - LARGER */}
                   <div
-                    className={`md:col-span-${isEven ? '4' : '8'} ${isEven ? 'md:order-1' : 'md:order-2'}`}
+                    className={isEven ? 'md:col-span-4 md:order-1' : 'md:col-span-8 md:order-2'}
                     style={{
                       position: 'relative'
                     }}
@@ -434,7 +454,7 @@ const EchelonWork = ({
                   </div>
 
                   {/* Content Section */}
-                  <div className={`md:col-span-${isEven ? '8' : '4'} ${isEven ? 'md:order-2' : 'md:order-1'} pt-8 md:pt-10`}>
+                  <div className={isEven ? 'md:col-span-8 md:order-2 pt-8 md:pt-10' : 'md:col-span-4 md:order-1 pt-8 md:pt-10'}>
                     {/* Meta Info */}
                     {isEditing ? (
                       <input
@@ -474,6 +494,7 @@ const EchelonWork = ({
                         value={project.title || ''}
                         onChange={(e) => handleProjectChange(index, 'title', e.target.value)}
                         placeholder="PROJECT TITLE"
+                        className="work-project-title"
                         style={{
                           fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                           fontSize: 'clamp(36px, 6vw, 64px)',
@@ -490,7 +511,7 @@ const EchelonWork = ({
                         }}
                       />
                     ) : (
-                      <h3 style={{
+                      <h3 className="work-project-title" style={{
                         fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
                         fontSize: 'clamp(36px, 6vw, 64px)',
                         fontWeight: 900,
@@ -641,6 +662,7 @@ const EchelonWork = ({
         )}
       </SwissGrid>
     </section>
+    </>
   );
 };
 

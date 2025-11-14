@@ -614,7 +614,7 @@ const CaseStudyEditorPage = () => {
     }}>
       {/* Mobile-responsive styles */}
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .case-study-header {
             padding: 16px 20px !important;
             flex-wrap: wrap !important;
