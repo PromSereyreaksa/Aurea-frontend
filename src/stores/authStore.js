@@ -85,18 +85,19 @@ const useAuthStore = create(
           set({ isLoading: true });
 
           const result = await authApi.signup({ name, email, password });
-          const { user } = result.data; // The user and token are in result.data
+
+          // Don't set isAuthenticated - user needs to verify email first
+          // Clear any token that was stored during signup
+          localStorage.removeItem('aurea_token');
+          localStorage.removeItem('aurea_user');
 
           set({
-            user,
-            isAuthenticated: true,
+            user: null,
+            isAuthenticated: false,
             isLoading: false,
           });
 
-          // Start token expiration monitoring
-          get().startTokenExpirationCheck();
-
-          toast.success("Account created successfully!", { duration: 2000 });
+          toast.success("Account created! Please check your email to verify.", { duration: 3000 });
           return { success: true };
         } catch (error) {
           set({ isLoading: false });
