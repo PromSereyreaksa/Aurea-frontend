@@ -14,7 +14,7 @@ export const templates = {
     name: 'Echelon',
     description: 'Swiss/International Typographic Style - clean, precise, grid-driven design',
     category: 'swiss',
-    preview: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/echolon.png',
     previewUrl: '/template-preview/echelon',
     component: EchelonTemplate,
 
@@ -157,7 +157,7 @@ export const templates = {
     name: 'Serene',
     description: 'Botanical and elegant portfolio template with soft, organic, nature-inspired design',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/blossom.png',
     previewUrl: '/template-preview/serene',
     component: SereneTemplate,
 
@@ -208,23 +208,113 @@ export const templates = {
       },
       gallery: {
         heading: 'My Work',
-        heroText1: 'Melbourne-based tattoo artist Rachel Garcia creates tattoos inspired by nature with a soft watercolor technique.',
-        heroText2: 'Her delicate, nostalgic flowers, plants and birds are inked with the precision of scientific illustrations (grandma would approve).',
+        heroText1: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        heroText2: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.',
         firstRow: [
-          { image: '', title: 'Project 1', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 2', description: 'Description', price: '', caption: '', span: 1 },
-          { image: '', title: 'Project 3', description: 'Description', price: '', caption: '', span: 2 }
+          {
+            id: 'project-1',
+            image: '/portfolios/10.jpg',
+            title: 'Project One',
+            description: 'Creative design showcase',
+            detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-2',
+            image: '/portfolios/12.jpg',
+            title: 'Project Two',
+            description: 'Innovative visual concept',
+            detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+            price: '',
+            caption: '',
+            span: 1
+          },
+          {
+            id: 'project-3',
+            image: '/portfolios/13.jpg',
+            title: 'Project Three',
+            description: 'Modern artistic approach',
+            detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+            price: '',
+            caption: '',
+            span: 2
+          }
         ],
         secondRow: [
-          { image: '', title: 'Project 4', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 5', description: 'Description', price: '', caption: '', span: 3 },
-          { image: '', title: 'Project 6', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 7', description: 'Description', price: '', caption: '', span: 2 }
+          {
+            id: 'project-4',
+            image: '/portfolios/4.png',
+            title: 'Project Four',
+            description: 'Contemporary design study',
+            detailedDescription: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-5',
+            image: '/portfolios/5.jpg',
+            title: 'Project Five',
+            description: 'Elegant composition work',
+            detailedDescription: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.\n\nTemporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
+            price: '',
+            caption: '',
+            span: 3
+          },
+          {
+            id: 'project-6',
+            image: '/portfolios/6.jpg',
+            title: 'Project Six',
+            description: 'Minimalist aesthetic vision',
+            detailedDescription: 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error.\n\nVoluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-7',
+            image: '/portfolios/7.jpg',
+            title: 'Project Seven',
+            description: 'Bold creative expression',
+            detailedDescription: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.\n\nQui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
+            price: '',
+            caption: '',
+            span: 2
+          }
         ],
         thirdRow: [
-          { image: '', title: 'Project 8', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 9', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 10', description: 'Description', price: '', caption: '', span: 1 }
+          {
+            id: 'project-8',
+            image: '/portfolios/8.jpg',
+            title: 'Project Eight',
+            description: 'Strategic visual design',
+            detailedDescription: 'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.\n\nQuam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus.',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-9',
+            image: '/portfolios/9.jpg',
+            title: 'Project Nine',
+            description: 'Refined artistic detail',
+            detailedDescription: 'Qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi.\n\nId est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio.',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-10',
+            image: '/portfolios/10.jpg',
+            title: 'Project Ten',
+            description: 'Sophisticated visual narrative',
+            detailedDescription: 'Cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.\n\nSaepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.',
+            price: '',
+            caption: '',
+            span: 1
+          }
         ]
       }
     },
@@ -286,7 +376,7 @@ export const templates = {
     name: 'Chic',
     description: 'Editorial/Magazine-inspired portfolio with asymmetric sidebar layout and clean typography. Features a sticky left info panel and a two-column project grid with alternating layouts.',
     category: 'editorial',
-    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/chic.png',
     previewUrl: '/template-preview/chic',
     component: ChicTemplate,
 
@@ -332,45 +422,97 @@ export const templates = {
       work: {
         projects: [
           {
-            id: 1,
-            title: 'CHAOSK',
-            subtitle: 'Brand Identity',
-            description: 'Complete brand identity system for an innovative design collective. Including logo design, typography selection, color system, and comprehensive brand guidelines.',
-            image: '',
+            id: 'project-1',
+            title: 'PROJECT ONE',
+            subtitle: 'Creative Direction',
+            description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit.',
+            detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            image: '/mockDataImage/1.jpg',
             category: 'Brand Identity',
-            year: '2023',
-            awards: 'Awwwards Nominee 2023',
+            year: '2024',
+            awards: '',
             link: ''
           },
           {
-            id: 2,
-            title: 'NOVA EDITORIAL',
-            subtitle: 'Magazine Design',
-            description: 'Art direction and layout design for a contemporary art and culture publication. Focus on bold typography and strategic use of whitespace.',
-            image: '',
+            id: 'project-2',
+            title: 'PROJECT TWO',
+            subtitle: 'Visual Design',
+            description: 'Sed ut perspiciatis unde omnis iste natus error.',
+            detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+            image: '/mockDataImage/2.jpg',
             category: 'Editorial',
             year: '2024',
             awards: '',
             link: ''
           },
           {
-            id: 3,
-            title: 'SPECTRUM',
-            subtitle: 'Web Experience',
-            description: 'UI/UX design for an interactive digital experience showcasing emerging artists. Minimalist interface with emphasis on content.',
-            image: '',
+            id: 'project-3',
+            title: 'PROJECT THREE',
+            subtitle: 'Art Direction',
+            description: 'Neque porro quisquam est qui dolorem ipsum.',
+            detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+            image: '/mockDataImage/5.jpg',
             category: 'Digital',
+            year: '2023',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-4',
+            title: 'PROJECT FOUR',
+            subtitle: 'Brand Strategy',
+            description: 'At vero eos et accusamus et iusto odio dignissimos.',
+            detailedDescription: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
+            image: '/mockDataImage/6.jpg',
+            category: 'Branding',
+            year: '2023',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-5',
+            title: 'PROJECT FIVE',
+            subtitle: 'Design System',
+            description: 'Nam libero tempore cum soluta nobis est eligendi.',
+            detailedDescription: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.\n\nTemporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
+            image: '/mockDataImage/7.jpg',
+            category: 'UX/UI',
             year: '2024',
             awards: '',
             link: ''
           },
           {
-            id: 4,
-            title: 'APEX STUDIOS',
-            subtitle: 'Visual Identity',
-            description: 'Complete visual identity system for a multidisciplinary creative studio based in Berlin.',
-            image: '',
-            category: 'Branding',
+            id: 'project-6',
+            title: 'PROJECT SIX',
+            subtitle: 'Print Design',
+            description: 'Itaque earum rerum hic tenetur a sapiente delectus.',
+            detailedDescription: 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.\n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis.',
+            image: '/mockDataImage/8.jpg',
+            category: 'Print',
+            year: '2023',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-7',
+            title: 'PROJECT SEVEN',
+            subtitle: 'Typography',
+            description: 'Nemo enim ipsam voluptatem quia voluptas sit.',
+            detailedDescription: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.\n\nQui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
+            image: '/mockDataImage/9.jpg',
+            category: 'Typography',
+            year: '2024',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-8',
+            title: 'PROJECT EIGHT',
+            subtitle: 'Motion Design',
+            description: 'Ut enim ad minima veniam quis nostrum exercitationem.',
+            detailedDescription: 'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.\n\nQuam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus.',
+            image: '/mockDataImage/10.jpg',
+            category: 'Motion',
             year: '2023',
             awards: '',
             link: ''
@@ -464,7 +606,7 @@ export const templates = {
     name: 'BoldFolio',
     description: 'Bold, creative portfolio template with striking typography and vibrant magenta accents. Perfect for designers and creatives who want to make a statement.',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/boldfolio.png',
     previewUrl: '/template-preview/boldfolio',
     component: BoldFolioTemplate,
 

@@ -41,7 +41,11 @@ const StaticCaseStudyViewer = lazy(() => import("./pages/StaticCaseStudyViewer")
 const EchelonPreviewPage = lazy(() => import("./pages/EchelonPreviewPage"));
 const SerenePreviewPage = lazy(() => import("./pages/SerenePreviewPage"));
 const SereneAboutPreviewPage = lazy(() => import("./pages/SereneAboutPreviewPage"));
+const SereneProjectPreviewPage = lazy(() => import("./pages/SereneProjectPreviewPage"));
+const TemplateProjectEditor = lazy(() => import("./pages/TemplateProjectEditor"));
 const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
+const ChicProjectPreviewPage = lazy(() => import("./pages/ChicProjectPreviewPage"));
+const ChicProjectEditorPage = lazy(() => import("./templates/Chic/ChicProjectEditorPage"));
 const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
@@ -190,6 +194,14 @@ function App() {
               }
             />
             <Route
+              path="/portfolio-builder/:portfolioId/project/:projectId"
+              element={
+                <ProtectedRoute>
+                  <TemplateProjectEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/template-preview/echelon"
               element={<EchelonPreviewPage />}
             />
@@ -202,8 +214,16 @@ function App() {
               element={<SereneAboutPreviewPage />}
             />
             <Route
+              path="/template-preview/serene/project/:projectId"
+              element={<SereneProjectPreviewPage />}
+            />
+            <Route
               path="/template-preview/chic"
               element={<ChicPreviewPage />}
+            />
+            <Route
+              path="/template-preview/chic/project/:projectId"
+              element={<ChicProjectPreviewPage />}
             />
             <Route
               path="/template-preview/boldfolio"

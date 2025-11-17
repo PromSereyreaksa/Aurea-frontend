@@ -18,7 +18,8 @@ const ChicTemplate = ({
   isEditing = false,
   onContentChange,
   className = '',
-  portfolioId = null
+  portfolioId = null,
+  baseUrl = '/template-preview/chic'
 }) => {
   const { isMobile, isTablet, isDesktop } = useBreakpoints();
 
@@ -205,6 +206,8 @@ const ChicTemplate = ({
             styling={mergedStyling}
             isEditing={isEditing}
             onContentChange={handleSectionContentChange}
+            portfolioId={portfolioId}
+            baseUrl={baseUrl}
           />
         )}
       </div>

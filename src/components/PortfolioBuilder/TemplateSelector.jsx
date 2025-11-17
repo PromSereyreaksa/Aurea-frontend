@@ -214,54 +214,22 @@ const TemplateSelector = ({ onSelectTemplate, selectedTemplateId }) => {
                 </div>
               </div>
             )}
-            {/* Template Preview with Dynamic Gradients */}
-            <div className="aspect-[4/5] bg-gradient-to-br from-[#fb8500]/10 via-purple-500/10 to-blue-500/10 relative overflow-hidden group-hover:from-[#fb8500]/20 group-hover:via-purple-500/20 group-hover:to-blue-500/20 transition-all">
-              {/* Geometric decorations */}
-              <div className="absolute top-4 left-4 w-16 h-16 border-2 border-[#fb8500]/30"></div>
-              <div className="absolute bottom-4 right-4 w-12 h-12 bg-[#fb8500]/20"></div>
-              
-              {/* Mock preview of the template */}
-              <div className="absolute inset-0 p-4">
-                {/* Hero section preview with gradient */}
-                <div className="bg-gradient-to-br from-white to-gray-50 mb-3 p-3 shadow-lg border border-neutral-200 group-hover:shadow-xl transition-shadow">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#fb8500] to-[#ff9500] rounded-full mx-auto mb-2"></div>
-                  <div className="h-2 bg-gradient-to-r from-[#fb8500] to-[#ff9500] rounded w-3/4 mx-auto mb-1"></div>
-                  <div className="h-1.5 bg-neutral-300 rounded w-1/2 mx-auto"></div>
-                </div>
-                
-                {/* Content sections preview with colors */}
-                <div className="space-y-2">
-                  <div className="bg-white p-2 shadow-md border border-neutral-200">
-                    <div className="h-1.5 bg-[#fb8500] rounded w-1/4 mb-1"></div>
-                    <div className="grid grid-cols-2 gap-1">
-                      <div className="h-8 bg-gradient-to-br from-[#fb8500]/20 to-purple-500/20 rounded"></div>
-                      <div className="space-y-1">
-                        <div className="h-1 bg-neutral-300 rounded"></div>
-                        <div className="h-1 bg-neutral-300 rounded w-3/4"></div>
-                        <div className="h-1 bg-neutral-300 rounded w-1/2"></div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white p-2 shadow-md border border-neutral-200">
-                    <div className="h-1.5 bg-purple-500 rounded w-1/3 mb-1"></div>
-                    <div className="grid grid-cols-3 gap-1">
-                      <div className="h-6 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded"></div>
-                      <div className="h-6 bg-gradient-to-br from-blue-500/20 to-[#fb8500]/20 rounded"></div>
-                      <div className="h-6 bg-gradient-to-br from-[#fb8500]/20 to-purple-500/20 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Template Preview Image */}
+            <div className="aspect-[4/5] bg-neutral-100 relative overflow-hidden group-hover:shadow-lg transition-all">
+              {/* Template preview image */}
+              <img
+                src={template.preview}
+                alt={`${template.name} template preview`}
+                className="w-full h-full object-cover object-top"
+                onError={(e) => {
+                  // Fallback gradient if image fails to load
+                  e.target.style.display = 'none';
+                  e.target.parentElement.classList.add('bg-gradient-to-br', 'from-[#fb8500]/10', 'via-purple-500/10', 'to-blue-500/10');
+                }}
+              />
 
-              {/* Selected indicator */}
-              {selectedTemplateId === template.id && (
-                <div className="absolute top-3 right-3 bg-blue-500 text-white p-2 rounded-full">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-[#fb8500]/0 group-hover:bg-[#fb8500]/10 transition-all duration-300"></div>
             </div>
 
             {/* Template Info */}
