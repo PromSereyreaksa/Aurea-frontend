@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAuthStore from "../stores/authStore";
 import aureaLogo from "../assets/AUREA - Logo.jpg";
+import GoogleSignInButton from "../components/Shared/GoogleSignInButton";
 
 const SignupPage = () => {
   const location = useLocation();
@@ -39,7 +40,17 @@ const SignupPage = () => {
 
   const onSubmit = async (data) => {
     const result = await signup(data.name, data.email, data.password);
-    // Don't navigate here - let the useEffect handle it after auth state updates
+
+    // Redirect to email verification page
+    if (result.success) {
+      // Store password temporarily for auto-login after email verification
+      sessionStorage.setItem('aurea_signup_password', data.password);
+
+      navigate('/verify-email', {
+        state: { email: data.email },
+        replace: true
+      });
+    }
   };
 
   const handleBack = () => {
@@ -88,6 +99,21 @@ const SignupPage = () => {
             <p className="text-gray-600">
               Create your account and start designing
             </p>
+          </div>
+
+          {/* Google Sign Up Button */}
+          <div className="mb-6">
+            <GoogleSignInButton text="Sign up with Google" fullWidth />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or sign up with email</span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

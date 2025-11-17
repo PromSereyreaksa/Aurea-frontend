@@ -1,0 +1,279 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import OTPInput from '../components/Shared/OTPInput';
+import useAuthStore from '../stores/authStore';
+
+const EmailVerificationPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get('email');
+
+  const [otp, setOtp] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [error, setError] = useState('');
+
+  const { user, checkAuth } = useAuthStore();
+
+  // Redirect if no email provided or already verified
+  useEffect(() => {
+    if (!email) {
+      toast.error('Email address is required');
+      navigate('/login');
+      return;
+    }
+
+    if (user?.emailVerified) {
+      toast.success('Email already verified');
+      navigate('/dashboard');
+    }
+  }, [email, user, navigate]);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanResend(true);
+    }
+  }, [countdown]);
+
+  const handleOTPComplete = async (otpValue) => {
+    setError('');
+    setOtp(otpValue);
+    await verifyOTP(otpValue);
+  };
+
+  const verifyOTP = async (otpValue) => {
+    setIsVerifying(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/verify-email-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: otpValue })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed');
+      }
+
+      toast.success('Email verified successfully!');
+
+      // Refresh user data
+      await checkAuth();
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
+    } catch (error) {
+      setError(error.message || 'Invalid or expired code');
+      toast.error(error.message || 'Invalid or expired code');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!canResend || isResending) return;
+
+    setIsResending(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/resend-verification-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend code');
+      }
+
+      toast.success('Verification code sent!');
+      setCanResend(false);
+      setCountdown(60);
+
+    } catch (error) {
+      toast.error(error.message || 'Failed to resend code');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Icon */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
+          >
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </motion.div>
+
+          {/* Title */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Verify Your Email
+            </h1>
+            <p className="text-gray-600">
+              We sent a code to{' '}
+              <span className="font-semibold text-gray-900">{email}</span>
+            </p>
+          </motion.div>
+
+          {/* OTP Input */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <OTPInput
+              length={6}
+              onComplete={handleOTPComplete}
+              onChange={(value) => {
+                setOtp(value);
+                setError('');
+              }}
+              disabled={isVerifying}
+              error={error}
+            />
+          </motion.div>
+
+          {/* Loading state */}
+          {isVerifying && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center mb-4"
+            >
+              <div className="inline-flex items-center gap-2 text-blue-600">
+                <svg
+                  className="animate-spin h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span>Verifying...</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Resend Button */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-center"
+          >
+            <p className="text-sm text-gray-600 mb-2">
+              Didn't receive the code?
+            </p>
+            <button
+              onClick={handleResend}
+              disabled={!canResend || isResending}
+              className={`
+                text-sm font-medium
+                ${canResend && !isResending
+                  ? 'text-blue-600 hover:text-blue-700 cursor-pointer'
+                  : 'text-gray-400 cursor-not-allowed'
+                }
+              `}
+            >
+              {isResending ? (
+                'Sending...'
+              ) : canResend ? (
+                'Resend Code'
+              ) : (
+                `Resend in ${countdown}s`
+              )}
+            </button>
+          </motion.div>
+
+          {/* Back to Login */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-6 text-center"
+          >
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              ← Back to Login
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Help Text */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-sm text-gray-600">
+            Check your spam folder if you don't see the email
+          </p>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default EmailVerificationPage;
