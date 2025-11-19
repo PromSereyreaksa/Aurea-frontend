@@ -24,6 +24,10 @@ const AllEventsPage = lazy(() => import("./pages/AllEventsPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const EmailVerificationPage = lazy(() => import("./pages/EmailVerificationPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const GoogleCallbackPage = lazy(() => import("./pages/GoogleCallbackPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const DashboardNew = lazy(() => import("./pages/DashboardNew"));
 const AccountNew = lazy(() => import("./pages/AccountNew"));
@@ -146,6 +150,10 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verify-email" element={<EmailVerificationPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+            <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
             <Route
               path="/dashboard"
               element={

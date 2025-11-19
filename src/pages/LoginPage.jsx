@@ -3,18 +3,24 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAuthStore from "../stores/authStore";
 import aureaLogo from "../assets/AUREA - Logo.jpg";
+import GoogleSignInButton from "../components/Shared/GoogleSignInButton";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      email: location.state?.email || "",
+    },
+  });
   const { login, isLoading, isAuthenticated, checkAuth } = useAuthStore();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [authChecked, setAuthChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || "");
 
   // Get return URL from query params or state
   const searchParams = new URLSearchParams(location.search);
@@ -118,6 +124,28 @@ const LoginPage = () => {
               Welcome back
             </h1>
             <p className="text-gray-600">Sign in to your AUREA account</p>
+          </div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md">
+              <p className="text-sm font-medium">{successMessage}</p>
+            </div>
+          )}
+
+          {/* Google Sign In Button */}
+          <div className="mb-6">
+            <GoogleSignInButton fullWidth />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with email</span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
