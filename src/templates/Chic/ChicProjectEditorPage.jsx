@@ -12,6 +12,8 @@ import StarterKit from '@tiptap/starter-kit';
 import { portfolioApi } from '../../lib/portfolioApi';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import useUploadStore from '../../stores/uploadStore';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
 const ChicProjectEditorPage = () => {
   const navigate = useNavigate();
@@ -21,10 +23,13 @@ const ChicProjectEditorPage = () => {
 
   const [portfolio, setPortfolio] = useState(null);
   const [project, setProject] = useState(null);
+  const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [currentUploadId, setCurrentUploadId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Rich text editor for detailed description
   const editor = useEditor({
@@ -46,11 +51,11 @@ const ChicProjectEditorPage = () => {
         const data = await portfolioApi.getById(portfolioId);
         setPortfolio(data);
 
-        // Find the project
-        const content = data.content || {};
-        const work = content.work || {};
-        const projects = work.projects || [];
+        // Get all projects for sidebar
+        const projects = getProjectsForTemplate(data.content, data.template || 'chic');
+        setAllProjects(projects);
 
+        // Find the current project
         const foundProject = projects.find(p => p.id === projectId);
         if (foundProject) {
           setProject(foundProject);
@@ -79,6 +84,13 @@ const ChicProjectEditorPage = () => {
       editor.commands.setContent(project.detailedDescription.replace(/\n/g, '<br>'));
     }
   }, [project, editor]);
+
+  // Track unsaved changes when project state changes
+  useEffect(() => {
+    if (project) {
+      setHasUnsavedChanges(true);
+    }
+  }, [project]);
 
   // Handle image upload
   const handleImageUpload = async (e) => {
@@ -140,6 +152,7 @@ const ChicProjectEditorPage = () => {
         // Save to backend
         await portfolioApi.update(portfolioId, { content: updatedContent });
 
+        setHasUnsavedChanges(false);
         toast.success('Project updated successfully!');
       }
     } catch (error) {
@@ -180,12 +193,25 @@ const ChicProjectEditorPage = () => {
     return null;
   }
 
+  const currentProjectIndex = getProjectIndex(allProjects, projectId);
+
   return (
     <div style={{
       width: '100%',
       minHeight: '100vh',
       backgroundColor: '#FFFFFF'
     }}>
+      {/* Project Sidebar */}
+      <ProjectSidebar
+        portfolioId={portfolioId}
+        projects={allProjects}
+        currentProjectId={projectId}
+        templateType={portfolio?.template || 'chic'}
+        isOpen={sidebarOpen}
+        onToggle={setSidebarOpen}
+        hasUnsavedChanges={hasUnsavedChanges}
+      />
+
       {/* Header */}
       <div style={{
         position: 'fixed',
@@ -238,7 +264,7 @@ const ChicProjectEditorPage = () => {
             flex: 1,
             textAlign: 'center'
           }}>
-            Editing Project
+            {currentProjectIndex > 0 ? `Editing Project ${currentProjectIndex}` : 'Editing Project'}
           </div>
 
           <button

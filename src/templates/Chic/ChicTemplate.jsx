@@ -5,12 +5,14 @@
  * Reference: Readymag-style layout with absolute positioning
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBreakpoints } from '../../hooks/useMediaQuery';
 import ChicHero from './sections/ChicHero';
 import ChicAbout from './sections/ChicAbout';
 import ChicWork from './sections/ChicWork';
 import ChicContact from './sections/ChicContact';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate } from '../../utils/projectUtils';
 
 const ChicTemplate = ({
   content = {},
@@ -22,6 +24,12 @@ const ChicTemplate = ({
   baseUrl = '/template-preview/chic'
 }) => {
   const { isMobile, isTablet, isDesktop } = useBreakpoints();
+
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar
+  const allProjects = isEditing ? getProjectsForTemplate(content, 'chic') : [];
 
   // Default styling - Chic Editorial theme
   const defaultStyling = {
@@ -131,6 +139,19 @@ const ChicTemplate = ({
         position: 'relative'
       }}
     >
+      {/* Project Sidebar - Only show in editing mode */}
+      {isEditing && portfolioId && allProjects.length > 0 && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="chic"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
+
       {/* Fixed Left Sidebar - Sticky positioned */}
       <div
         className="fixed-position-container"

@@ -12,6 +12,8 @@ import StarterKit from '@tiptap/starter-kit';
 import { portfolioApi } from '../../lib/portfolioApi';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import useUploadStore from '../../stores/uploadStore';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
 const SereneProjectEditorPage = () => {
   const navigate = useNavigate();
@@ -21,10 +23,13 @@ const SereneProjectEditorPage = () => {
 
   const [portfolio, setPortfolio] = useState(null);
   const [project, setProject] = useState(null);
+  const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [currentUploadId, setCurrentUploadId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Rich text editor for detailed description
   const editor = useEditor({
@@ -46,16 +51,12 @@ const SereneProjectEditorPage = () => {
         const data = await portfolioApi.getById(portfolioId);
         setPortfolio(data);
 
-        // Find the project
-        const content = data.content || {};
-        const gallery = content.gallery || {};
-        const allProjects = [
-          ...(gallery.firstRow || []),
-          ...(gallery.secondRow || []),
-          ...(gallery.thirdRow || [])
-        ];
+        // Get all projects for sidebar
+        const projects = getProjectsForTemplate(data.content, data.template || 'serene');
+        setAllProjects(projects);
 
-        const foundProject = allProjects.find(p => p.id === projectId);
+        // Find the current project
+        const foundProject = projects.find(p => p.id === projectId);
         if (foundProject) {
           setProject(foundProject);
           // Set editor content
@@ -83,6 +84,13 @@ const SereneProjectEditorPage = () => {
       editor.commands.setContent(project.detailedDescription.replace(/\n/g, '<br>'));
     }
   }, [project, editor]);
+
+  // Track unsaved changes when project state changes
+  useEffect(() => {
+    if (project) {
+      setHasUnsavedChanges(true);
+    }
+  }, [project]);
 
   // Handle image upload
   const handleImageUpload = async (e) => {
@@ -148,6 +156,7 @@ const SereneProjectEditorPage = () => {
       // Save to backend
       await portfolioApi.update(portfolioId, { content: updatedContent });
 
+      setHasUnsavedChanges(false);
       toast.success('Project updated successfully!');
     } catch (error) {
       console.error('Failed to save project:', error);
@@ -196,12 +205,25 @@ const SereneProjectEditorPage = () => {
     border: '#e5e7eb'
   };
 
+  const currentProjectIndex = getProjectIndex(allProjects, projectId);
+
   return (
     <div style={{
       width: '100%',
       minHeight: '100vh',
       backgroundColor: sereneColors.background
     }}>
+      {/* Project Sidebar */}
+      <ProjectSidebar
+        portfolioId={portfolioId}
+        projects={allProjects}
+        currentProjectId={projectId}
+        templateType={portfolio?.template || 'serene'}
+        isOpen={sidebarOpen}
+        onToggle={setSidebarOpen}
+        hasUnsavedChanges={hasUnsavedChanges}
+      />
+
       {/* Header */}
       <div style={{
         position: 'fixed',
@@ -254,7 +276,7 @@ const SereneProjectEditorPage = () => {
             flex: 1,
             textAlign: 'center'
           }}>
-            Editing Project
+            {currentProjectIndex > 0 ? `Editing Project ${currentProjectIndex}` : 'Editing Project'}
           </div>
 
           <button

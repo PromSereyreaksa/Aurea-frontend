@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BoldFolioHero from './sections/BoldFolioHero';
 import BoldFolioAbout from './sections/BoldFolioAbout';
 import BoldFolioWork from './sections/BoldFolioWork';
 import BoldFolioContact from './sections/BoldFolioContact';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate } from '../../utils/projectUtils';
 
 const BoldFolioTemplate = ({
   content = {},
@@ -11,6 +13,12 @@ const BoldFolioTemplate = ({
   className = '',
   portfolioId = null
 }) => {
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar
+  const allProjects = isEditing ? getProjectsForTemplate(content, 'boldfolio') : [];
+
   // Handle content changes
   const handleSectionContentChange = (section, field, value) => {
     if (onContentChange) {
@@ -37,6 +45,19 @@ const BoldFolioTemplate = ({
         fontStyle: 'normal'
       }}
     >
+      {/* Project Sidebar - Only show in editing mode */}
+      {isEditing && portfolioId && allProjects.length > 0 && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="boldfolio"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
+
       {/* Hero Section */}
       <BoldFolioHero
         content={content.hero || {}}

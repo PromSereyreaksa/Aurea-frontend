@@ -5,11 +5,13 @@
  * Schema-driven template that adapts to backend configuration
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import SereneNavigation from './sections/SereneNavigation';
 import SereneHero from './sections/SereneHero';
 import SereneGallery from './sections/SereneGallery';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate } from '../../utils/projectUtils';
 
 const SereneTemplate = ({
   content = {},
@@ -20,6 +22,12 @@ const SereneTemplate = ({
   portfolioId,
   baseUrl = '/template-preview/serene',
 }) => {
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar
+  const allProjects = isEditing ? getProjectsForTemplate(content, 'serene') : [];
+
   // Merge styling from backend with defaults - Clean Blossom color palette
   const colors = styling?.colorScheme || styling?.colors || {
     primary: '#4a5568',
@@ -66,6 +74,19 @@ const SereneTemplate = ({
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet"
       />
+
+      {/* Project Sidebar - Only show in editing mode */}
+      {isEditing && portfolioId && allProjects.length > 0 && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="serene"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
 
       {/* Navigation */}
       {content.navigation && (

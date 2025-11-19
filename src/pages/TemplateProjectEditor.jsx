@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { portfolioApi } from '../lib/portfolioApi';
 import SereneProjectEditorPage from '../templates/Serene/SereneProjectEditorPage';
 import ChicProjectEditorPage from '../templates/Chic/ChicProjectEditorPage';
+import BoldFolioProjectEditorPage from '../templates/BoldFolio/BoldFolioProjectEditorPage';
 
 /**
  * Template-aware wrapper for project editor pages
@@ -109,6 +110,8 @@ const TemplateProjectEditor = () => {
       return <SereneProjectEditorPage />;
     case 'chic':
       return <ChicProjectEditorPage />;
+    case 'boldfolio':
+      return <BoldFolioProjectEditorPage />;
     default:
       // Default to Serene for backwards compatibility
       console.warn(`Unknown template: ${templateId}, defaulting to Serene editor`);

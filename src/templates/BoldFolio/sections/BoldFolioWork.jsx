@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useImageUpload } from '../../../hooks/useImageUpload';
 import { useBreakpoints } from '../../../hooks/useMediaQuery';
 
-const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => {
+const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange, baseUrl = '/template-preview/boldfolio' }) => {
+  const navigate = useNavigate();
+  const { portfolioId } = useParams();
   const [visibleSections, setVisibleSections] = useState([]);
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
   const { uploadImage } = useImageUpload();
@@ -280,7 +283,7 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
                     backgroundImage: img.src ? `url(${img.src})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    cursor: isEditing ? 'pointer' : 'default',
+                    cursor: (isEditing || project.id) ? 'pointer' : 'default',
                     position: 'relative',
                     display: 'flex',
                     alignItems: 'center',
@@ -289,6 +292,12 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
                   onClick={() => {
                     if (isEditing) {
                       document.getElementById(`file-input-boldfolio-${imageKey}`).click();
+                    } else if (project.id) {
+                      // In preview mode: navigate to project detail page
+                      const projectUrl = portfolioId
+                        ? `/portfolio-builder/${portfolioId}/project/${project.id}`
+                        : `${baseUrl}/project/${project.id}`;
+                      navigate(projectUrl);
                     }
                   }}
                 >

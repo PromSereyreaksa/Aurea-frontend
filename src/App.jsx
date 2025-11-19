@@ -47,6 +47,7 @@ const ChicPreviewPage = lazy(() => import("./pages/ChicPreviewPage"));
 const ChicProjectPreviewPage = lazy(() => import("./pages/ChicProjectPreviewPage"));
 const ChicProjectEditorPage = lazy(() => import("./templates/Chic/ChicProjectEditorPage"));
 const BoldFolioPreviewPage = lazy(() => import("./pages/BoldFolioPreviewPage"));
+const BoldFolioProjectPreviewPage = lazy(() => import("./pages/BoldFolioProjectPreviewPage"));
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
@@ -228,6 +229,10 @@ function App() {
             <Route
               path="/template-preview/boldfolio"
               element={<BoldFolioPreviewPage />}
+            />
+            <Route
+              path="/template-preview/boldfolio/project/:projectId"
+              element={<BoldFolioProjectPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route
