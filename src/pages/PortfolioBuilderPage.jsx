@@ -1050,7 +1050,7 @@ const PortfolioBuilderPage = () => {
                 <TemplatePreview
                   key={selectedTemplate?.id}
                   template={selectedTemplate}
-                  portfolioData={portfolioData}
+                  portfolioData={{ ...portfolioData, id: id }}
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
                   onEditingStateChange={(editing) => {

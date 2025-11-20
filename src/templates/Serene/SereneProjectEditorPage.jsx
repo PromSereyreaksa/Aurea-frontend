@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -16,8 +16,18 @@ import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
 import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
 const SereneProjectEditorPage = () => {
+  console.log('🚀 SereneProjectEditorPage COMPONENT LOADED');
+
   const navigate = useNavigate();
+  const location = useLocation();
   const { portfolioId, projectId } = useParams();
+
+  // Get passed state from navigation
+  const passedState = location.state || {};
+
+  console.log('🚀 SereneProjectEditorPage params:', { portfolioId, projectId });
+  console.log('🚀 SereneProjectEditorPage state:', passedState);
+
   const { uploadImage } = useImageUpload();
   const { startUpload, getPreviewUrl, getFinalUrl, getProgress } = useUploadStore();
 
@@ -48,15 +58,65 @@ const SereneProjectEditorPage = () => {
     const loadPortfolio = async () => {
       try {
         setLoading(true);
+
+        // If project data was passed via navigation state, use it directly
+        if (passedState.project && passedState.allProjects) {
+          console.log('✅ Using passed project data from navigation state');
+          setProject(passedState.project);
+          setAllProjects(passedState.allProjects);
+
+          // Set editor content
+          if (editor && passedState.project.detailedDescription) {
+            editor.commands.setContent(passedState.project.detailedDescription.replace(/\n/g, '<br>'));
+          }
+
+          setLoading(false);
+          return;
+        }
+
+        console.log('⚠️ No passed state, fetching from backend...');
         const data = await portfolioApi.getById(portfolioId);
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Portfolio Data:', {
+          portfolioId,
+          projectId,
+          hasData: !!data,
+          hasContent: !!data?.content,
+          hasSections: !!data?.sections,
+          template: data?.template,
+          rawData: data,
+          contentKeys: data?.content ? Object.keys(data.content) : [],
+          sectionsCount: data?.sections?.length || 0,
+          galleryStructure: data?.content?.gallery,
+          hasFirstRow: !!data?.content?.gallery?.firstRow,
+          hasSecondRow: !!data?.content?.gallery?.secondRow,
+          hasThirdRow: !!data?.content?.gallery?.thirdRow,
+          firstRowCount: data?.content?.gallery?.firstRow?.length || 0,
+          secondRowCount: data?.content?.gallery?.secondRow?.length || 0,
+          thirdRowCount: data?.content?.gallery?.thirdRow?.length || 0
+        });
+
         setPortfolio(data);
 
         // Get all projects for sidebar
         const projects = getProjectsForTemplate(data.content, data.template || 'serene');
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Extracted Projects:', {
+          projectsCount: projects?.length || 0,
+          projects: projects,
+          lookingForProjectId: projectId
+        });
+
         setAllProjects(projects);
 
         // Find the current project
         const foundProject = projects.find(p => p.id === projectId);
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Found Project:', {
+          found: !!foundProject,
+          project: foundProject
+        });
+
         if (foundProject) {
           setProject(foundProject);
           // Set editor content
@@ -64,8 +124,24 @@ const SereneProjectEditorPage = () => {
             editor.commands.setContent(foundProject.detailedDescription.replace(/\n/g, '<br>'));
           }
         } else {
-          toast.error('Project not found');
-          navigate(`/portfolio-builder/${portfolioId}`);
+          console.error('❌ Project not found in portfolio data!');
+          console.error('Available project IDs:', projects.map(p => p.id));
+          console.error('Looking for project ID:', projectId);
+          console.error('Full gallery data:', data?.content?.gallery);
+
+          // TEMPORARY: Don't redirect, just show error in UI
+          toast.error(`Project "${projectId}" not found. Check console for details.`);
+
+          // Create a dummy project to prevent crash
+          setProject({
+            id: projectId,
+            title: `Project ${projectId} (Not Found)`,
+            image: '',
+            detailedDescription: 'This project was not found in the portfolio data. Check the console logs for details.'
+          });
+
+          // DON'T redirect - comment this out temporarily
+          // navigate(`/portfolio-builder/${portfolioId}`);
         }
       } catch (error) {
         console.error('Failed to load portfolio:', error);

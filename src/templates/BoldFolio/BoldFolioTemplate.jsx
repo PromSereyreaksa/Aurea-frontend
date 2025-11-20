@@ -4,7 +4,7 @@ import BoldFolioAbout from './sections/BoldFolioAbout';
 import BoldFolioWork from './sections/BoldFolioWork';
 import BoldFolioContact from './sections/BoldFolioContact';
 import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
-import { getProjectsForTemplate } from '../../utils/projectUtils';
+import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUtils';
 
 const BoldFolioTemplate = ({
   content = {},
@@ -16,8 +16,10 @@ const BoldFolioTemplate = ({
   // Sidebar state for editing mode
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Get all projects for sidebar
-  const allProjects = isEditing ? getProjectsForTemplate(content, 'boldfolio') : [];
+  // Get all projects for sidebar with ensured IDs
+  const allProjects = isEditing
+    ? ensureProjectIds(getProjectsForTemplate(content, 'boldfolio'), 'boldfolio')
+    : [];
 
   // Handle content changes
   const handleSectionContentChange = (section, field, value) => {
@@ -45,8 +47,8 @@ const BoldFolioTemplate = ({
         fontStyle: 'normal'
       }}
     >
-      {/* Project Sidebar - Only show in editing mode */}
-      {isEditing && portfolioId && allProjects.length > 0 && (
+      {/* Project Sidebar - Show in editing mode when portfolio exists */}
+      {isEditing && portfolioId && portfolioId !== 'new' && (
         <ProjectSidebar
           portfolioId={portfolioId}
           projects={allProjects}

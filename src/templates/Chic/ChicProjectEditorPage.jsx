@@ -49,14 +49,39 @@ const ChicProjectEditorPage = () => {
       try {
         setLoading(true);
         const data = await portfolioApi.getById(portfolioId);
+
+        console.log('🔍 CHIC PROJECT EDITOR DEBUG - Portfolio Data:', {
+          portfolioId,
+          projectId,
+          hasData: !!data,
+          hasContent: !!data?.content,
+          template: data?.template,
+          contentKeys: data?.content ? Object.keys(data.content) : [],
+          workProjects: data?.content?.work?.projects,
+          workProjectsCount: data?.content?.work?.projects?.length || 0
+        });
+
         setPortfolio(data);
 
         // Get all projects for sidebar
         const projects = getProjectsForTemplate(data.content, data.template || 'chic');
+
+        console.log('🔍 CHIC PROJECT EDITOR DEBUG - Extracted Projects:', {
+          projectsCount: projects?.length || 0,
+          projects: projects,
+          lookingForProjectId: projectId
+        });
+
         setAllProjects(projects);
 
         // Find the current project
         const foundProject = projects.find(p => p.id === projectId);
+
+        console.log('🔍 CHIC PROJECT EDITOR DEBUG - Found Project:', {
+          found: !!foundProject,
+          project: foundProject
+        });
+
         if (foundProject) {
           setProject(foundProject);
           // Set editor content
@@ -64,8 +89,24 @@ const ChicProjectEditorPage = () => {
             editor.commands.setContent(foundProject.detailedDescription.replace(/\n/g, '<br>'));
           }
         } else {
-          toast.error('Project not found');
-          navigate(`/portfolio-builder/${portfolioId}`);
+          console.error('❌ Chic Project not found in portfolio data!');
+          console.error('Available project IDs:', projects.map(p => p.id));
+          console.error('Looking for project ID:', projectId);
+          console.error('Full work.projects data:', data?.content?.work?.projects);
+
+          // TEMPORARY: Don't redirect, just show error in UI
+          toast.error(`Project "${projectId}" not found. Check console for details.`);
+
+          // Create a dummy project to prevent crash
+          setProject({
+            id: projectId,
+            title: `Project ${projectId} (Not Found)`,
+            image: '',
+            detailedDescription: 'This project was not found in the portfolio data. Check the console logs for details.'
+          });
+
+          // DON'T redirect - comment this out temporarily
+          // navigate(`/portfolio-builder/${portfolioId}`);
         }
       } catch (error) {
         console.error('Failed to load portfolio:', error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProjectIndex, getProjectThumbnail, getProjectTitle } from '../../utils/projectUtils';
 
@@ -14,6 +14,64 @@ const ProjectSidebar = ({
 }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(controlledIsOpen ?? true);
+
+  console.log('🎯 ProjectSidebar COMPONENT RENDERED', {
+    portfolioId,
+    projectsCount: projects?.length,
+    projects,
+    currentProjectId,
+    templateType,
+    timestamp: new Date().toISOString()
+  });
+
+  // Debug props on mount
+  useEffect(() => {
+    console.log('ProjectSidebar mounted with props:', {
+      portfolioId,
+      projectsCount: projects?.length || 0,
+      currentProjectId,
+      templateType,
+      hasProjects: projects && projects.length > 0,
+      firstProject: projects?.[0],
+      currentURL: window.location.pathname
+    });
+
+    // Log all project IDs for debugging
+    if (projects && projects.length > 0) {
+      console.log('ProjectSidebar: Available projects:',
+        projects.map(p => ({
+          id: p.id,
+          title: getProjectTitle(p),
+          navigationPath: `/portfolio-builder/${portfolioId}/project/${p.id}`
+        }))
+      );
+    }
+
+    // Global click listener to debug what's blocking clicks
+    const globalClickListener = (e) => {
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+      const elementAtPoint = document.elementFromPoint(clickX, clickY);
+
+      console.log('🔍 GLOBAL CLICK DEBUG:', {
+        x: clickX,
+        y: clickY,
+        elementAtPoint: elementAtPoint,
+        elementTag: elementAtPoint?.tagName,
+        elementClass: elementAtPoint?.className,
+        elementId: elementAtPoint?.id,
+        zIndex: window.getComputedStyle(elementAtPoint || document.body).zIndex,
+        pointerEvents: window.getComputedStyle(elementAtPoint || document.body).pointerEvents,
+        position: window.getComputedStyle(elementAtPoint || document.body).position,
+        // Check if click is in sidebar area (left 280px)
+        isInSidebarArea: clickX < 280,
+        sidebarOpen: isOpen
+      });
+    };
+
+    document.addEventListener('click', globalClickListener, true);
+    return () => document.removeEventListener('click', globalClickListener, true);
+  }, [portfolioId, projects, currentProjectId, templateType, isOpen]);
 
   // Sync with controlled state if provided
   useEffect(() => {
@@ -30,17 +88,60 @@ const ProjectSidebar = ({
     }
   };
 
-  const handleProjectClick = (projectId) => {
-    if (projectId === currentProjectId) return;
+  const handleProjectClick = (e, projectId) => {
+    console.log('ProjectSidebar: Handling project click', {
+      projectId,
+      currentProjectId,
+      portfolioId,
+      currentURL: window.location.pathname
+    });
+
+    if (projectId === currentProjectId) {
+      console.log('ProjectSidebar: Same project, skipping navigation');
+      e.preventDefault();
+      return;
+    }
+
+    if (!portfolioId || portfolioId === 'new') {
+      console.error('ProjectSidebar: Invalid portfolio ID for navigation', portfolioId);
+      e.preventDefault();
+      return;
+    }
+
+    if (!projectId) {
+      console.error('ProjectSidebar: No project ID provided');
+      e.preventDefault();
+      return;
+    }
 
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(
         'You have unsaved changes. Are you sure you want to switch projects?'
       );
-      if (!confirmed) return;
+      if (!confirmed) {
+        e.preventDefault();
+        return;
+      }
     }
 
-    navigate(`/portfolio-builder/${portfolioId}/project/${projectId}`);
+    const navigationPath = `/portfolio-builder/${portfolioId}/project/${projectId}`;
+    console.log('ProjectSidebar: Navigation path', navigationPath);
+
+    // Let the Link component handle navigation naturally
+    // If for some reason the Link doesn't work, we have a fallback
+    setTimeout(() => {
+      const currentPath = window.location.pathname;
+      console.log('ProjectSidebar: Checking navigation after 100ms', {
+        expectedPath: navigationPath,
+        currentPath: currentPath
+      });
+
+      // If we're still on the same page after 100ms, force navigation
+      if (currentPath === window.location.pathname && currentPath !== navigationPath) {
+        console.log('ProjectSidebar: Link navigation failed, using fallback');
+        window.location.href = navigationPath;
+      }
+    }, 100);
   };
 
   const currentIndex = getProjectIndex(projects, currentProjectId);
@@ -50,10 +151,11 @@ const ProjectSidebar = ({
       {/* Toggle Button - Always Visible */}
       <motion.button
         onClick={handleToggle}
-        className="fixed top-20 z-50 bg-white border border-gray-200 rounded-r-lg shadow-lg hover:bg-gray-50 transition-colors"
+        className="fixed top-20 bg-white border border-gray-200 rounded-r-lg shadow-lg hover:bg-gray-50 transition-colors"
         style={{
           left: isOpen ? '280px' : '0px',
-          padding: '12px 8px'
+          padding: '12px 8px',
+          zIndex: 1000001
         }}
         initial={false}
         animate={{ left: isOpen ? '280px' : '0px' }}
@@ -84,12 +186,16 @@ const ProjectSidebar = ({
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-lg z-40 overflow-y-auto"
+            className="fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-lg overflow-y-auto"
             style={{
               width: '280px',
               paddingTop: '80px',
-              paddingBottom: '20px'
+              paddingBottom: '20px',
+              zIndex: 1000000,
+              pointerEvents: 'auto'
             }}
+            onClick={(e) => console.log('Sidebar container clicked', e.target)}
+            onMouseEnter={() => console.log('Mouse entered sidebar container')}
           >
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-200">
@@ -127,18 +233,48 @@ const ProjectSidebar = ({
                   const projectNumber = index + 1;
 
                   return (
-                    <motion.div
+                    <div
                       key={project.id || index}
-                      className={`px-4 py-3 cursor-pointer transition-colors ${
-                        isActive
-                          ? 'bg-blue-100 border-l-4 border-blue-600'
-                          : 'hover:bg-gray-50 border-l-4 border-transparent'
-                      }`}
-                      onClick={() => handleProjectClick(project.id)}
-                      whileHover={{ scale: isActive ? 1 : 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        console.log('=== SIDEBAR CLICK DEBUG ===');
+                        console.log('Project clicked:', {
+                          projectId: project.id,
+                          projectTitle: title,
+                          portfolioId,
+                          project: project
+                        });
+
+                        // Navigate with project data in state
+                        const navPath = `/portfolio-builder/${portfolioId}/project/${project.id}`;
+                        console.log('Navigating to:', navPath, 'with project data:', project);
+
+                        navigate(navPath, {
+                          state: {
+                            project: project,
+                            allProjects: projects,
+                            portfolioId: portfolioId,
+                            templateType: templateType
+                          }
+                        });
+                      }}
+                      onMouseEnter={() => console.log('🖱️ Mouse ENTER on project:', project.id, title)}
+                      onMouseLeave={() => console.log('🖱️ Mouse LEAVE on project:', project.id)}
+                      style={{ cursor: 'pointer', position: 'relative', zIndex: 10 }}
                     >
-                      <div className="flex items-start gap-3">
+                      <motion.div
+                        className={`px-4 py-3 cursor-pointer transition-colors ${
+                          isActive
+                            ? 'bg-blue-100 border-l-4 border-blue-600'
+                            : 'hover:bg-gray-50 border-l-4 border-transparent'
+                        }`}
+                        style={{ pointerEvents: 'auto' }}
+                        whileHover={{ scale: isActive ? 1 : 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onMouseEnter={() => console.log('Mouse entered motion.div for project:', project.id)}
+                        onClick={() => console.log('Motion.div clicked for project:', project.id)}
+                      >
+                        <div className="flex items-start gap-3">
                         {/* Thumbnail */}
                         <div
                           className="flex-shrink-0 w-16 h-16 rounded bg-gray-100 overflow-hidden"
@@ -197,7 +333,8 @@ const ProjectSidebar = ({
                           </p>
                         </div>
                       </div>
-                    </motion.div>
+                      </motion.div>
+                    </div>
                   );
                 })
               )}
@@ -221,7 +358,8 @@ const ProjectSidebar = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 md:hidden"
+            style={{ zIndex: 999999 }}
             onClick={handleToggle}
           />
         )}

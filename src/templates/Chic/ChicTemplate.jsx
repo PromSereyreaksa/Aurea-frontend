@@ -12,7 +12,7 @@ import ChicAbout from './sections/ChicAbout';
 import ChicWork from './sections/ChicWork';
 import ChicContact from './sections/ChicContact';
 import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
-import { getProjectsForTemplate } from '../../utils/projectUtils';
+import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUtils';
 
 const ChicTemplate = ({
   content = {},
@@ -28,8 +28,10 @@ const ChicTemplate = ({
   // Sidebar state for editing mode
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Get all projects for sidebar
-  const allProjects = isEditing ? getProjectsForTemplate(content, 'chic') : [];
+  // Get all projects for sidebar with ensured IDs
+  const allProjects = isEditing
+    ? ensureProjectIds(getProjectsForTemplate(content, 'chic'), 'chic')
+    : [];
 
   // Default styling - Chic Editorial theme
   const defaultStyling = {
@@ -139,8 +141,8 @@ const ChicTemplate = ({
         position: 'relative'
       }}
     >
-      {/* Project Sidebar - Only show in editing mode */}
-      {isEditing && portfolioId && allProjects.length > 0 && (
+      {/* Project Sidebar - Show in editing mode when portfolio exists */}
+      {isEditing && portfolioId && portfolioId !== 'new' && (
         <ProjectSidebar
           portfolioId={portfolioId}
           projects={allProjects}

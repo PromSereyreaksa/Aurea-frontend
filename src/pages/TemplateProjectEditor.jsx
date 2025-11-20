@@ -10,7 +10,12 @@ import BoldFolioProjectEditorPage from '../templates/BoldFolio/BoldFolioProjectE
  * Routes to the correct editor based on the portfolio's template
  */
 const TemplateProjectEditor = () => {
-  const { portfolioId } = useParams();
+  console.log('🌟 TemplateProjectEditor WRAPPER LOADED');
+
+  const { portfolioId, projectId } = useParams();
+
+  console.log('🌟 TemplateProjectEditor params:', { portfolioId, projectId });
+
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -104,6 +109,12 @@ const TemplateProjectEditor = () => {
 
   // Route to the correct editor based on template
   const templateId = portfolio.template;
+
+  console.log('TemplateProjectEditor: Routing to template editor', {
+    templateId,
+    portfolioId,
+    projectId
+  });
 
   switch (templateId) {
     case 'serene':
