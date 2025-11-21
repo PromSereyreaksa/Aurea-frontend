@@ -55,6 +55,9 @@ const BoldFolioProjectPreviewPage = lazy(() => import("./pages/BoldFolioProjectP
 const EchelonCaseStudyPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyPage")
 );
+const PublicProjectPage = lazy(() =>
+  import("./pages/PublicProjectPage")
+);
 const EchelonCaseStudyEditorPage = lazy(() =>
   import("./templates/Echelon/EchelonCaseStudyEditorPage")
 );

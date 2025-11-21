@@ -5,13 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { portfolioApi } from '../../lib/portfolioApi';
-import { useImageUpload } from '../../hooks/useImageUpload';
-import useUploadStore from '../../stores/uploadStore';
 import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
 import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
@@ -28,16 +25,11 @@ const SereneProjectEditorPage = () => {
   console.log('🚀 SereneProjectEditorPage params:', { portfolioId, projectId });
   console.log('🚀 SereneProjectEditorPage state:', passedState);
 
-  const { uploadImage } = useImageUpload();
-  const { startUpload, getPreviewUrl, getFinalUrl, getProgress } = useUploadStore();
-
   const [portfolio, setPortfolio] = useState(null);
   const [project, setProject] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [currentUploadId, setCurrentUploadId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -57,25 +49,25 @@ const SereneProjectEditorPage = () => {
   useEffect(() => {
     const loadPortfolio = async () => {
       try {
-        setLoading(true);
-
-        // If project data was passed via navigation state, use it directly
+        // Use passed state for instant display (if available)
         if (passedState.project && passedState.allProjects) {
-          console.log('✅ Using passed project data from navigation state');
+          console.log('⚡ Using passed state for instant display');
           setProject(passedState.project);
           setAllProjects(passedState.allProjects);
-
-          // Set editor content
           if (editor && passedState.project.detailedDescription) {
             editor.commands.setContent(passedState.project.detailedDescription.replace(/\n/g, '<br>'));
           }
-
           setLoading(false);
-          return;
+        } else {
+          setLoading(true);
         }
 
-        console.log('⚠️ No passed state, fetching from backend...');
-        const data = await portfolioApi.getById(portfolioId);
+        // Always fetch portfolio from backend for save functionality
+        console.log('📡 Fetching portfolio from backend...');
+        const response = await portfolioApi.getById(portfolioId);
+
+        // Extract portfolio from response - handle different response structures
+        const data = response?.data?.portfolio || response?.portfolio || response;
 
         console.log('🔍 PROJECT EDITOR DEBUG - Portfolio Data:', {
           portfolioId,
@@ -84,7 +76,6 @@ const SereneProjectEditorPage = () => {
           hasContent: !!data?.content,
           hasSections: !!data?.sections,
           template: data?.template,
-          rawData: data,
           contentKeys: data?.content ? Object.keys(data.content) : [],
           sectionsCount: data?.sections?.length || 0,
           galleryStructure: data?.content?.gallery,
@@ -168,40 +159,21 @@ const SereneProjectEditorPage = () => {
     }
   }, [project]);
 
-  // Handle image upload
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingImage(true);
-      const uploadId = startUpload(file);
-      setCurrentUploadId(uploadId);
-
-      // Show instant preview
-      const previewUrl = getPreviewUrl(uploadId);
-      setProject(prev => ({ ...prev, image: previewUrl }));
-
-      // Upload to Cloudinary
-      const uploadedUrl = await uploadImage(file, uploadId);
-
-      if (uploadedUrl) {
-        const finalUrl = getFinalUrl(uploadId);
-        setProject(prev => ({ ...prev, image: finalUrl || uploadedUrl }));
-        toast.success('Image uploaded!');
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Failed to upload image');
-    } finally {
-      setUploadingImage(false);
-      setCurrentUploadId(null);
-    }
-  };
 
   // Save changes
   const handleSave = async () => {
-    if (!portfolio || !project) return;
+    if (!portfolio || !project) {
+      toast.error('Portfolio or project not loaded');
+      return;
+    }
+
+    // Use the actual project ID from the loaded project, not from URL
+    const actualProjectId = project.id;
+
+    if (!actualProjectId) {
+      toast.error('Project ID not found');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -214,36 +186,41 @@ const SereneProjectEditorPage = () => {
         .replace(/<[^>]*>/g, '')
         .trim();
 
-      // Update project in portfolio data
-      const updatedContent = { ...portfolio.content };
-      const gallery = { ...updatedContent.gallery };
+      // Deep clone the content to avoid mutation issues
+      const updatedContent = JSON.parse(JSON.stringify(portfolio.content || {}));
+      const gallery = updatedContent.gallery || {};
 
-      // Find and update the project in the correct row
+      // Find and update the project in the correct row - use string comparison
       const updateProjectInRow = (row) => {
-        return row.map(p => p.id === projectId ? { ...p, ...project, detailedDescription: textContent } : p);
+        if (!row) return [];
+        return row.map(p =>
+          String(p.id) === String(actualProjectId)
+            ? { ...p, ...project, detailedDescription: textContent }
+            : p
+        );
       };
 
-      gallery.firstRow = updateProjectInRow(gallery.firstRow || []);
-      gallery.secondRow = updateProjectInRow(gallery.secondRow || []);
-      gallery.thirdRow = updateProjectInRow(gallery.thirdRow || []);
+      gallery.firstRow = updateProjectInRow(gallery.firstRow);
+      gallery.secondRow = updateProjectInRow(gallery.secondRow);
+      gallery.thirdRow = updateProjectInRow(gallery.thirdRow);
 
       updatedContent.gallery = gallery;
 
       // Save to backend
       await portfolioApi.update(portfolioId, { content: updatedContent });
 
+      // Update local portfolio state
+      setPortfolio(prev => ({ ...prev, content: updatedContent }));
+
       setHasUnsavedChanges(false);
-      toast.success('Project updated successfully!');
+      toast.success('Project saved!');
     } catch (error) {
       console.error('Failed to save project:', error);
-      toast.error('Failed to save changes');
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
-
-  // Get upload progress
-  const uploadProgress = currentUploadId ? getProgress(currentUploadId) : 0;
 
   if (loading) {
     return (
@@ -268,6 +245,16 @@ const SereneProjectEditorPage = () => {
     );
   }
 
+  // Debug info - shows what projects exist
+  const debugInfo = {
+    portfolioId,
+    projectId,
+    template: portfolio?.template,
+    projectsCount: allProjects?.length || 0,
+    projectIds: allProjects?.map(p => p.id) || [],
+    foundProject: !!project && project.title !== `Project ${projectId} (Not Found)`
+  };
+
   if (!project) {
     return null;
   }
@@ -289,6 +276,27 @@ const SereneProjectEditorPage = () => {
       minHeight: '100vh',
       backgroundColor: sereneColors.background
     }}>
+      {/* DEBUG BANNER - Remove after fixing */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1a1a2e',
+        color: '#00ff88',
+        padding: '12px 20px',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        zIndex: 9999,
+        borderTop: '2px solid #00ff88'
+      }}>
+        <strong>DEBUG:</strong> template={debugInfo.template} |
+        projectsCount={debugInfo.projectsCount} |
+        lookingFor="{debugInfo.projectId}" |
+        availableIds=[{debugInfo.projectIds.join(', ')}] |
+        found={debugInfo.foundProject ? 'YES' : 'NO'}
+      </div>
+
       {/* Project Sidebar */}
       <ProjectSidebar
         portfolioId={portfolioId}
@@ -298,6 +306,7 @@ const SereneProjectEditorPage = () => {
         isOpen={sidebarOpen}
         onToggle={setSidebarOpen}
         hasUnsavedChanges={hasUnsavedChanges}
+        onSaveBeforeNavigate={handleSave}
       />
 
       {/* Header */}
@@ -403,7 +412,7 @@ const SereneProjectEditorPage = () => {
             type="text"
             value={project.title || ''}
             onChange={(e) => setProject({ ...project, title: e.target.value })}
-            placeholder="Enter project title"
+            placeholder="Project Title"
             style={{
               fontFamily: '"Inter", sans-serif',
               fontSize: 'clamp(24px, 4vw, 36px)',
@@ -458,7 +467,7 @@ const SereneProjectEditorPage = () => {
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Project Image (Read-only) */}
         <div style={{ marginBottom: '48px' }}>
           <label style={{
             fontFamily: '"Inter", sans-serif',
@@ -476,61 +485,26 @@ const SereneProjectEditorPage = () => {
           <div style={{
             position: 'relative',
             width: '100%',
-            border: `2px dashed ${sereneColors.border}`,
+            border: `2px solid ${sereneColors.border}`,
             borderRadius: '4px',
             overflow: 'hidden',
             backgroundColor: sereneColors.accent
           }}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploadingImage}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0,
-                cursor: uploadingImage ? 'not-allowed' : 'pointer',
-                zIndex: 10
-              }}
-            />
-
             {project.image ? (
-              <div style={{ position: 'relative' }}>
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    maxHeight: '500px',
-                    objectFit: 'cover',
-                    display: 'block'
-                  }}
-                />
-                {uploadingImage && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '16px',
-                    left: '16px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    fontFamily: '"Inter", sans-serif',
-                    fontSize: '12px',
-                    fontWeight: 600
-                  }}>
-                    Uploading: {uploadProgress}%
-                  </div>
-                )}
-              </div>
+              <img
+                src={project.image}
+                alt={project.title}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '500px',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
             ) : (
               <div style={{
-                height: '400px',
+                height: '200px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -546,11 +520,20 @@ const SereneProjectEditorPage = () => {
                   color: sereneColors.secondary,
                   textAlign: 'center'
                 }}>
-                  Click to upload project image<br/>
-                  <span style={{ fontSize: '12px' }}>JPG, PNG or GIF</span>
+                  No image set
                 </div>
               </div>
             )}
+          </div>
+
+          <div style={{
+            marginTop: '12px',
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            fontStyle: 'italic'
+          }}>
+            To change the image, go back to the portfolio builder
           </div>
         </div>
 

@@ -10,24 +10,18 @@ import { toast } from 'react-hot-toast';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { portfolioApi } from '../../lib/portfolioApi';
-import { useImageUpload } from '../../hooks/useImageUpload';
-import useUploadStore from '../../stores/uploadStore';
 import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
 import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
 const BoldFolioProjectEditorPage = () => {
   const navigate = useNavigate();
   const { portfolioId, projectId } = useParams();
-  const { uploadImage } = useImageUpload();
-  const { startUpload, getPreviewUrl, getFinalUrl, getProgress } = useUploadStore();
 
   const [portfolio, setPortfolio] = useState(null);
   const [project, setProject] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingIndex, setUploadingIndex] = useState(null);
-  const [currentUploadId, setCurrentUploadId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -48,7 +42,10 @@ const BoldFolioProjectEditorPage = () => {
     const loadPortfolio = async () => {
       try {
         setLoading(true);
-        const data = await portfolioApi.getById(portfolioId);
+        const response = await portfolioApi.getById(portfolioId);
+
+        // Extract portfolio from response - handle different response structures
+        const data = response?.data?.portfolio || response?.portfolio || response;
 
         console.log('🔍 BOLDFOLIO PROJECT EDITOR DEBUG - Portfolio Data:', {
           portfolioId,
@@ -133,81 +130,25 @@ const BoldFolioProjectEditorPage = () => {
     }
   }, [project]);
 
-  // Handle image upload for a specific image slot
-  const handleImageUpload = async (e, imageIndex) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingIndex(imageIndex);
-      const uploadId = startUpload(file);
-      setCurrentUploadId(uploadId);
-
-      // Show instant preview
-      const previewUrl = getPreviewUrl(uploadId);
-      setProject(prev => {
-        const images = [...(prev.images || [])];
-        if (!images[imageIndex]) {
-          images[imageIndex] = { src: '', width: '300px', height: '200px' };
-        }
-        images[imageIndex] = { ...images[imageIndex], src: previewUrl };
-        return { ...prev, images };
-      });
-
-      // Upload to Cloudinary
-      const uploadedUrl = await uploadImage(file, uploadId);
-
-      if (uploadedUrl) {
-        const finalUrl = getFinalUrl(uploadId);
-        setProject(prev => {
-          const images = [...(prev.images || [])];
-          images[imageIndex] = { ...images[imageIndex], src: finalUrl || uploadedUrl };
-          return { ...prev, images };
-        });
-        toast.success('Image uploaded!');
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Failed to upload image');
-    } finally {
-      setUploadingIndex(null);
-      setCurrentUploadId(null);
-    }
-  };
-
-  // Add new image slot
-  const addImageSlot = () => {
-    setProject(prev => ({
-      ...prev,
-      images: [...(prev.images || []), { src: '', width: '300px', height: '200px' }]
-    }));
-  };
-
-  // Remove image slot
-  const removeImageSlot = (index) => {
-    setProject(prev => ({
-      ...prev,
-      images: (prev.images || []).filter((_, i) => i !== index)
-    }));
-  };
-
   // Update field
   const updateField = (field, value) => {
     setProject(prev => ({ ...prev, [field]: value }));
   };
 
-  // Update image dimensions
-  const updateImageDimensions = (index, dimension, value) => {
-    setProject(prev => {
-      const images = [...(prev.images || [])];
-      images[index] = { ...images[index], [dimension]: value };
-      return { ...prev, images };
-    });
-  };
-
   // Save changes
   const handleSave = async () => {
-    if (!portfolio || !project) return;
+    if (!portfolio || !project) {
+      toast.error('Portfolio or project not loaded');
+      return;
+    }
+
+    // Use the actual project ID from the loaded project, not from URL
+    const actualProjectId = project.id;
+
+    if (!actualProjectId) {
+      toast.error('Project ID not found');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -220,12 +161,14 @@ const BoldFolioProjectEditorPage = () => {
         .replace(/<[^>]*>/g, '')
         .trim();
 
-      // Update project in portfolio data
-      const updatedContent = { ...portfolio.content };
-      const work = { ...updatedContent.work };
-      const projects = [...(work.projects || [])];
+      // Deep clone the content to avoid mutation issues
+      const updatedContent = JSON.parse(JSON.stringify(portfolio.content || {}));
+      const work = updatedContent.work || {};
+      const projects = work.projects || [];
 
-      const projectIndex = projects.findIndex(p => p.id === projectId);
+      // Find project using string comparison with actual project ID
+      const projectIndex = projects.findIndex(p => String(p.id) === String(actualProjectId));
+
       if (projectIndex !== -1) {
         projects[projectIndex] = {
           ...projects[projectIndex],
@@ -238,19 +181,21 @@ const BoldFolioProjectEditorPage = () => {
         // Save to backend
         await portfolioApi.update(portfolioId, { content: updatedContent });
 
+        // Update local portfolio state
+        setPortfolio(prev => ({ ...prev, content: updatedContent }));
+
         setHasUnsavedChanges(false);
-        toast.success('Project updated successfully!');
+        toast.success('Project saved!');
+      } else {
+        toast.error('Project not found in portfolio data');
       }
     } catch (error) {
       console.error('Failed to save project:', error);
-      toast.error('Failed to save changes');
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
-
-  // Get upload progress
-  const uploadProgress = currentUploadId ? getProgress(currentUploadId) : 0;
 
   if (loading) {
     return (
@@ -279,6 +224,7 @@ const BoldFolioProjectEditorPage = () => {
         isOpen={sidebarOpen}
         onToggle={setSidebarOpen}
         hasUnsavedChanges={hasUnsavedChanges}
+        onSaveBeforeNavigate={handleSave}
       />
 
       {/* Header */}
@@ -341,7 +287,7 @@ const BoldFolioProjectEditorPage = () => {
                 onChange={(e) => updateField('description', e.target.value)}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded focus:border-pink-600 focus:outline-none transition-colors font-sans"
                 rows="4"
-                placeholder="Use <br /> for line breaks"
+                placeholder="A brief description of your project and what makes it unique."
               />
               <p className="mt-1 text-xs text-gray-500">
                 Supports HTML tags like &lt;br /&gt; for line breaks
@@ -365,104 +311,50 @@ const BoldFolioProjectEditorPage = () => {
               </p>
             </div>
 
-            {/* Images */}
+            {/* Images (Read-only) */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="block text-sm font-bold text-gray-900 uppercase tracking-wide">
-                  Project Images
-                </label>
-                <button
-                  onClick={addImageSlot}
-                  className="px-4 py-2 bg-gray-900 text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-gray-800 transition-colors"
-                >
-                  + Add Image
-                </button>
-              </div>
+              <label className="block text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
+                Project Images
+              </label>
 
               <div className="space-y-4">
                 {(project.images || []).map((img, index) => (
                   <div key={index} className="p-4 border-2 border-gray-300 rounded">
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-sm font-bold text-pink-600">Image {index + 1}</span>
-                      <button
-                        onClick={() => removeImageSlot(index)}
-                        className="text-red-600 hover:text-red-700 text-sm font-semibold"
-                      >
-                        Remove
-                      </button>
-                    </div>
+                    <span className="text-sm font-bold text-pink-600 block mb-3">Image {index + 1}</span>
 
-                    {/* Image Preview/Upload */}
-                    <div className="mb-3">
-                      <div
-                        className="relative border-2 border-dashed border-gray-300 rounded overflow-hidden cursor-pointer hover:border-pink-600 transition-colors"
-                        style={{ width: '100%', height: '200px' }}
-                        onClick={() => document.getElementById(`file-${index}`).click()}
-                      >
-                        {img.src ? (
-                          <img
-                            src={img.src}
-                            alt={`Project image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p className="mt-2 text-sm">Click to upload</p>
-                          </div>
-                        )}
-
-                        {uploadingIndex === index && (
-                          <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center">
-                            <div className="w-24 h-24 border-4 border-pink-600 border-t-transparent rounded-full animate-spin"></div>
-                            <p className="mt-4 text-sm font-semibold text-gray-700">{uploadProgress}%</p>
-                          </div>
-                        )}
-                      </div>
-
-                      <input
-                        id={`file-${index}`}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleImageUpload(e, index)}
-                      />
-                    </div>
-
-                    {/* Dimensions */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Width</label>
-                        <input
-                          type="text"
-                          value={img.width || ''}
-                          onChange={(e) => updateImageDimensions(index, 'width', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                          placeholder="300px"
+                    {/* Image Preview (Read-only) */}
+                    <div
+                      className="border-2 border-gray-300 rounded overflow-hidden"
+                      style={{ width: '100%', height: '200px' }}
+                    >
+                      {img.src ? (
+                        <img
+                          src={img.src}
+                          alt={`Project image ${index + 1}`}
+                          className="w-full h-full object-cover"
                         />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Height</label>
-                        <input
-                          type="text"
-                          value={img.height || ''}
-                          onChange={(e) => updateImageDimensions(index, 'height', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                          placeholder="200px"
-                        />
-                      </div>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                          <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="mt-2 text-sm">No image</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
 
                 {(!project.images || project.images.length === 0) && (
                   <div className="text-center py-8 text-gray-500 text-sm">
-                    No images yet. Click "Add Image" to add one.
+                    No images set for this project
                   </div>
                 )}
               </div>
+
+              <p className="mt-3 text-xs text-gray-500 italic">
+                To add or change images, go back to the portfolio builder
+              </p>
             </div>
 
             {/* Detailed Description */}

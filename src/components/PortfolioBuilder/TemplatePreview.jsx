@@ -18,7 +18,8 @@ const TemplatePreview = ({
   template,
   portfolioData,
   isEditing = false,
-  onContentChange
+  onContentChange,
+  onSaveBeforeNavigate = null
 }) => {
   // ========================================
   // 1. TEMPLATE LOADING
@@ -106,12 +107,17 @@ const TemplatePreview = ({
   // 4. RENDER
   // ========================================
   
+  // Get styling from portfolio data or template defaults
+  const styling = portfolioData?.styling || template?.styling || {};
+
   return (
     <div className="w-full bg-white">
       <TemplateComponent
         content={content}
+        styling={styling}
         isEditing={isEditing}
         onContentChange={handleContentChange}
+        onSaveBeforeNavigate={onSaveBeforeNavigate}
         portfolioId={portfolioData?.id}
         caseStudies={portfolioData?.caseStudies || {}}
       />

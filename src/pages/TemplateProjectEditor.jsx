@@ -4,6 +4,7 @@ import { portfolioApi } from '../lib/portfolioApi';
 import SereneProjectEditorPage from '../templates/Serene/SereneProjectEditorPage';
 import ChicProjectEditorPage from '../templates/Chic/ChicProjectEditorPage';
 import BoldFolioProjectEditorPage from '../templates/BoldFolio/BoldFolioProjectEditorPage';
+import EchelonProjectEditorPage from '../templates/Echelon/EchelonProjectEditorPage';
 
 /**
  * Template-aware wrapper for project editor pages
@@ -24,7 +25,10 @@ const TemplateProjectEditor = () => {
     const loadPortfolio = async () => {
       try {
         setLoading(true);
-        const data = await portfolioApi.getById(portfolioId);
+        const response = await portfolioApi.getById(portfolioId);
+        // Extract portfolio from response - handle different response structures
+        const data = response?.data?.portfolio || response?.portfolio || response;
+        console.log('🌟 TemplateProjectEditor loaded portfolio:', { template: data?.template, id: data?._id });
         setPortfolio(data);
       } catch (err) {
         console.error('Failed to load portfolio:', err);
@@ -117,6 +121,8 @@ const TemplateProjectEditor = () => {
   });
 
   switch (templateId) {
+    case 'echelon':
+      return <EchelonProjectEditorPage />;
     case 'serene':
       return <SereneProjectEditorPage />;
     case 'chic':
@@ -124,9 +130,9 @@ const TemplateProjectEditor = () => {
     case 'boldfolio':
       return <BoldFolioProjectEditorPage />;
     default:
-      // Default to Serene for backwards compatibility
-      console.warn(`Unknown template: ${templateId}, defaulting to Serene editor`);
-      return <SereneProjectEditorPage />;
+      // Default to Echelon for backwards compatibility
+      console.warn(`Unknown template: ${templateId}, defaulting to Echelon editor`);
+      return <EchelonProjectEditorPage />;
   }
 };
 

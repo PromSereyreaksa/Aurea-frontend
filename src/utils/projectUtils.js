@@ -29,8 +29,8 @@ export const getProjectsForTemplate = (content, templateId) => {
 
     case 'echolon':
     case 'echelon':
-      // Echelon uses case studies
-      return content.caseStudies || [];
+      // Echelon stores projects in work.projects
+      return content.work?.projects || [];
 
     default:
       // Try to find projects in common locations
@@ -168,6 +168,16 @@ export const updateProjectInContent = (content, templateId, projectId, updatedPr
       if (newContent.work?.projects) {
         newContent.work.projects = newContent.work.projects.map(p =>
           p.id === projectId ? { ...p, ...updatedProject } : p
+        );
+      }
+      break;
+
+    case 'echolon':
+    case 'echelon':
+      // Echelon stores projects in work.projects
+      if (newContent.work?.projects) {
+        newContent.work.projects = newContent.work.projects.map(p =>
+          String(p.id) === String(projectId) ? { ...p, ...updatedProject } : p
         );
       }
       break;

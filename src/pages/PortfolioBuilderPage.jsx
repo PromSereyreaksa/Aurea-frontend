@@ -1053,6 +1053,7 @@ const PortfolioBuilderPage = () => {
                   portfolioData={{ ...portfolioData, id: id }}
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
+                  onSaveBeforeNavigate={handleSave}
                   onEditingStateChange={(editing) => {
                     setIsUserEditing(editing);
                     if (!editing && portfolioData) {

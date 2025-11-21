@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useImageUpload } from '../../../hooks/useImageUpload';
 import { useBreakpoints } from '../../../hooks/useMediaQuery';
 
@@ -10,8 +9,7 @@ import { useBreakpoints } from '../../../hooks/useMediaQuery';
  * Desktop specs: 1024px content area, absolute positioning
  * Left column: 467px @ x:40px | Right column: 705px @ x:517px
  */
-const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange, portfolioId, baseUrl = '/template-preview/chic' }) => {
-  const navigate = useNavigate();
+const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange }) => {
   const fonts = styling.fonts || {};
   const projects = content.projects || [];
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
@@ -195,24 +193,17 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
 
           {/* Project Image */}
           <div
-            className="group"
             style={{
               width: '100%',
               aspectRatio: '4 / 3',
               overflow: 'hidden',
               backgroundColor: styling.colors?.border || '#e0e0e0',
               position: 'relative',
-              cursor: 'pointer'
+              cursor: isEditing ? 'pointer' : 'default'
             }}
             onClick={() => {
               if (isEditing) {
                 document.getElementById(`file-input-chic-${index}`).click();
-              } else if (project.id) {
-                // Navigate to project detail page
-                const projectUrl = portfolioId
-                  ? `/portfolio-builder/${portfolioId}/project/${project.id}`
-                  : `${baseUrl}/project/${project.id}`;
-                navigate(projectUrl);
               }
             }}
           >
@@ -268,38 +259,6 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
                 }}
               >
                 Uploading...
-              </div>
-            )}
-
-            {/* Hover overlay with "View Details" (only in preview mode) */}
-            {!isEditing && project.image && project.id && (
-              <div
-                className="group-hover:opacity-100 opacity-0 transition-opacity duration-300"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  pointerEvents: 'none'
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: fonts.inter || '"Helvetica Neue", sans-serif',
-                    fontSize: 'clamp(11px, 1.2vw, 12px)',
-                    padding: '12px 24px',
-                    backgroundColor: '#FFFFFF',
-                    color: '#000000',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontWeight: 600,
-                    borderRadius: '2px'
-                  }}
-                >
-                  VIEW DETAILS
-                </div>
               </div>
             )}
           </div>
@@ -377,9 +336,9 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
                       maxWidth: '336px'
                     }}
                   >
-                    {project.subtitle && <span>{project.subtitle}</span>}
-                    {project.subtitle && project.year && <span> —— </span>}
-                    {project.year && <span>{project.year}</span>}
+                    
+                    
+                    
                     {project.awards && (
                       <div style={{ marginTop: '4px' }}>
                         {project.awards}
@@ -396,7 +355,6 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.6 }}
-              className="group"
               style={{
                 position: 'absolute',
                 left: `${layout.x}px`,
@@ -405,19 +363,13 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
                 height: `${layout.height}px`,
                 zIndex: layout.zIndex,
                 overflow: 'hidden',
-                cursor: 'pointer',
+                cursor: isEditing ? 'pointer' : (project.link ? 'pointer' : 'default'),
                 backgroundColor: project.image ? 'transparent' : '#f3f4f6'
               }}
               onClick={(e) => {
                 if (isEditing) {
                   e.stopPropagation();
                   document.getElementById(`file-input-chic-${index}`).click();
-                } else if (project.id) {
-                  // Navigate to project detail page
-                  const projectUrl = portfolioId
-                    ? `/portfolio-builder/${portfolioId}/project/${project.id}`
-                    : `${baseUrl}/project/${project.id}`;
-                  navigate(projectUrl);
                 } else if (project.link) {
                   window.open(project.link, '_blank');
                 }
@@ -554,39 +506,6 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
                   >
                     Click to change image
                   </p>
-                </div>
-              )}
-
-              {/* Hover overlay with "View Details" (only in preview mode) */}
-              {!isEditing && project.image && project.id && (
-                <div
-                  className="group-hover:opacity-100 opacity-0 transition-opacity duration-300"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    pointerEvents: 'none',
-                    zIndex: 1
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: fonts.inter || '"Helvetica Neue", sans-serif',
-                      fontSize: '12px',
-                      padding: '14px 32px',
-                      backgroundColor: '#FFFFFF',
-                      color: '#000000',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      fontWeight: 600,
-                      borderRadius: '2px'
-                    }}
-                  >
-                    VIEW DETAILS
-                  </div>
                 </div>
               )}
             </motion.div>

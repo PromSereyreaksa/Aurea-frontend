@@ -175,7 +175,7 @@ export const templates = {
       about: {
         type: 'about',
         layout: 'split_layout',
-        editable: ['name', 'role', 'image', 'bio', 'location', 'experience']
+        editable: ['name', 'role', 'image', 'bio', 'location', 'experience'] 
       },
       gallery: {
         type: 'gallery',
@@ -208,15 +208,15 @@ export const templates = {
       },
       gallery: {
         heading: 'My Work',
-        heroText1: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        heroText2: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.',
+        heroText1: '',
+        heroText2: '',
         firstRow: [
           {
             id: 'project-1',
             image: '',
-            title: 'Project One',
-            description: 'Creative design showcase',
-            detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            title: 'Project 1',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -224,9 +224,9 @@ export const templates = {
           {
             id: 'project-2',
             image: '',
-            title: 'Project Two',
-            description: 'Innovative visual concept',
-            detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+            title: 'Project 2',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 1
@@ -234,9 +234,9 @@ export const templates = {
           {
             id: 'project-3',
             image: '',
-            title: 'Project Three',
-            description: 'Modern artistic approach',
-            detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+            title: 'Project 3',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -246,9 +246,9 @@ export const templates = {
           {
             id: 'project-4',
             image: '',
-            title: 'Project Four',
-            description: 'Contemporary design study',
-            detailedDescription: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
+            title: 'Project 4',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -256,9 +256,9 @@ export const templates = {
           {
             id: 'project-5',
             image: '',
-            title: 'Project Five',
-            description: 'Elegant composition work',
-            detailedDescription: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.\n\nTemporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
+            title: 'Project 5',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 3
@@ -266,9 +266,9 @@ export const templates = {
           {
             id: 'project-6',
             image: '',
-            title: 'Project Six',
-            description: 'Minimalist aesthetic vision',
-            detailedDescription: 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error.\n\nVoluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.',
+            title: 'Project 6',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -276,9 +276,9 @@ export const templates = {
           {
             id: 'project-7',
             image: '',
-            title: 'Project Seven',
-            description: 'Bold creative expression',
-            detailedDescription: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.\n\nQui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
+            title: 'Project 7',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -288,9 +288,9 @@ export const templates = {
           {
             id: 'project-8',
             image: '',
-            title: 'Project Eight',
-            description: 'Strategic visual design',
-            detailedDescription: 'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.\n\nQuam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus.',
+            title: 'Project 8',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -298,9 +298,9 @@ export const templates = {
           {
             id: 'project-9',
             image: '',
-            title: 'Project Nine',
-            description: 'Refined artistic detail',
-            detailedDescription: 'Qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi.\n\nId est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio.',
+            title: 'Project 9',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 2
@@ -308,9 +308,9 @@ export const templates = {
           {
             id: 'project-10',
             image: '',
-            title: 'Project Ten',
-            description: 'Sophisticated visual narrative',
-            detailedDescription: 'Cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.\n\nSaepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.',
+            title: 'Project 10',
+            description: '',
+            detailedDescription: '',
             price: '',
             caption: '',
             span: 1
@@ -423,97 +423,97 @@ export const templates = {
         projects: [
           {
             id: 'project-1',
-            title: 'PROJECT ONE',
-            subtitle: 'Creative Direction',
-            description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit.',
-            detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            title: 'Project 1',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Brand Identity',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-2',
-            title: 'PROJECT TWO',
-            subtitle: 'Visual Design',
-            description: 'Sed ut perspiciatis unde omnis iste natus error.',
-            detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+            title: 'Project 2',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Editorial',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-3',
-            title: 'PROJECT THREE',
-            subtitle: 'Art Direction',
-            description: 'Neque porro quisquam est qui dolorem ipsum.',
-            detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+            title: 'Project 3',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Digital',
-            year: '2023',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-4',
-            title: 'PROJECT FOUR',
-            subtitle: 'Brand Strategy',
-            description: 'At vero eos et accusamus et iusto odio dignissimos.',
-            detailedDescription: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
+            title: 'Project 4',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Branding',
-            year: '2023',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-5',
-            title: 'PROJECT FIVE',
-            subtitle: 'Design System',
-            description: 'Nam libero tempore cum soluta nobis est eligendi.',
-            detailedDescription: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.\n\nTemporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
+            title: 'Project 5',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'UX/UI',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-6',
-            title: 'PROJECT SIX',
-            subtitle: 'Print Design',
-            description: 'Itaque earum rerum hic tenetur a sapiente delectus.',
-            detailedDescription: 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.\n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis.',
+            title: 'Project 6',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Print',
-            year: '2023',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-7',
-            title: 'PROJECT SEVEN',
-            subtitle: 'Typography',
-            description: 'Nemo enim ipsam voluptatem quia voluptas sit.',
-            detailedDescription: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.\n\nQui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
+            title: 'Project 7',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Typography',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
             id: 'project-8',
-            title: 'PROJECT EIGHT',
-            subtitle: 'Motion Design',
-            description: 'Ut enim ad minima veniam quis nostrum exercitationem.',
-            detailedDescription: 'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.\n\nQuam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus.',
+            title: 'Project 8',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Motion',
-            year: '2023',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           }
@@ -644,21 +644,21 @@ export const templates = {
         projects: [
           {
             id: 'project-1',
-            title: 'Ice Peak',
-            description: 'A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.',
-            detailedDescription: 'A flexible design identity that strengthens the overall image of Ice Peak, an adventure company focused on alpinism. The project includes brand guidelines, visual identity, and digital presence.\n\nOur approach emphasized clarity, strength, and connection to the mountain environment through bold typography and clean layouts.',
+            title: 'Project 1',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '580px', height: '380px', src: '' },
               { width: '450px', height: '280px', src: '' }
             ],
-            logo: '<span>|||</span><span>|||</span><span style="font-size: 100px; letter-spacing: 12px">ICE</span><span style="font-size: 100px; letter-spacing: 12px">PEAK</span>',
+            logo: '',
             link: ''
           },
           {
             id: 'project-2',
-            title: 'The Recreationist',
-            description: 'Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.',
-            detailedDescription: 'Brand identity and creative campaign for The Recreationist, an online boutique that sells independent designers and global goods for summer vacations by the sea.\n\nThe identity celebrates coastal living with vibrant colors, organic shapes, and playful typography that captures the essence of seaside leisure.',
+            title: 'Project 2',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '250px', height: '280px', src: '' },
               { width: '580px', height: '380px', src: '' }
@@ -668,9 +668,9 @@ export const templates = {
           },
           {
             id: 'project-3',
-            title: 'Hyperloop',
-            description: 'Identity and store for a brand<br />selling minimalistic jewelry.',
-            detailedDescription: 'Identity and store for a brand selling minimalistic jewelry. The project focused on creating an elegant, refined aesthetic that mirrors the simplicity and precision of the jewelry pieces.\n\nWe developed a complete visual system including packaging, digital experience, and retail environment design.',
+            title: 'Project 3',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '250px', height: '280px', src: '' },
               { width: '500px', height: '500px', src: '' }

@@ -10,7 +10,8 @@ const ProjectSidebar = ({
   templateType,
   isOpen: controlledIsOpen,
   onToggle,
-  hasUnsavedChanges = false
+  hasUnsavedChanges = false,
+  onSaveBeforeNavigate = null // Callback to save before navigating
 }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(controlledIsOpen ?? true);
@@ -237,18 +238,23 @@ const ProjectSidebar = ({
                       key={project.id || index}
                       onClick={(e) => {
                         e.preventDefault();
-                        console.log('=== SIDEBAR CLICK DEBUG ===');
-                        console.log('Project clicked:', {
-                          projectId: project.id,
-                          projectTitle: title,
-                          portfolioId,
-                          project: project
-                        });
+
+                        // Skip if clicking current project
+                        if (project.id === currentProjectId) {
+                          console.log('ProjectSidebar: Same project, skipping navigation');
+                          return;
+                        }
+
+                        // Show save reminder if there are unsaved changes
+                        if (hasUnsavedChanges) {
+                          const shouldContinue = window.confirm(
+                            '⚠️ Please save your changes first!\n\nClick the SAVE button before switching projects.\n\nClick OK to continue anyway (unsaved changes will be lost) or Cancel to go back and save.'
+                          );
+                          if (!shouldContinue) return;
+                        }
 
                         // Navigate with project data in state
                         const navPath = `/portfolio-builder/${portfolioId}/project/${project.id}`;
-                        console.log('Navigating to:', navPath, 'with project data:', project);
-
                         navigate(navPath, {
                           state: {
                             project: project,
@@ -342,28 +348,17 @@ const ProjectSidebar = ({
 
             {/* Footer Info */}
             <div className="px-4 py-3 mt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-3;">
                 Click a project to edit its content
+              </p>
+              <p className="text-xs text-red-600">
+                Please save before editing a project to avoid data loss!
               </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Mobile Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black bg-opacity-50 md:hidden"
-            style={{ zIndex: 999999 }}
-            onClick={handleToggle}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };

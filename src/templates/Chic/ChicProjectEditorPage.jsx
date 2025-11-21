@@ -5,29 +5,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { portfolioApi } from '../../lib/portfolioApi';
-import { useImageUpload } from '../../hooks/useImageUpload';
-import useUploadStore from '../../stores/uploadStore';
 import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
 import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
 
 const ChicProjectEditorPage = () => {
   const navigate = useNavigate();
   const { portfolioId, projectId } = useParams();
-  const { uploadImage } = useImageUpload();
-  const { startUpload, getPreviewUrl, getFinalUrl, getProgress } = useUploadStore();
 
   const [portfolio, setPortfolio] = useState(null);
   const [project, setProject] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [currentUploadId, setCurrentUploadId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -48,7 +41,10 @@ const ChicProjectEditorPage = () => {
     const loadPortfolio = async () => {
       try {
         setLoading(true);
-        const data = await portfolioApi.getById(portfolioId);
+        const response = await portfolioApi.getById(portfolioId);
+
+        // Extract portfolio from response - handle different response structures
+        const data = response?.data?.portfolio || response?.portfolio || response;
 
         console.log('🔍 CHIC PROJECT EDITOR DEBUG - Portfolio Data:', {
           portfolioId,
@@ -133,40 +129,21 @@ const ChicProjectEditorPage = () => {
     }
   }, [project]);
 
-  // Handle image upload
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingImage(true);
-      const uploadId = startUpload(file);
-      setCurrentUploadId(uploadId);
-
-      // Show instant preview
-      const previewUrl = getPreviewUrl(uploadId);
-      setProject(prev => ({ ...prev, image: previewUrl }));
-
-      // Upload to Cloudinary
-      const uploadedUrl = await uploadImage(file, uploadId);
-
-      if (uploadedUrl) {
-        const finalUrl = getFinalUrl(uploadId);
-        setProject(prev => ({ ...prev, image: finalUrl || uploadedUrl }));
-        toast.success('Image uploaded!');
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Failed to upload image');
-    } finally {
-      setUploadingImage(false);
-      setCurrentUploadId(null);
-    }
-  };
 
   // Save changes
   const handleSave = async () => {
-    if (!portfolio || !project) return;
+    if (!portfolio || !project) {
+      toast.error('Portfolio or project not loaded');
+      return;
+    }
+
+    // Use the actual project ID from the loaded project, not from URL
+    const actualProjectId = project.id;
+
+    if (!actualProjectId) {
+      toast.error('Project ID not found');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -179,12 +156,14 @@ const ChicProjectEditorPage = () => {
         .replace(/<[^>]*>/g, '')
         .trim();
 
-      // Update project in portfolio data
-      const updatedContent = { ...portfolio.content };
-      const work = { ...updatedContent.work };
-      const projects = [...(work.projects || [])];
+      // Deep clone the content to avoid mutation issues
+      const updatedContent = JSON.parse(JSON.stringify(portfolio.content || {}));
+      const work = updatedContent.work || {};
+      const projects = work.projects || [];
 
-      const projectIndex = projects.findIndex(p => p.id === projectId);
+      // Find project using string comparison with actual project ID
+      const projectIndex = projects.findIndex(p => String(p.id) === String(actualProjectId));
+
       if (projectIndex !== -1) {
         projects[projectIndex] = { ...projects[projectIndex], ...project, detailedDescription: textContent };
         work.projects = projects;
@@ -193,19 +172,21 @@ const ChicProjectEditorPage = () => {
         // Save to backend
         await portfolioApi.update(portfolioId, { content: updatedContent });
 
+        // Update local portfolio state
+        setPortfolio(prev => ({ ...prev, content: updatedContent }));
+
         setHasUnsavedChanges(false);
-        toast.success('Project updated successfully!');
+        toast.success('Project saved!');
+      } else {
+        toast.error('Project not found in portfolio data');
       }
     } catch (error) {
       console.error('Failed to save project:', error);
-      toast.error('Failed to save changes');
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
-
-  // Get upload progress
-  const uploadProgress = currentUploadId ? getProgress(currentUploadId) : 0;
 
   if (loading) {
     return (
@@ -251,6 +232,7 @@ const ChicProjectEditorPage = () => {
         isOpen={sidebarOpen}
         onToggle={setSidebarOpen}
         hasUnsavedChanges={hasUnsavedChanges}
+        onSaveBeforeNavigate={handleSave}
       />
 
       {/* Header */}
@@ -356,7 +338,7 @@ const ChicProjectEditorPage = () => {
             type="text"
             value={project.title || ''}
             onChange={(e) => setProject({ ...project, title: e.target.value })}
-            placeholder="Enter project title"
+            placeholder="Project Title"
             style={{
               fontFamily: '"Helvetica Neue", sans-serif',
               fontSize: 'clamp(24px, 4vw, 36px)',
@@ -375,156 +357,7 @@ const ChicProjectEditorPage = () => {
           />
         </div>
 
-        {/* Subtitle Editor */}
-        <div style={{ marginBottom: '32px' }}>
-          <label style={{
-            fontFamily: '"SF Mono", monospace',
-            fontSize: '10px',
-            color: '#999999',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            display: 'block',
-            marginBottom: '12px',
-            fontWeight: 600
-          }}>
-            Subtitle
-          </label>
-          <input
-            type="text"
-            value={project.subtitle || ''}
-            onChange={(e) => setProject({ ...project, subtitle: e.target.value })}
-            placeholder="Project subtitle"
-            style={{
-              fontFamily: '"Helvetica Neue", sans-serif',
-              fontSize: '16px',
-              color: '#666666',
-              backgroundColor: '#FFFFFF',
-              border: '2px solid #E5E5E5',
-              borderRadius: '0',
-              padding: '12px 16px',
-              width: '100%',
-              outline: 'none',
-              transition: 'border-color 0.3s ease'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#000000'}
-            onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-          />
-        </div>
-
-        {/* Meta Fields Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '24px',
-          marginBottom: '48px'
-        }}>
-          {/* Category */}
-          <div>
-            <label style={{
-              fontFamily: '"SF Mono", monospace',
-              fontSize: '10px',
-              color: '#999999',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              display: 'block',
-              marginBottom: '12px',
-              fontWeight: 600
-            }}>
-              Category
-            </label>
-            <input
-              type="text"
-              value={project.category || ''}
-              onChange={(e) => setProject({ ...project, category: e.target.value })}
-              placeholder="Category"
-              style={{
-                fontFamily: '"Helvetica Neue", sans-serif',
-                fontSize: '14px',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E5E5',
-                borderRadius: '0',
-                padding: '10px 14px',
-                width: '100%',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#000000'}
-              onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-            />
-          </div>
-
-          {/* Year */}
-          <div>
-            <label style={{
-              fontFamily: '"SF Mono", monospace',
-              fontSize: '10px',
-              color: '#999999',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              display: 'block',
-              marginBottom: '12px',
-              fontWeight: 600
-            }}>
-              Year
-            </label>
-            <input
-              type="text"
-              value={project.year || ''}
-              onChange={(e) => setProject({ ...project, year: e.target.value })}
-              placeholder="2024"
-              style={{
-                fontFamily: '"Helvetica Neue", sans-serif',
-                fontSize: '14px',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E5E5',
-                borderRadius: '0',
-                padding: '10px 14px',
-                width: '100%',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#000000'}
-              onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-            />
-          </div>
-
-          {/* Awards */}
-          <div>
-            <label style={{
-              fontFamily: '"SF Mono", monospace',
-              fontSize: '10px',
-              color: '#999999',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              display: 'block',
-              marginBottom: '12px',
-              fontWeight: 600
-            }}>
-              Awards (Optional)
-            </label>
-            <input
-              type="text"
-              value={project.awards || ''}
-              onChange={(e) => setProject({ ...project, awards: e.target.value })}
-              placeholder="Awards"
-              style={{
-                fontFamily: '"Helvetica Neue", sans-serif',
-                fontSize: '14px',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E5E5',
-                borderRadius: '0',
-                padding: '10px 14px',
-                width: '100%',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#000000'}
-              onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-            />
-          </div>
-        </div>
-
-        {/* Image Upload */}
+        {/* Project Image (Read-only) */}
         <div style={{ marginBottom: '48px' }}>
           <label style={{
             fontFamily: '"SF Mono", monospace',
@@ -542,64 +375,27 @@ const ChicProjectEditorPage = () => {
           <div style={{
             position: 'relative',
             width: '100%',
-            border: '2px dashed #E5E5E5',
+            border: '2px solid #E5E5E5',
             borderRadius: '0',
             overflow: 'hidden',
             backgroundColor: '#FAFAFA'
           }}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploadingImage}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0,
-                cursor: uploadingImage ? 'not-allowed' : 'pointer',
-                zIndex: 10
-              }}
-            />
-
             {project.image ? (
-              <div style={{ position: 'relative' }}>
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    maxHeight: '500px',
-                    objectFit: 'contain',
-                    display: 'block',
-                    backgroundColor: '#F5F5F5'
-                  }}
-                />
-                {uploadingImage && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '16px',
-                    left: '16px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '0',
-                    fontFamily: '"SF Mono", monospace',
-                    fontSize: '10px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    Uploading: {uploadProgress}%
-                  </div>
-                )}
-              </div>
+              <img
+                src={project.image}
+                alt={project.title}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '500px',
+                  objectFit: 'contain',
+                  display: 'block',
+                  backgroundColor: '#F5F5F5'
+                }}
+              />
             ) : (
               <div style={{
-                height: '400px',
+                height: '200px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -615,11 +411,20 @@ const ChicProjectEditorPage = () => {
                   color: '#999999',
                   textAlign: 'center'
                 }}>
-                  Click to upload project image<br/>
-                  <span style={{ fontSize: '11px' }}>JPG, PNG or GIF</span>
+                  No image set
                 </div>
               </div>
             )}
+          </div>
+
+          <div style={{
+            marginTop: '12px',
+            fontFamily: '"Helvetica Neue", sans-serif',
+            fontSize: '11px',
+            color: '#999999',
+            fontStyle: 'italic'
+          }}>
+            To change the image, go back to the portfolio builder
           </div>
         </div>
 

@@ -37,8 +37,10 @@
     "work": {
       "projects": [
         {
-          "title": "Ice Peak",
-          "description": "A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.",
+          "id": "project-1",
+          "title": "Project 1",
+          "description": "",
+          "detailedDescription": "",
           "images": [
             {
               "width": "580px",
@@ -51,12 +53,14 @@
               "src": ""
             }
           ],
-          "logo": "<span>|||</span><span>|||</span><span style=\"font-size: 100px; letter-spacing: 12px\">ICE</span><span style=\"font-size: 100px; letter-spacing: 12px\">PEAK</span>",
+          "logo": "",
           "link": ""
         },
         {
-          "title": "The Recreationist",
-          "description": "Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.",
+          "id": "project-2",
+          "title": "Project 2",
+          "description": "",
+          "detailedDescription": "",
           "images": [
             {
               "width": "250px",
@@ -73,8 +77,10 @@
           "link": ""
         },
         {
-          "title": "Hyperloop",
-          "description": "Identity and store for a brand<br />selling minimalistic jewelry.",
+          "id": "project-3",
+          "title": "Project 3",
+          "description": "",
+          "detailedDescription": "",
           "images": [
             {
               "width": "250px",

@@ -10,6 +10,7 @@ const BoldFolioTemplate = ({
   content = {},
   isEditing = false,
   onContentChange,
+  onSaveBeforeNavigate = null,
   className = '',
   portfolioId = null
 }) => {
@@ -21,18 +22,7 @@ const BoldFolioTemplate = ({
     ? ensureProjectIds(getProjectsForTemplate(content, 'boldfolio'), 'boldfolio')
     : [];
 
-  // Handle content changes
-  const handleSectionContentChange = (section, field, value) => {
-    if (onContentChange) {
-      onContentChange({
-        ...content,
-        [section]: {
-          ...content[section],
-          [field]: value
-        }
-      });
-    }
-  };
+  // Pass onContentChange directly - BoldFolioWork expects (section, field, value) format
 
   return (
     <div
@@ -64,7 +54,7 @@ const BoldFolioTemplate = ({
       <BoldFolioHero
         content={content.hero || {}}
         isEditing={isEditing}
-        onContentChange={handleSectionContentChange}
+        onContentChange={(field, value) => onContentChange && onContentChange('hero', field, value)}
       />
 
       {/* Work Section */}
@@ -72,7 +62,9 @@ const BoldFolioTemplate = ({
         <BoldFolioWork
           content={content.work || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={onContentChange}
+          portfolioId={portfolioId}
+          onSaveBeforeNavigate={onSaveBeforeNavigate}
         />
       )}
 
@@ -81,7 +73,7 @@ const BoldFolioTemplate = ({
         <BoldFolioAbout
           content={content.about || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={(field, value) => onContentChange && onContentChange('about', field, value)}
         />
       )}
 
@@ -90,7 +82,7 @@ const BoldFolioTemplate = ({
         <BoldFolioContact
           content={content.contact || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={(field, value) => onContentChange && onContentChange('contact', field, value)}
         />
       )}
 

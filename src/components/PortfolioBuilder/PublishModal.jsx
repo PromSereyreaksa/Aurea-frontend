@@ -133,15 +133,14 @@ const PublishModal = ({
       await onPublish(slug);
       setPublishingProgress('Publishing complete!');
 
-      // Small delay to show completion message
+      // Redirect to published portfolio after short delay
       setTimeout(() => {
-        onClose();
-        setPublishingProgress('');
-      }, 500);
+        const publishedUrl = `${window.location.origin}/${slug}/html`;
+        window.location.href = publishedUrl;
+      }, 800);
     } catch (err) {
       setError(err.message || 'Failed to publish portfolio');
       setPublishingProgress('');
-    } finally {
       setIsPublishing(false);
     }
   };
@@ -344,28 +343,6 @@ const PublishModal = ({
               </div>
             )}
 
-            {/* Info Box */}
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-              <div className="flex gap-3">
-                <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <div className="text-sm text-purple-800 space-y-2">
-                  <p className="font-semibold">Understanding Your URLs</p>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="font-medium text-orange-700">🎨 React Portfolio URL:</p>
-                      <p className="text-purple-700 ml-4">Interactive version rendered in the React app - best for sharing with others to view online</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-blue-700">📄 Static HTML URL:</p>
-                      <p className="text-purple-700 ml-4">Standalone HTML file - download and host anywhere (GitHub Pages, Netlify, your own server, or open offline)</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-purple-600 font-medium">✨ Both show the exact same design - choose based on your needs!</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Footer */}

@@ -4,14 +4,12 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, baseUrl = '/template-preview/serene' }) => {
+const SereneGallery = ({ content, styling, isEditing, onChange }) => {
   const { colors, fonts } = styling;
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const { uploadImage } = useImageUpload();
-  const navigate = useNavigate();
 
   // First row - 3 items (masonry: medium-tall, short, medium) - NO IMAGES, just placeholders
   const defaultFirstRow = [
@@ -149,17 +147,11 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
           className="relative overflow-hidden w-full transition-all duration-200 rounded-sm h-full"
           style={{
             backgroundColor: '#f3f4f6',
-            cursor: 'pointer'
+            cursor: isEditing ? 'pointer' : 'default'
           }}
           onClick={() => {
             if (isEditing) {
               document.getElementById(`file-input-${rowType}-${index}`).click();
-            } else if (product.id) {
-              // Navigate to project detail page
-              const projectUrl = portfolioId
-                ? `/portfolio-builder/${portfolioId}/project/${product.id}`
-                : `${baseUrl}/project/${product.id}`;
-              navigate(projectUrl);
             }
           }}
         >
@@ -234,38 +226,8 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
               </div>
             </div>
           )}
-
-          {/* Hover overlay with "View Details" button (only in preview mode) */}
-          {!isEditing && product.image && product.id && (
-            <div
-              className="group-hover:opacity-100 opacity-0 transition-opacity duration-300"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                pointerEvents: 'none'
-              }}
-            >
-              <div style={{
-                fontFamily: fonts.bodyFont,
-                fontSize: '14px',
-                padding: '12px 24px',
-                backgroundColor: colors.background,
-                color: colors.primary,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 600,
-                borderRadius: '2px'
-              }}>
-                View Details
-              </div>
-            </div>
-          )}
         </div>
-        <div className="mt-3 md:mt-4 lg:mt-5 space-y-1 md:space-y-2">
+        <div className="mt-5">
           <h3
             contentEditable={isEditing}
             suppressContentEditableWarning
@@ -281,16 +243,14 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
                 onChange(rowType, updatedRow);
               }
             }}
-            className="text-base md:text-lg lg:text-xl break-words"
+            className="mb-2 text-lg md:text-xl lg:text-2xl"
             style={{
               color: '#4a5568',
               fontFamily: fonts.bodyFont,
-              fontWeight: 600,
-              lineHeight: '1.3',
+              fontWeight: 500,
+              lineHeight: '1.4',
               outline: isEditing ? '1px dashed transparent' : 'none',
-              cursor: isEditing ? 'text' : 'default',
-              wordBreak: 'break-word',
-              overflowWrap: 'break-word'
+              cursor: isEditing ? 'text' : 'default'
             }}
             onFocus={(e) => {
               if (isEditing) {
@@ -318,16 +278,13 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
                 onChange(rowType, updatedRow);
               }
             }}
-            className="text-sm md:text-base break-words"
+            className="text-sm md:text-base lg:text-lg"
             style={{
               color: '#6b7280',
               fontFamily: fonts.bodyFont,
               fontWeight: 500,
-              lineHeight: '1.5',
               outline: isEditing ? '1px dashed transparent' : 'none',
-              cursor: isEditing ? 'text' : 'default',
-              wordBreak: 'break-word',
-              overflowWrap: 'break-word'
+              cursor: isEditing ? 'text' : 'default'
             }}
             onFocus={(e) => {
               if (isEditing) {
@@ -351,13 +308,13 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
         className="py-12 md:py-16 lg:py-20"
         style={{ backgroundColor: colors.background }}
       >
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 max-w-[1800px] mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 lg:px-12">
         {/* First Row: Hero Text on Left + 3 Images on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,400px)_1fr] gap-8 md:gap-12 lg:gap-16 xl:gap-20 mb-12 md:mb-16 lg:mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8 md:gap-12 lg:gap-16 mb-12 md:mb-16 lg:mb-20">
           {/* Hero Text - Left Column */}
-          <div className="space-y-6 md:space-y-8 lg:space-y-10 lg:sticky lg:top-24 self-start">
+          <div className="space-y-10">
             <div
-              className="leading-[1.7] text-base md:text-lg lg:text-xl break-words"
+              className="leading-[1.7] text-base md:text-lg lg:text-xl"
               contentEditable={isEditing}
               suppressContentEditableWarning
               onBlur={(e) => isEditing && onChange('heroText1', e.target.textContent)}
@@ -365,15 +322,13 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
                 color: colors.text,
                 fontFamily: fonts.bodyFont,
                 fontWeight: 600,
-                paddingTop: '4px',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word'
+                paddingTop: '4px'
               }}
             >
-              {content.heroText1 || (isEditing ? 'Click to edit: Add your compelling introduction here. Share what makes your work unique and captivating.' : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')}
+              {content.heroText1 || (isEditing ? 'Click to edit: Add your compelling introduction here. Share what makes your work unique and captivating.' : 'Melbourne-based tattoo artist Rachel Garcia creates tattoos inspired by nature with a soft watercolor technique.')}
             </div>
             <div
-              className="leading-[1.7] text-base md:text-lg lg:text-xl break-words"
+              className="leading-[1.7] text-base md:text-lg lg:text-xl"
               contentEditable={isEditing}
               suppressContentEditableWarning
               onBlur={(e) => isEditing && onChange('heroText2', e.target.textContent)}
@@ -381,12 +336,10 @@ const SereneGallery = ({ content, styling, isEditing, onChange, portfolioId, bas
                 color: colors.text,
                 fontFamily: fonts.bodyFont,
                 fontWeight: 600,
-                paddingTop: '4px',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word'
+                paddingTop: '4px'
               }}
             >
-              {content.heroText2 || (isEditing ? 'Click to edit: Tell your audience about your creative process, expertise, or what drives your passion.' : 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.')}
+              {content.heroText2 || (isEditing ? 'Click to edit: Tell your audience about your creative process, expertise, or what drives your passion.' : 'Her delicate, nostalgic flowers, plants and birds are inked with the precision of scientific illustrations (grandma would approve).')}
             </div>
           </div>
 

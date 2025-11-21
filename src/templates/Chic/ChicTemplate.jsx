@@ -19,6 +19,7 @@ const ChicTemplate = ({
   styling = {},
   isEditing = false,
   onContentChange,
+  onSaveBeforeNavigate = null,
   className = '',
   portfolioId = null,
   baseUrl = '/template-preview/chic'
@@ -116,18 +117,7 @@ const ChicTemplate = ({
     typography: { ...defaultStyling.typography, ...styling?.typography }
   };
 
-  // Handle content changes
-  const handleSectionContentChange = (section, field, value) => {
-    if (onContentChange) {
-      onContentChange({
-        ...content,
-        [section]: {
-          ...content[section],
-          [field]: value
-        }
-      });
-    }
-  };
+  // Pass onContentChange directly - ChicWork expects (section, field, value) format
 
   return (
     <div
@@ -181,7 +171,7 @@ const ChicTemplate = ({
             content={content.hero || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={(field, value) => onContentChange && onContentChange('hero', field, value)}
           />
 
           {(content.about || isEditing) && (
@@ -190,7 +180,7 @@ const ChicTemplate = ({
                 content={content.about || {}}
                 styling={mergedStyling}
                 isEditing={isEditing}
-                onContentChange={handleSectionContentChange}
+                onContentChange={(field, value) => onContentChange && onContentChange('about', field, value)}
               />
             </div>
           )}
@@ -202,7 +192,7 @@ const ChicTemplate = ({
             content={content.contact || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={(field, value) => onContentChange && onContentChange('contact', field, value)}
           />
         </div>
       </div>
@@ -228,9 +218,10 @@ const ChicTemplate = ({
             content={content.work || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={onContentChange}
             portfolioId={portfolioId}
             baseUrl={baseUrl}
+            onSaveBeforeNavigate={onSaveBeforeNavigate}
           />
         )}
       </div>
