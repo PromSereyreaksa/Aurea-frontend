@@ -130,69 +130,75 @@ const ChicPreviewPage = () => {
     work: {
       projects: [
         {
-          id: 1,
-          title: 'CHAOSK',
-          subtitle: 'Brand Identity',
-          year: '2023',
-          awards: 'ADG Laus Silver 2023',
-          image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=1200&h=800&fit=crop',
-          link: ''
-        },
-        {
-          id: 2,
-          title: 'ANNKI STUDIO',
-          subtitle: 'Brand Guardianship',
-          year: 'currently',
-          image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&h=800&fit=crop',
-          link: ''
-        },
-        {
-          id: 3,
-          title: 'UU PHOTOSTUDIO',
-          subtitle: 'Advent Calendar',
+          id: 'project-1',
+          title: 'PROJECT ONE',
+          subtitle: 'Creative Direction',
+          description: 'A comprehensive brand identity project showcasing strategic visual design.',
+          detailedDescription: 'A comprehensive brand identity project that demonstrates the power of strategic visual design and thoughtful creative direction. This project explores the intersection of modern aesthetics and timeless design principles.\n\nThe work encompasses brand strategy, visual identity development, and complete design system implementation. Each element was carefully crafted to create a cohesive and impactful brand presence.',
+          image: '/portfolios/1.png',
+          category: 'Brand Identity',
           year: '2024',
-          image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=800&fit=crop',
+          awards: '',
           link: ''
         },
         {
-          id: 4,
-          title: 'FITTING HISTORY',
-          subtitle: 'Visual Identity for an art center in Barcelona',
-          year: '2023',
-          awards: 'Best Thesis Project Award / Presented at Brut!',
-          image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&h=800&fit=crop',
-          link: ''
-        },
-        {
-          id: 5,
-          title: 'GO UPLORBLOCK',
-          subtitle: 'Visual Identity & Brand Guardianship',
-          year: '2023',
-          image: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=1200&h=800&fit=crop',
-          link: ''
-        },
-        {
-          id: 6,
-          title: 'ART UU',
-          subtitle: 'Website Design & Development',
+          id: 'project-2',
+          title: 'PROJECT TWO',
+          subtitle: 'Visual Design',
+          description: 'An exploration of contemporary visual language in editorial design.',
+          detailedDescription: 'An exploration of contemporary visual language that pushes the boundaries of editorial design. This project investigates new approaches to typography, layout, and visual storytelling.\n\nThrough careful attention to detail and innovative composition techniques, the work creates engaging visual narratives that captivate audiences and enhance the reading experience.',
+          image: '/portfolios/2.png',
+          category: 'Editorial',
           year: '2024',
-          image: 'https://images.unsplash.com/photo-1545239705-1564e58b9e4a?w=1200&h=800&fit=crop',
+          awards: '',
           link: ''
         },
         {
-          id: 7,
-          title: 'SSSTUFF SUPERMARKET',
-          subtitle: 'Prints, posters, money, stickers & more',
-          year: '2021-2023',
-          image: 'https://images.unsplash.com/photo-1557180295-76eee20ae8aa?w=1200&h=800&fit=crop',
+          id: 'project-3',
+          title: 'PROJECT THREE',
+          subtitle: 'Art Direction',
+          description: 'Bold art direction combining photography and graphic design elements.',
+          detailedDescription: 'Bold art direction that seamlessly combines photography, illustration, and graphic design elements into a unified visual language. The project demonstrates mastery of composition, color theory, and visual hierarchy.\n\nEach design decision was made with intention, creating a powerful and memorable aesthetic that resonates with audiences and communicates complex ideas through visual means.',
+          image: '/portfolios/3.png',
+          category: 'Digital',
+          year: '2024',
+          awards: '',
           link: ''
         },
         {
-          id: 8,
-          title: 'EMBODIED MAGAZINE',
-          subtitle: 'Editorial Design, Art Direction',
-          year: '2022',
-          image: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=1200&h=800&fit=crop',
+          id: 'project-4',
+          title: 'PROJECT FOUR',
+          subtitle: 'Brand Strategy',
+          description: 'Strategic branding work focused on market positioning and visual identity.',
+          detailedDescription: 'Strategic branding work that focuses on precise market positioning and distinctive visual identity development. This project showcases the integration of research, strategy, and creative execution.\n\nThe comprehensive approach includes competitive analysis, brand positioning, messaging strategy, and complete visual identity system designed to create lasting brand equity.',
+          image: '/portfolios/4.png',
+          category: 'Branding',
+          year: '2023',
+          awards: '',
+          link: ''
+        },
+        {
+          id: 'project-5',
+          title: 'PROJECT FIVE',
+          subtitle: 'Design System',
+          description: 'Comprehensive design system for digital product development.',
+          detailedDescription: 'A comprehensive design system built to scale across multiple digital products and platforms. The system establishes clear design principles, reusable components, and consistent patterns.\n\nThis work streamlines the design and development process while ensuring visual consistency and exceptional user experience across all touchpoints.',
+          image: '/portfolios/5.jpg',
+          category: 'UX/UI',
+          year: '2024',
+          awards: '',
+          link: ''
+        },
+        {
+          id: 'project-6',
+          title: 'PROJECT SIX',
+          subtitle: 'Print Design',
+          description: 'Elegant print design exploring tactile materials and production techniques.',
+          detailedDescription: 'Elegant print design work that explores the intersection of tactile materials, specialized production techniques, and refined aesthetics. The project celebrates the craft of print design.\n\nThrough careful material selection, attention to typography, and innovative finishing techniques, the work creates memorable physical experiences that engage multiple senses.',
+          image: '/portfolios/6.jpg',
+          category: 'Print',
+          year: '2023',
+          awards: '',
           link: ''
         }
       ]
@@ -278,7 +284,7 @@ const ChicPreviewPage = () => {
 
         <div className="flex gap-2 md:gap-4 items-center">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate('/templates')}
             className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm"
             style={{
               fontFamily: "'Inter', sans-serif",

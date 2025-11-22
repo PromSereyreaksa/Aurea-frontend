@@ -5,20 +5,32 @@
  * Schema-driven template that adapts to backend configuration
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import SereneNavigation from './sections/SereneNavigation';
 import SereneHero from './sections/SereneHero';
 import SereneGallery from './sections/SereneGallery';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUtils';
 
 const SereneTemplate = ({
   content = {},
   styling = {},
   isEditing = false,
   onContentChange = () => {},
+  onSaveBeforeNavigate = null,
   className = '',
   portfolioId,
+  baseUrl = '/template-preview/serene',
 }) => {
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar with ensured IDs
+  const allProjects = isEditing
+    ? ensureProjectIds(getProjectsForTemplate(content, 'serene'), 'serene')
+    : [];
+
   // Merge styling from backend with defaults - Clean Blossom color palette
   const colors = styling?.colorScheme || styling?.colors || {
     primary: '#4a5568',
@@ -66,6 +78,19 @@ const SereneTemplate = ({
         rel="stylesheet"
       />
 
+      {/* Project Sidebar - Show in editing mode when portfolio exists */}
+      {isEditing && portfolioId && portfolioId !== 'new' && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="serene"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
+
       {/* Navigation */}
       {content.navigation && (
         <SereneNavigation
@@ -84,6 +109,9 @@ const SereneTemplate = ({
           styling={{ colors, fonts }}
           isEditing={isEditing}
           onChange={(fieldId, value) => onContentChange('gallery', fieldId, value)}
+          portfolioId={portfolioId}
+          baseUrl={baseUrl}
+          onSaveBeforeNavigate={onSaveBeforeNavigate}
         />
       )}
 

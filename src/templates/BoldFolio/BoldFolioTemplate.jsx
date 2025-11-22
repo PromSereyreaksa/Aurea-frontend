@@ -1,28 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BoldFolioHero from './sections/BoldFolioHero';
 import BoldFolioAbout from './sections/BoldFolioAbout';
 import BoldFolioWork from './sections/BoldFolioWork';
 import BoldFolioContact from './sections/BoldFolioContact';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUtils';
 
 const BoldFolioTemplate = ({
   content = {},
   isEditing = false,
   onContentChange,
+  onSaveBeforeNavigate = null,
   className = '',
   portfolioId = null
 }) => {
-  // Handle content changes
-  const handleSectionContentChange = (section, field, value) => {
-    if (onContentChange) {
-      onContentChange({
-        ...content,
-        [section]: {
-          ...content[section],
-          [field]: value
-        }
-      });
-    }
-  };
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar with ensured IDs
+  const allProjects = isEditing
+    ? ensureProjectIds(getProjectsForTemplate(content, 'boldfolio'), 'boldfolio')
+    : [];
+
+  // Pass onContentChange directly - BoldFolioWork expects (section, field, value) format
 
   return (
     <div
@@ -37,11 +37,24 @@ const BoldFolioTemplate = ({
         fontStyle: 'normal'
       }}
     >
+      {/* Project Sidebar - Show in editing mode when portfolio exists */}
+      {isEditing && portfolioId && portfolioId !== 'new' && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="boldfolio"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
+
       {/* Hero Section */}
       <BoldFolioHero
         content={content.hero || {}}
         isEditing={isEditing}
-        onContentChange={handleSectionContentChange}
+        onContentChange={(field, value) => onContentChange && onContentChange('hero', field, value)}
       />
 
       {/* Work Section */}
@@ -49,7 +62,9 @@ const BoldFolioTemplate = ({
         <BoldFolioWork
           content={content.work || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={onContentChange}
+          portfolioId={portfolioId}
+          onSaveBeforeNavigate={onSaveBeforeNavigate}
         />
       )}
 
@@ -58,7 +73,7 @@ const BoldFolioTemplate = ({
         <BoldFolioAbout
           content={content.about || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={(field, value) => onContentChange && onContentChange('about', field, value)}
         />
       )}
 
@@ -67,7 +82,7 @@ const BoldFolioTemplate = ({
         <BoldFolioContact
           content={content.contact || {}}
           isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
+          onContentChange={(field, value) => onContentChange && onContentChange('contact', field, value)}
         />
       )}
 

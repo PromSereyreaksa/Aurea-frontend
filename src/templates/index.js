@@ -14,7 +14,7 @@ export const templates = {
     name: 'Echelon',
     description: 'Swiss/International Typographic Style - clean, precise, grid-driven design',
     category: 'swiss',
-    preview: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/echolon.png',
     previewUrl: '/template-preview/echelon',
     component: EchelonTemplate,
 
@@ -157,7 +157,7 @@ export const templates = {
     name: 'Serene',
     description: 'Botanical and elegant portfolio template with soft, organic, nature-inspired design',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/blossom.png',
     previewUrl: '/template-preview/serene',
     component: SereneTemplate,
 
@@ -175,7 +175,7 @@ export const templates = {
       about: {
         type: 'about',
         layout: 'split_layout',
-        editable: ['name', 'role', 'image', 'bio', 'location', 'experience']
+        editable: ['name', 'role', 'image', 'bio', 'location', 'experience'] 
       },
       gallery: {
         type: 'gallery',
@@ -208,23 +208,113 @@ export const templates = {
       },
       gallery: {
         heading: 'My Work',
-        heroText1: 'Melbourne-based tattoo artist Rachel Garcia creates tattoos inspired by nature with a soft watercolor technique.',
-        heroText2: 'Her delicate, nostalgic flowers, plants and birds are inked with the precision of scientific illustrations (grandma would approve).',
+        heroText1: '',
+        heroText2: '',
         firstRow: [
-          { image: '', title: 'Project 1', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 2', description: 'Description', price: '', caption: '', span: 1 },
-          { image: '', title: 'Project 3', description: 'Description', price: '', caption: '', span: 2 }
+          {
+            id: 'project-1',
+            image: '',
+            title: 'Project 1',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-2',
+            image: '',
+            title: 'Project 2',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 1
+          },
+          {
+            id: 'project-3',
+            image: '',
+            title: 'Project 3',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          }
         ],
         secondRow: [
-          { image: '', title: 'Project 4', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 5', description: 'Description', price: '', caption: '', span: 3 },
-          { image: '', title: 'Project 6', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 7', description: 'Description', price: '', caption: '', span: 2 }
+          {
+            id: 'project-4',
+            image: '',
+            title: 'Project 4',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-5',
+            image: '',
+            title: 'Project 5',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 3
+          },
+          {
+            id: 'project-6',
+            image: '',
+            title: 'Project 6',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-7',
+            image: '',
+            title: 'Project 7',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          }
         ],
         thirdRow: [
-          { image: '', title: 'Project 8', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 9', description: 'Description', price: '', caption: '', span: 2 },
-          { image: '', title: 'Project 10', description: 'Description', price: '', caption: '', span: 1 }
+          {
+            id: 'project-8',
+            image: '',
+            title: 'Project 8',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-9',
+            image: '',
+            title: 'Project 9',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 2
+          },
+          {
+            id: 'project-10',
+            image: '',
+            title: 'Project 10',
+            description: '',
+            detailedDescription: '',
+            price: '',
+            caption: '',
+            span: 1
+          }
         ]
       }
     },
@@ -286,7 +376,7 @@ export const templates = {
     name: 'Chic',
     description: 'Editorial/Magazine-inspired portfolio with asymmetric sidebar layout and clean typography. Features a sticky left info panel and a two-column project grid with alternating layouts.',
     category: 'editorial',
-    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/chic.png',
     previewUrl: '/template-preview/chic',
     component: ChicTemplate,
 
@@ -332,46 +422,98 @@ export const templates = {
       work: {
         projects: [
           {
-            id: 1,
-            title: 'CHAOSK',
-            subtitle: 'Brand Identity',
-            description: 'Complete brand identity system for an innovative design collective. Including logo design, typography selection, color system, and comprehensive brand guidelines.',
+            id: 'project-1',
+            title: 'Project 1',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Brand Identity',
-            year: '2023',
-            awards: 'Awwwards Nominee 2023',
-            link: ''
-          },
-          {
-            id: 2,
-            title: 'NOVA EDITORIAL',
-            subtitle: 'Magazine Design',
-            description: 'Art direction and layout design for a contemporary art and culture publication. Focus on bold typography and strategic use of whitespace.',
-            image: '',
-            category: 'Editorial',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
-            id: 3,
-            title: 'SPECTRUM',
-            subtitle: 'Web Experience',
-            description: 'UI/UX design for an interactive digital experience showcasing emerging artists. Minimalist interface with emphasis on content.',
+            id: 'project-2',
+            title: 'Project 2',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Digital',
-            year: '2024',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           },
           {
-            id: 4,
-            title: 'APEX STUDIOS',
-            subtitle: 'Visual Identity',
-            description: 'Complete visual identity system for a multidisciplinary creative studio based in Berlin.',
+            id: 'project-3',
+            title: 'Project 3',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
             image: '',
-            category: 'Branding',
-            year: '2023',
+            category: '',
+            year: '',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-4',
+            title: 'Project 4',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
+            image: '',
+            category: '',
+            year: '',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-5',
+            title: 'Project 5',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
+            image: '',
+            category: '',
+            year: '',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-6',
+            title: 'Project 6',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
+            image: '',
+            category: '',
+            year: '',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-7',
+            title: 'Project 7',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
+            image: '',
+            category: '',
+            year: '',
+            awards: '',
+            link: ''
+          },
+          {
+            id: 'project-8',
+            title: 'Project 8',
+            subtitle: '',
+            description: '',
+            detailedDescription: '',
+            image: '',
+            category: '',
+            year: '',
             awards: '',
             link: ''
           }
@@ -464,7 +606,7 @@ export const templates = {
     name: 'BoldFolio',
     description: 'Bold, creative portfolio template with striking typography and vibrant magenta accents. Perfect for designers and creatives who want to make a statement.',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    preview: '/template-preview/boldfolio.png',
     previewUrl: '/template-preview/boldfolio',
     component: BoldFolioTemplate,
 
@@ -501,18 +643,22 @@ export const templates = {
       work: {
         projects: [
           {
-            title: 'Ice Peak',
-            description: 'A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.',
+            id: 'project-1',
+            title: 'Project 1',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '580px', height: '380px', src: '' },
               { width: '450px', height: '280px', src: '' }
             ],
-            logo: '<span>|||</span><span>|||</span><span style="font-size: 100px; letter-spacing: 12px">ICE</span><span style="font-size: 100px; letter-spacing: 12px">PEAK</span>',
+            logo: '',
             link: ''
           },
           {
-            title: 'The Recreationist',
-            description: 'Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.',
+            id: 'project-2',
+            title: 'Project 2',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '250px', height: '280px', src: '' },
               { width: '580px', height: '380px', src: '' }
@@ -521,8 +667,10 @@ export const templates = {
             link: ''
           },
           {
-            title: 'Hyperloop',
-            description: 'Identity and store for a brand<br />selling minimalistic jewelry.',
+            id: 'project-3',
+            title: 'Project 3',
+            description: '',
+            detailedDescription: '',
             images: [
               { width: '250px', height: '280px', src: '' },
               { width: '500px', height: '500px', src: '' }

@@ -121,20 +121,6 @@ const FloatingActionButtons = ({
             {/* Mobile Menu - Appears above toggle button */}
             {isMobileMenuOpen && (
               <div className="absolute bottom-16 right-0 bg-white rounded-2xl shadow-2xl p-3 space-y-2 min-w-[240px]">
-                {/* Change Template */}
-                <MobileMenuItem
-                  icon={
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.79 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.79 4 8 4s8-1.79 8-4M4 7c0-2.21 3.79-4 8-4s8 1.79 8 4" />
-                    </svg>
-                  }
-                  label="Change Template"
-                  onClick={() => {
-                    onChangeTemplate();
-                    setIsMobileMenuOpen(false);
-                  }}
-                />
-
                 {/* Preview */}
                 <MobileMenuItem
                   icon={
@@ -146,20 +132,6 @@ const FloatingActionButtons = ({
                   label="Preview"
                   onClick={() => {
                     onPreview();
-                    setIsMobileMenuOpen(false);
-                  }}
-                />
-
-                {/* Export PDF */}
-                <MobileMenuItem
-                  icon={
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  }
-                  label="Export PDF"
-                  onClick={() => {
-                    onExportPDF();
                     setIsMobileMenuOpen(false);
                   }}
                 />
@@ -216,17 +188,6 @@ const FloatingActionButtons = ({
 
           {/* Desktop: All Buttons Stacked */}
           <div className="hidden md:flex flex-col space-y-3">
-            {/* Change Template */}
-            <ActionButton
-              icon={
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.79 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.79 4 8 4s8-1.79 8-4M4 7c0-2.21 3.79-4 8-4s8 1.79 8 4" />
-                </svg>
-              }
-              label="Change Template"
-              onClick={onChangeTemplate}
-            />
-
             {/* Preview */}
             <ActionButton
               icon={
@@ -237,17 +198,6 @@ const FloatingActionButtons = ({
               }
               label="Preview"
               onClick={onPreview}
-            />
-
-            {/* Export PDF */}
-            <ActionButton
-              icon={
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              }
-              label="Export PDF"
-              onClick={onExportPDF}
             />
 
             {/* Settings */}

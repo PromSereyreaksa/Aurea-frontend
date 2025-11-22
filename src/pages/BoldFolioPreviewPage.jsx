@@ -130,54 +130,60 @@ const BoldFolioPreviewPage = () => {
     work: {
       projects: [
         {
-          title: 'Ice Peak',
-          description: 'A flexible design identity that<br />strengthens the overall image of<br />Ice Peak, an adventure company<br />focused on alpinism.',
+          id: 'project-1',
+          title: 'Alpine Vision',
+          description: 'Lorem ipsum dolor sit amet<br />consectetur adipiscing elit<br />sed do eiusmod tempor<br />incididunt ut labore.',
+          detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
           images: [
             {
               width: '580px',
               height: '380px',
-              src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop'
+              src: '/portfolios/1.png'
             },
             {
               width: '450px',
               height: '280px',
-              src: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&h=600&fit=crop'
+              src: '/portfolios/2.png'
             }
           ],
-          logo: '<span style="font-size: 60px; letter-spacing: 8px; font-weight: 700;">ICE PEAK</span>',
+          logo: '<span style="font-size: 60px; letter-spacing: 8px; font-weight: 700;">ALPINE</span>',
           link: ''
         },
         {
-          title: 'The Recreationist',
-          description: 'Brand identity and<br />creative campaign for The<br />Recreationist, an online<br />boutique that sells<br />independent designers and<br />global goods for summer<br />vacations by the sea.',
+          id: 'project-2',
+          title: 'Creative Studio',
+          description: 'Sed ut perspiciatis unde<br />omnis iste natus error sit<br />voluptatem accusantium<br />doloremque laudantium.',
+          detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.',
           images: [
             {
               width: '250px',
               height: '280px',
-              src: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=700&fit=crop'
+              src: '/portfolios/3.png'
             },
             {
               width: '580px',
               height: '380px',
-              src: 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=1200&h=800&fit=crop'
+              src: '/portfolios/4.png'
             }
           ],
           logo: '',
           link: ''
         },
         {
-          title: 'Hyperloop',
-          description: 'Identity and store for a brand<br />selling minimalistic jewelry.',
+          id: 'project-3',
+          title: 'Modern Elegance',
+          description: 'Neque porro quisquam est<br />qui dolorem ipsum quia<br />dolor sit amet consectetur<br />adipisci velit.',
+          detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.',
           images: [
             {
               width: '250px',
               height: '280px',
-              src: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=700&fit=crop'
+              src: '/portfolios/5.jpg'
             },
             {
               width: '500px',
               height: '500px',
-              src: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=1000&h=1000&fit=crop'
+              src: '/portfolios/6.jpg'
             }
           ],
           logo: '',
@@ -272,7 +278,7 @@ const BoldFolioPreviewPage = () => {
 
         <div className="flex gap-2 md:gap-4 items-center">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate('/templates')}
             className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm"
             style={{
               fontFamily: 'Graphik, sans-serif',

@@ -34,7 +34,7 @@ const SereneHero = ({ content, styling, isEditing, onChange }) => {
                 lineHeight: '1.6'
               }}
             >
-              {content.title || 'Rachel Garcia is a tattoo artist based in Queens, NY'}
+              {content.title || 'Lorem ipsum dolor sit amet consectetur adipiscing elit'}
             </h1>
 
             {/* Description */}

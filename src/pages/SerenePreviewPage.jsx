@@ -128,85 +128,105 @@ const SerenePreviewPage = () => {
       ]
     },
     hero: {
-      title: 'Rachel Garcia is a logo designer & brand identity specialist based in Melbourne',
-      description1: 'Specializing in minimalist logo design and comprehensive brand identity systems that bring clarity and recognition to modern businesses.',
-      description2: 'With over 8 years of experience, I create distinctive logos that capture the essence of brands through clean, memorable design solutions.'
+      title: 'Lorem ipsum dolor sit amet consectetur adipiscing elit',
+      description1: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      description2: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     },
     gallery: {
-      heroText1: 'Award-winning logo designer specializing in creating distinctive brand identities for global companies across various industries.',
-      heroText2: 'From international sports organizations to luxury fashion brands, each project showcases a commitment to strategic design thinking and visual excellence.',
+      heroText1: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      heroText2: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.',
       firstRow: [
         {
-          image: '/mockDataImage/logo/chanel.jpg',
-          title: 'Chanel',
-          description: 'Luxury fashion brand identity',
+          id: 'project-1',
+          image: '/portfolios/10.jpg',
+          title: 'Project One',
+          description: 'Creative design showcase',
+          detailedDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
           span: 2
         },
         {
-          image: '/mockDataImage/logo/loiusvulton.png',
-          title: 'Louis Vuitton',
-          description: 'Premium lifestyle brand',
+          id: 'project-2',
+          image: '/portfolios/12.jpg',
+          title: 'Project Two',
+          description: 'Innovative visual concept',
+          detailedDescription: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\n\nNemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
           span: 1
         },
         {
-          image: '/mockDataImage/logo/Arsenal-Logo.png',
-          title: 'Arsenal FC',
-          description: 'Sports team logo design',
+          id: 'project-3',
+          image: '/portfolios/13.jpg',
+          title: 'Project Three',
+          description: 'Modern artistic approach',
+          detailedDescription: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.\n\nUt enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
           span: 2
         }
       ],
       secondRow: [
         {
-          image: '/mockDataImage/logo/lalakers.png',
-          title: 'LA Lakers',
-          description: 'Professional basketball team',
+          id: 'project-4',
+          image: '/portfolios/4.png',
+          title: 'Project Four',
+          description: 'Contemporary design study',
+          detailedDescription: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
           span: 2
         },
         {
-          image: '/mockDataImage/logo/nba.jpg',
-          title: 'NBA',
-          description: 'Sports league branding',
+          id: 'project-5',
+          image: '/portfolios/5.jpg',
+          title: 'Project Five',
+          description: 'Elegant composition work',
+          detailedDescription: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.\n\nTemporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
           span: 3
         },
         {
-          image: '/mockDataImage/logo/Premier-League-Symbol.png',
-          title: 'Premier League',
-          description: 'Football league identity',
+          id: 'project-6',
+          image: '/portfolios/6.jpg',
+          title: 'Project Six',
+          description: 'Minimalist aesthetic vision',
+          detailedDescription: 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error.\n\nVoluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.',
           span: 2
         },
         {
-          image: '/mockDataImage/logo/adidas.webp',
-          title: 'Adidas',
-          description: 'Athletic brand logo',
+          id: 'project-7',
+          image: '/portfolios/7.jpg',
+          title: 'Project Seven',
+          description: 'Bold creative expression',
+          detailedDescription: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est.\n\nQui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
           span: 2
         }
       ],
       thirdRow: [
         {
-          image: '/mockDataImage/logo/84e482f1ccb817ac426324d294eb5f59.jpg',
-          title: 'Brand Logo',
-          description: 'Corporate identity design',
+          id: 'project-8',
+          image: '/portfolios/8.jpg',
+          title: 'Project Eight',
+          description: 'Strategic visual design',
+          detailedDescription: 'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.\n\nQuam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus.',
           span: 2
         },
         {
-          image: '/mockDataImage/logo/media_17770be5de64c9b159b23a7da870ae0bd5bc0f400.jpeg',
-          title: 'Media Brand',
-          description: 'Digital media logo',
+          id: 'project-9',
+          image: '/portfolios/9.jpg',
+          title: 'Project Nine',
+          description: 'Refined artistic detail',
+          detailedDescription: 'Qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi.\n\nId est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio.',
           span: 2
         },
         {
-          image: '/mockDataImage/logo/pasted-image-0-2-3-1024x950.png',
-          title: 'Shell',
-          description: 'Energy company logo',
+          id: 'project-10',
+          image: '/portfolios/10.jpg',
+          title: 'Project Ten',
+          description: 'Sophisticated visual narrative',
+          detailedDescription: 'Cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.\n\nSaepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.',
           span: 1
         }
       ]
     },
     about: {
-      bio1: 'Rachel Garcia began tattooing fresh out of art school, and her botanical work has a painterly quality that reflects her training:',
-      tagline: ' with delicate highlights and shadows.',
-      bio2: 'After graduating with a Bachelor of Fine Arts from Greenkrug College of Arts & Design (Auckland, New Zealand) in 2013, her work has been an ever-evolving platform for self-expression.',
-      bio3: 'Rachel often travels to visit museums for inspiration. Recent projects were inspired by a visit to the Sotheby\'s Institute of Art, London.'
+      bio1: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      tagline: ' Ut enim ad minim veniam quis nostrud.',
+      bio2: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      bio3: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto.'
     }
   };
 

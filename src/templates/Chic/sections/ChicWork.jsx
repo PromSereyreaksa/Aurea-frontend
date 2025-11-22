@@ -336,9 +336,9 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
                       maxWidth: '336px'
                     }}
                   >
-                    {project.subtitle && <span>{project.subtitle}</span>}
-                    {project.subtitle && project.year && <span> —— </span>}
-                    {project.year && <span>{project.year}</span>}
+                    
+                    
+                    
                     {project.awards && (
                       <div style={{ marginTop: '4px' }}>
                         {project.awards}

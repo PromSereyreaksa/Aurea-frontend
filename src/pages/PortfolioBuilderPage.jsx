@@ -1050,9 +1050,10 @@ const PortfolioBuilderPage = () => {
                 <TemplatePreview
                   key={selectedTemplate?.id}
                   template={selectedTemplate}
-                  portfolioData={portfolioData}
+                  portfolioData={{ ...portfolioData, id: id }}
                   isEditing={isEditing}
                   onContentChange={contentChangeHandler}
+                  onSaveBeforeNavigate={handleSave}
                   onEditingStateChange={(editing) => {
                     setIsUserEditing(editing);
                     if (!editing && portfolioData) {

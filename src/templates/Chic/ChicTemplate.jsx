@@ -5,22 +5,34 @@
  * Reference: Readymag-style layout with absolute positioning
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBreakpoints } from '../../hooks/useMediaQuery';
 import ChicHero from './sections/ChicHero';
 import ChicAbout from './sections/ChicAbout';
 import ChicWork from './sections/ChicWork';
 import ChicContact from './sections/ChicContact';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUtils';
 
 const ChicTemplate = ({
   content = {},
   styling = {},
   isEditing = false,
   onContentChange,
+  onSaveBeforeNavigate = null,
   className = '',
-  portfolioId = null
+  portfolioId = null,
+  baseUrl = '/template-preview/chic'
 }) => {
   const { isMobile, isTablet, isDesktop } = useBreakpoints();
+
+  // Sidebar state for editing mode
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all projects for sidebar with ensured IDs
+  const allProjects = isEditing
+    ? ensureProjectIds(getProjectsForTemplate(content, 'chic'), 'chic')
+    : [];
 
   // Default styling - Chic Editorial theme
   const defaultStyling = {
@@ -105,18 +117,7 @@ const ChicTemplate = ({
     typography: { ...defaultStyling.typography, ...styling?.typography }
   };
 
-  // Handle content changes
-  const handleSectionContentChange = (section, field, value) => {
-    if (onContentChange) {
-      onContentChange({
-        ...content,
-        [section]: {
-          ...content[section],
-          [field]: value
-        }
-      });
-    }
-  };
+  // Pass onContentChange directly - ChicWork expects (section, field, value) format
 
   return (
     <div
@@ -130,6 +131,19 @@ const ChicTemplate = ({
         position: 'relative'
       }}
     >
+      {/* Project Sidebar - Show in editing mode when portfolio exists */}
+      {isEditing && portfolioId && portfolioId !== 'new' && (
+        <ProjectSidebar
+          portfolioId={portfolioId}
+          projects={allProjects}
+          currentProjectId={null}
+          templateType="chic"
+          isOpen={sidebarOpen}
+          onToggle={setSidebarOpen}
+          hasUnsavedChanges={false}
+        />
+      )}
+
       {/* Fixed Left Sidebar - Sticky positioned */}
       <div
         className="fixed-position-container"
@@ -157,7 +171,7 @@ const ChicTemplate = ({
             content={content.hero || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={(field, value) => onContentChange && onContentChange('hero', field, value)}
           />
 
           {(content.about || isEditing) && (
@@ -166,7 +180,7 @@ const ChicTemplate = ({
                 content={content.about || {}}
                 styling={mergedStyling}
                 isEditing={isEditing}
-                onContentChange={handleSectionContentChange}
+                onContentChange={(field, value) => onContentChange && onContentChange('about', field, value)}
               />
             </div>
           )}
@@ -178,7 +192,7 @@ const ChicTemplate = ({
             content={content.contact || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={(field, value) => onContentChange && onContentChange('contact', field, value)}
           />
         </div>
       </div>
@@ -204,7 +218,10 @@ const ChicTemplate = ({
             content={content.work || {}}
             styling={mergedStyling}
             isEditing={isEditing}
-            onContentChange={handleSectionContentChange}
+            onContentChange={onContentChange}
+            portfolioId={portfolioId}
+            baseUrl={baseUrl}
+            onSaveBeforeNavigate={onSaveBeforeNavigate}
           />
         )}
       </div>

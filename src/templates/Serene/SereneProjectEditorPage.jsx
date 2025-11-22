@@ -1,0 +1,580 @@
+/**
+ * Serene Project Detail Editor Page
+ * Allows editing project details including image and detailed description
+ */
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { portfolioApi } from '../../lib/portfolioApi';
+import ProjectSidebar from '../../components/PortfolioBuilder/ProjectSidebar';
+import { getProjectsForTemplate, getProjectIndex } from '../../utils/projectUtils';
+
+const SereneProjectEditorPage = () => {
+  console.log('🚀 SereneProjectEditorPage COMPONENT LOADED');
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { portfolioId, projectId } = useParams();
+
+  // Get passed state from navigation
+  const passedState = location.state || {};
+
+  console.log('🚀 SereneProjectEditorPage params:', { portfolioId, projectId });
+  console.log('🚀 SereneProjectEditorPage state:', passedState);
+
+  const [portfolio, setPortfolio] = useState(null);
+  const [project, setProject] = useState(null);
+  const [allProjects, setAllProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Rich text editor for detailed description
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[200px] max-w-none',
+        style: 'font-family: "Inter", sans-serif; color: #6b7280; line-height: 1.8;'
+      }
+    }
+  });
+
+  // Load portfolio and find project
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      try {
+        // Use passed state for instant display (if available)
+        if (passedState.project && passedState.allProjects) {
+          console.log('⚡ Using passed state for instant display');
+          setProject(passedState.project);
+          setAllProjects(passedState.allProjects);
+          if (editor && passedState.project.detailedDescription) {
+            editor.commands.setContent(passedState.project.detailedDescription.replace(/\n/g, '<br>'));
+          }
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
+
+        // Always fetch portfolio from backend for save functionality
+        console.log('📡 Fetching portfolio from backend...');
+        const response = await portfolioApi.getById(portfolioId);
+
+        // Extract portfolio from response - handle different response structures
+        const data = response?.data?.portfolio || response?.portfolio || response;
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Portfolio Data:', {
+          portfolioId,
+          projectId,
+          hasData: !!data,
+          hasContent: !!data?.content,
+          hasSections: !!data?.sections,
+          template: data?.template,
+          contentKeys: data?.content ? Object.keys(data.content) : [],
+          sectionsCount: data?.sections?.length || 0,
+          galleryStructure: data?.content?.gallery,
+          hasFirstRow: !!data?.content?.gallery?.firstRow,
+          hasSecondRow: !!data?.content?.gallery?.secondRow,
+          hasThirdRow: !!data?.content?.gallery?.thirdRow,
+          firstRowCount: data?.content?.gallery?.firstRow?.length || 0,
+          secondRowCount: data?.content?.gallery?.secondRow?.length || 0,
+          thirdRowCount: data?.content?.gallery?.thirdRow?.length || 0
+        });
+
+        setPortfolio(data);
+
+        // Get all projects for sidebar
+        const projects = getProjectsForTemplate(data.content, data.template || 'serene');
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Extracted Projects:', {
+          projectsCount: projects?.length || 0,
+          projects: projects,
+          lookingForProjectId: projectId
+        });
+
+        setAllProjects(projects);
+
+        // Find the current project
+        const foundProject = projects.find(p => p.id === projectId);
+
+        console.log('🔍 PROJECT EDITOR DEBUG - Found Project:', {
+          found: !!foundProject,
+          project: foundProject
+        });
+
+        if (foundProject) {
+          setProject(foundProject);
+          // Set editor content
+          if (editor && foundProject.detailedDescription) {
+            editor.commands.setContent(foundProject.detailedDescription.replace(/\n/g, '<br>'));
+          }
+        } else {
+          console.error('❌ Project not found in portfolio data!');
+          console.error('Available project IDs:', projects.map(p => p.id));
+          console.error('Looking for project ID:', projectId);
+          console.error('Full gallery data:', data?.content?.gallery);
+
+          // TEMPORARY: Don't redirect, just show error in UI
+          toast.error(`Project "${projectId}" not found. Check console for details.`);
+
+          // Create a dummy project to prevent crash
+          setProject({
+            id: projectId,
+            title: `Project ${projectId} (Not Found)`,
+            image: '',
+            detailedDescription: 'This project was not found in the portfolio data. Check the console logs for details.'
+          });
+
+          // DON'T redirect - comment this out temporarily
+          // navigate(`/portfolio-builder/${portfolioId}`);
+        }
+      } catch (error) {
+        console.error('Failed to load portfolio:', error);
+        toast.error('Failed to load project');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPortfolio();
+  }, [portfolioId, projectId, navigate]);
+
+  // Update editor when project changes
+  useEffect(() => {
+    if (editor && project?.detailedDescription) {
+      editor.commands.setContent(project.detailedDescription.replace(/\n/g, '<br>'));
+    }
+  }, [project, editor]);
+
+  // Track unsaved changes when project state changes
+  useEffect(() => {
+    if (project) {
+      setHasUnsavedChanges(true);
+    }
+  }, [project]);
+
+
+  // Save changes
+  const handleSave = async () => {
+    if (!portfolio || !project) {
+      toast.error('Portfolio or project not loaded');
+      return;
+    }
+
+    // Use the actual project ID from the loaded project, not from URL
+    const actualProjectId = project.id;
+
+    if (!actualProjectId) {
+      toast.error('Project ID not found');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Get description from editor (convert HTML back to plain text with newlines)
+      const editorHTML = editor?.getHTML() || '';
+      const textContent = editorHTML
+        .replace(/<\/p><p>/g, '\n')
+        .replace(/<br\s*\/?>/g, '\n')
+        .replace(/<[^>]*>/g, '')
+        .trim();
+
+      // Deep clone the content to avoid mutation issues
+      const updatedContent = JSON.parse(JSON.stringify(portfolio.content || {}));
+      const gallery = updatedContent.gallery || {};
+
+      // Find and update the project in the correct row - use string comparison
+      const updateProjectInRow = (row) => {
+        if (!row) return [];
+        return row.map(p =>
+          String(p.id) === String(actualProjectId)
+            ? { ...p, ...project, detailedDescription: textContent }
+            : p
+        );
+      };
+
+      gallery.firstRow = updateProjectInRow(gallery.firstRow);
+      gallery.secondRow = updateProjectInRow(gallery.secondRow);
+      gallery.thirdRow = updateProjectInRow(gallery.thirdRow);
+
+      updatedContent.gallery = gallery;
+
+      // Save to backend
+      await portfolioApi.update(portfolioId, { content: updatedContent });
+
+      // Update local portfolio state
+      setPortfolio(prev => ({ ...prev, content: updatedContent }));
+
+      setHasUnsavedChanges(false);
+      toast.success('Project saved!');
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        width: '100%',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff'
+      }}>
+        <div style={{
+          fontFamily: '"Inter", sans-serif',
+          fontSize: '14px',
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}>
+          Loading project...
+        </div>
+      </div>
+    );
+  }
+
+  // Debug info - shows what projects exist
+  const debugInfo = {
+    portfolioId,
+    projectId,
+    template: portfolio?.template,
+    projectsCount: allProjects?.length || 0,
+    projectIds: allProjects?.map(p => p.id) || [],
+    foundProject: !!project && project.title !== `Project ${projectId} (Not Found)`
+  };
+
+  if (!project) {
+    return null;
+  }
+
+  const sereneColors = {
+    primary: '#4a5568',
+    secondary: '#9ca3af',
+    accent: '#e5e7eb',
+    background: '#ffffff',
+    text: '#6b7280',
+    border: '#e5e7eb'
+  };
+
+  const currentProjectIndex = getProjectIndex(allProjects, projectId);
+
+  return (
+    <div style={{
+      width: '100%',
+      minHeight: '100vh',
+      backgroundColor: sereneColors.background
+    }}>
+      {/* DEBUG BANNER - Remove after fixing */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1a1a2e',
+        color: '#00ff88',
+        padding: '12px 20px',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        zIndex: 9999,
+        borderTop: '2px solid #00ff88'
+      }}>
+        <strong>DEBUG:</strong> template={debugInfo.template} |
+        projectsCount={debugInfo.projectsCount} |
+        lookingFor="{debugInfo.projectId}" |
+        availableIds=[{debugInfo.projectIds.join(', ')}] |
+        found={debugInfo.foundProject ? 'YES' : 'NO'}
+      </div>
+
+      {/* Project Sidebar */}
+      <ProjectSidebar
+        portfolioId={portfolioId}
+        projects={allProjects}
+        currentProjectId={projectId}
+        templateType={portfolio?.template || 'serene'}
+        isOpen={sidebarOpen}
+        onToggle={setSidebarOpen}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onSaveBeforeNavigate={handleSave}
+      />
+
+      {/* Header */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        borderBottom: `1px solid ${sereneColors.border}`,
+        zIndex: 100,
+        backdropFilter: 'blur(10px)'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '16px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}>
+          <button
+            onClick={() => navigate(`/portfolio-builder/${portfolioId}`)}
+            style={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '14px',
+              color: sereneColors.primary,
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontWeight: 500
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 10H5M5 10L10 5M5 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </button>
+
+          <div style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            flex: 1,
+            textAlign: 'center'
+          }}>
+            {currentProjectIndex > 0 ? `Editing Project ${currentProjectIndex}` : 'Editing Project'}
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '14px',
+              padding: '10px 24px',
+              backgroundColor: saving ? '#999999' : sereneColors.primary,
+              color: sereneColors.background,
+              border: 'none',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontWeight: 500,
+              opacity: saving ? 0.7 : 1,
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        paddingTop: '80px',
+        maxWidth: '1000px',
+        margin: '0 auto',
+        padding: '80px 24px 80px'
+      }}>
+        {/* Title Editor */}
+        <div style={{ marginBottom: '32px' }}>
+          <label style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            display: 'block',
+            marginBottom: '12px',
+            fontWeight: 600
+          }}>
+            Project Title
+          </label>
+          <input
+            type="text"
+            value={project.title || ''}
+            onChange={(e) => setProject({ ...project, title: e.target.value })}
+            placeholder="Project Title"
+            style={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: 'clamp(24px, 4vw, 36px)',
+              color: sereneColors.primary,
+              backgroundColor: sereneColors.background,
+              border: `2px solid ${sereneColors.border}`,
+              borderRadius: '4px',
+              padding: '16px',
+              width: '100%',
+              fontWeight: 400,
+              outline: 'none',
+              transition: 'border-color 0.3s ease'
+            }}
+            onFocus={(e) => e.target.style.borderColor = sereneColors.primary}
+            onBlur={(e) => e.target.style.borderColor = sereneColors.border}
+          />
+        </div>
+
+        {/* Short Description Editor */}
+        <div style={{ marginBottom: '32px' }}>
+          <label style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            display: 'block',
+            marginBottom: '12px',
+            fontWeight: 600
+          }}>
+            Short Description (Gallery Preview)
+          </label>
+          <input
+            type="text"
+            value={project.description || ''}
+            onChange={(e) => setProject({ ...project, description: e.target.value })}
+            placeholder="Brief description for gallery view"
+            style={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '16px',
+              color: sereneColors.text,
+              backgroundColor: sereneColors.background,
+              border: `2px solid ${sereneColors.border}`,
+              borderRadius: '4px',
+              padding: '12px 16px',
+              width: '100%',
+              outline: 'none',
+              transition: 'border-color 0.3s ease'
+            }}
+            onFocus={(e) => e.target.style.borderColor = sereneColors.primary}
+            onBlur={(e) => e.target.style.borderColor = sereneColors.border}
+          />
+        </div>
+
+        {/* Project Image (Read-only) */}
+        <div style={{ marginBottom: '48px' }}>
+          <label style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            display: 'block',
+            marginBottom: '12px',
+            fontWeight: 600
+          }}>
+            Project Image
+          </label>
+
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            border: `2px solid ${sereneColors.border}`,
+            borderRadius: '4px',
+            overflow: 'hidden',
+            backgroundColor: sereneColors.accent
+          }}>
+            {project.image ? (
+              <img
+                src={project.image}
+                alt={project.title}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '500px',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
+            ) : (
+              <div style={{
+                height: '200px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px'
+              }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={sereneColors.secondary} strokeWidth="1.5">
+                  <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <div style={{
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: '14px',
+                  color: sereneColors.secondary,
+                  textAlign: 'center'
+                }}>
+                  No image set
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{
+            marginTop: '12px',
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            fontStyle: 'italic'
+          }}>
+            To change the image, go back to the portfolio builder
+          </div>
+        </div>
+
+        {/* Rich Text Editor for Detailed Description */}
+        <div style={{ marginBottom: '48px' }}>
+          <label style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            display: 'block',
+            marginBottom: '12px',
+            fontWeight: 600
+          }}>
+            Detailed Description
+          </label>
+
+          <div style={{
+            border: `2px solid ${sereneColors.border}`,
+            borderRadius: '4px',
+            padding: '16px',
+            backgroundColor: sereneColors.background,
+            minHeight: '300px'
+          }}>
+            <EditorContent editor={editor} />
+          </div>
+
+          <div style={{
+            marginTop: '12px',
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            color: sereneColors.secondary,
+            fontStyle: 'italic'
+          }}>
+            This detailed description will appear on the individual project page
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SereneProjectEditorPage;

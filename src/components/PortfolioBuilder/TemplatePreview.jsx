@@ -14,16 +14,24 @@ import { getTemplateComponent } from '../../templates';
  * - isEditing: Boolean flag to enable/disable edit mode
  * - onContentChange: Callback for content updates (section, field, value)
  */
-const TemplatePreview = ({ 
-  template, 
-  portfolioData, 
-  isEditing = false, 
-  onContentChange 
+const TemplatePreview = ({
+  template,
+  portfolioData,
+  isEditing = false,
+  onContentChange,
+  onSaveBeforeNavigate = null
 }) => {
   // ========================================
   // 1. TEMPLATE LOADING
   // ========================================
-  
+
+  // Debug log the portfolioData
+  console.log('TemplatePreview: Received portfolioData', {
+    id: portfolioData?.id,
+    templateId: portfolioData?.templateId,
+    hasContent: !!portfolioData?.content
+  });
+
   // Dynamically load the template component based on templateId
   const TemplateComponent = getTemplateComponent(
     portfolioData?.templateId || template?.id
@@ -99,12 +107,17 @@ const TemplatePreview = ({
   // 4. RENDER
   // ========================================
   
+  // Get styling from portfolio data or template defaults
+  const styling = portfolioData?.styling || template?.styling || {};
+
   return (
     <div className="w-full bg-white">
       <TemplateComponent
         content={content}
+        styling={styling}
         isEditing={isEditing}
         onContentChange={handleContentChange}
+        onSaveBeforeNavigate={onSaveBeforeNavigate}
         portfolioId={portfolioData?.id}
         caseStudies={portfolioData?.caseStudies || {}}
       />

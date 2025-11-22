@@ -23,13 +23,13 @@ const SereneNavigation = ({ content, styling, isEditing, onChange, portfolioId }
 
   return (
     <header
-      className="border-b border-gray-200 bg-white"
+      className="border-b border-gray-200 bg-white sticky top-0 z-50"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,
       }}
     >
-      <div className="px-4 sm:px-6 md:px-8 py-4">
+      <div className="px-4 sm:px-6 md:px-8 py-4 max-w-[1800px] mx-auto">
         <div className="flex justify-between items-center">
           {/* Logo - Blossom style - BOLD */}
           <button
