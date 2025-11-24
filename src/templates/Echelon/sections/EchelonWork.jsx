@@ -255,10 +255,11 @@ const EchelonWork = ({
         {/* Projects - Swiss Asymmetrical Layout */}
         {projects.map((project, index) => {
           const isEven = index % 2 === 0;
-          const hasCaseStudy = !isEditing && project.caseStudyUrl;
-          
+          // Check both hasCaseStudy (set by backend) and caseStudyUrl for compatibility
+          const hasCaseStudy = !isEditing && (project.hasCaseStudy || project.caseStudyUrl);
+
           const handleProjectClick = () => {
-            if (hasCaseStudy) {
+            if (hasCaseStudy && project.caseStudyUrl) {
               window.location.href = project.caseStudyUrl;
             }
           };
