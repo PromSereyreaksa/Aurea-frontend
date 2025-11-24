@@ -265,7 +265,7 @@ function App() {
               element={<StaticHTMLViewer />}
             />
             <Route
-              path="/:subdomain/case-study-:projectId.html"
+              path="/:subdomain/case-study/:projectId"
               element={<StaticCaseStudyViewer />}
             />
           </Routes>
