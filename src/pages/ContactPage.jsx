@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useForm, ValidationError } from "@formspree/react";
-import Navbar from "../components/Shared/Navbar";
+import V2Navbar from "../components/LandingPage/V2Navbar";
 import Footer from "../components/Shared/Footer";
 
 const contactMethods = [
@@ -87,7 +87,7 @@ const ContactPage = () => {
 
   return (
     <div className="app-page min-h-screen bg-white text-black font-sans">
-      <Navbar />
+      <V2Navbar />
 
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-12">

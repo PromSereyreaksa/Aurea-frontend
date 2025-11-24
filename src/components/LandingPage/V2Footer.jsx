@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import aureaLogo from "../../assets/AUREA - Logo.png";
+const aureaLogo = "/AUREA - Logo.png";
 
 export default function V2Footer() {
   const currentYear = new Date().getFullYear();
@@ -86,7 +86,7 @@ export default function V2Footer() {
             <img
               src={aureaLogo}
               alt="AUREA"
-              className="h-10 w-auto brightness-0 invert mb-4"
+              className="h-10 w-auto mb-4"
             />
             <p className="text-white/60 text-sm leading-relaxed">
               Where creative visions become beautiful websites.

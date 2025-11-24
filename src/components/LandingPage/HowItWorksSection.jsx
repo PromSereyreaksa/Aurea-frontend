@@ -72,7 +72,7 @@ export default function HowItWorksSection() {
         ScrollTrigger.create({
           trigger: section,
           start: "top top",
-          end: `+=80%`,
+          end: `+=120%`,
           pin: true,
           scrub: 1,
           markers: false,
@@ -103,7 +103,7 @@ export default function HowItWorksSection() {
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: "+=80%",
+            end: "+=120%",
             scrub: 1,
             markers: false,
           }

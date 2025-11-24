@@ -1,7 +1,7 @@
 import V2Navbar from "../components/LandingPage/V2Navbar";
 import V2Hero from "../components/LandingPage/V2Hero";
 import PortfolioGalleryMarquee from "../components/LandingPage/PortfolioGalleryMarquee";
-import MarqueeSection from "../components/LandingPage/MarqueeSection";
+// import MarqueeSection from "../components/LandingPage/MarqueeSection";
 import SolutionSection from "../components/LandingPage/SolutionSection";
 import TransitionSection from "../components/LandingPage/TransitionSection";
 import HowItWorksSection from "../components/LandingPage/HowItWorksSection";
@@ -19,27 +19,29 @@ export default function HomePage() {
         <PortfolioGalleryMarquee />
 
         {/* Hero Section */}
-        <div id="home">
+        {/* <div id="home">
           <V2Hero />
-        </div>
+        </div> */}
 
+          {/* How It Works - Scroll-jacking Section */}
+        <div className="bg-white">
+          <HowItWorksSection />
+        </div>
+        
         {/* Marquee Section - Scroll-based */}
-        <MarqueeSection />
+        {/* <MarqueeSection /> */}
 
         {/* Solution Section - Our Services */}
-        <div id="services" className="bg-white">
+        {/* <div id="services" className="bg-white">
           <SolutionSection />
-        </div>
+        </div> */}
 
         {/* Transition Section - Before & After */}
         <div className="bg-white">
           <TransitionSection />
         </div>
 
-        {/* How It Works - Scroll-jacking Section */}
-        <div className="bg-white">
-          <HowItWorksSection />
-        </div>
+      
       </main>
 
       <V2Footer />

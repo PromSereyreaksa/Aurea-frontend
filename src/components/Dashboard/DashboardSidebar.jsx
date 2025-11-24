@@ -209,7 +209,7 @@ const DashboardSidebar = ({
       <div className="p-4 lg:p-6 border-b border-white/20 sm:hidden lg:block">
         <Link to="/" className="flex items-center gap-3 group">
           <img
-            src="/AUREA - Logo.jpg"
+            src="/AUREA - Logo.png"
             alt="Aurea Logo"
             className="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-cover transition-transform duration-300 group-hover:scale-105 ring-2 ring-white/30"
           />
