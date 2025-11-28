@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 /**
@@ -13,17 +13,15 @@ const StaticHTMLViewer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchAndDisplayHTML();
-  }, [subdomain]);
-
-  const fetchAndDisplayHTML = async () => {
+  const fetchAndDisplayHTML = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiBase}/api/sites/${subdomain}/raw-html`);
+
+      // Use the correct endpoint: /api/sites/:subdomain
+      const response = await fetch(`${apiBase}/api/sites/${subdomain}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -37,14 +35,18 @@ const StaticHTMLViewer = () => {
 
       const data = await response.json();
 
-      if (data.success && data.html) {
+      // Check if the site has static HTML
+      if (data.success && data.data && data.data.staticHtml) {
         // Replace the entire document with the HTML content
         // This gives a true static HTML experience
         document.open();
-        document.write(data.html);
+        document.write(data.data.staticHtml);
         document.close();
+      } else if (data.success && data.data) {
+        // If no static HTML, redirect to the portfolio page renderer
+        navigate(`/portfolio/${subdomain}`);
       } else {
-        setError('Invalid HTML content');
+        setError('Portfolio not found');
         setLoading(false);
       }
 
@@ -53,7 +55,11 @@ const StaticHTMLViewer = () => {
       setError('Failed to load portfolio');
       setLoading(false);
     }
-  };
+  }, [subdomain, navigate]);
+
+  useEffect(() => {
+    fetchAndDisplayHTML();
+  }, [fetchAndDisplayHTML]);
 
   // Loading state
   if (loading) {

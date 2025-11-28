@@ -35,6 +35,7 @@ const PortfolioBuilderPage = lazy(() => import("./pages/PortfolioBuilderPage"));
 const TemplatesShowcasePage = lazy(() =>
   import("./pages/TemplatesShowcasePage")
 );
+const PortfoliosPage = lazy(() => import("./pages/PortfoliosPage"));
 const PublishedPortfolioPage = lazy(() =>
   import("./pages/PublishedPortfolioPage")
 );
@@ -246,6 +247,7 @@ function App() {
               element={<BoldFolioProjectPreviewPage />}
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
+            <Route path="/portfolios" element={<PortfoliosPage />} />
             <Route
               path="/portfolio/:slug"
               element={<PublishedPortfolioPage />}

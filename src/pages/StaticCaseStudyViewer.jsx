@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 /**
@@ -12,21 +12,19 @@ const StaticCaseStudyViewer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchAndDisplayHTML();
-  }, [subdomain, projectId]);
-
-  const fetchAndDisplayHTML = async () => {
+  const fetchAndDisplayHTML = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiBase}/api/sites/${subdomain}/case-study/${projectId}/raw-html`);
+
+      // First, try to get the portfolio site data
+      const response = await fetch(`${apiBase}/api/sites/${subdomain}`);
 
       if (!response.ok) {
         if (response.status === 404) {
-          setError('Case study not found');
+          setError('Portfolio not found');
         } else {
           setError('Failed to load case study');
         }
@@ -36,13 +34,21 @@ const StaticCaseStudyViewer = () => {
 
       const data = await response.json();
 
-      if (data.success && data.html) {
-        // Replace the entire document with the HTML content
-        document.open();
-        document.write(data.html);
-        document.close();
+      // Check if the portfolio has static case study HTML
+      if (data.success && data.data && data.data.caseStudies) {
+        const caseStudy = data.data.caseStudies.find(cs => cs.id === projectId || cs._id === projectId);
+
+        if (caseStudy && caseStudy.staticHtml) {
+          // Replace the entire document with the HTML content
+          document.open();
+          document.write(caseStudy.staticHtml);
+          document.close();
+        } else {
+          // Fallback to the portfolio page with case study
+          navigate(`/portfolio/${subdomain}/project/${projectId}`);
+        }
       } else {
-        setError('Invalid HTML content');
+        setError('Case study not found');
         setLoading(false);
       }
 
@@ -51,7 +57,11 @@ const StaticCaseStudyViewer = () => {
       setError('Failed to load case study');
       setLoading(false);
     }
-  };
+  }, [subdomain, projectId, navigate]);
+
+  useEffect(() => {
+    fetchAndDisplayHTML();
+  }, [fetchAndDisplayHTML]);
 
   // Loading state
   if (loading) {
