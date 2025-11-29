@@ -23,6 +23,7 @@ const V2Navbar = () => {
   const navItems = [
     { label: "About", link: "/about" },
     { label: "Templates", link: "/templates" },
+    { label: "Portfolios", link: "/portfolios" },
     { label: "Contact", link: "/contact" },
   ];
 
