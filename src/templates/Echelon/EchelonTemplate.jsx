@@ -150,14 +150,16 @@ const EchelonTemplate = ({
           onContentChange={handleSectionContentChange}
         />
 
-        {/* Work Section */}
-        <EchelonWork
-          content={content.work || {}}
-          isEditing={isEditing}
-          onContentChange={handleSectionContentChange}
-          portfolioId={portfolioId}
-          caseStudies={caseStudies}
-        />
+        {/* Work Section - Only show if enabled or in editing mode */}
+        {(isEditing || content.work?.enabled !== false) && (
+          <EchelonWork
+            content={content.work || {}}
+            isEditing={isEditing}
+            onContentChange={handleSectionContentChange}
+            portfolioId={portfolioId}
+            caseStudies={caseStudies}
+          />
+        )}
 
         {/* Gallery Section */}
         <EchelonGallery

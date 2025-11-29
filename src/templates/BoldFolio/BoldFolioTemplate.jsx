@@ -9,8 +9,10 @@ import { getProjectsForTemplate, ensureProjectIds } from '../../utils/projectUti
 const BoldFolioTemplate = ({
   content = {},
   isEditing = false,
+  isPreview = false,
   onContentChange,
   onSaveBeforeNavigate = null,
+  onViewDetails = null,
   className = '',
   portfolioId = null
 }) => {
@@ -62,9 +64,11 @@ const BoldFolioTemplate = ({
         <BoldFolioWork
           content={content.work || {}}
           isEditing={isEditing}
+          isPreview={isPreview}
           onContentChange={onContentChange}
           portfolioId={portfolioId}
           onSaveBeforeNavigate={onSaveBeforeNavigate}
+          onViewDetails={onViewDetails}
         />
       )}
 

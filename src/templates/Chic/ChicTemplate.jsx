@@ -18,8 +18,10 @@ const ChicTemplate = ({
   content = {},
   styling = {},
   isEditing = false,
+  isPreview = false,
   onContentChange,
   onSaveBeforeNavigate = null,
+  onViewDetails = null,
   className = '',
   portfolioId = null,
   baseUrl = '/template-preview/chic'
@@ -218,10 +220,12 @@ const ChicTemplate = ({
             content={content.work || {}}
             styling={mergedStyling}
             isEditing={isEditing}
+            isPreview={isPreview}
             onContentChange={onContentChange}
             portfolioId={portfolioId}
             baseUrl={baseUrl}
             onSaveBeforeNavigate={onSaveBeforeNavigate}
+            onViewDetails={onViewDetails}
           />
         )}
       </div>

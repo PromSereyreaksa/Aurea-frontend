@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useImageUpload } from '../../../hooks/useImageUpload';
 import { useBreakpoints } from '../../../hooks/useMediaQuery';
 
-const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => {
+const BoldFolioWork = ({ content = {}, isEditing = false, isPreview = false, onContentChange, onViewDetails = null }) => {
   const [visibleSections, setVisibleSections] = useState([]);
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
   const { uploadImage } = useImageUpload();
@@ -289,9 +289,40 @@ const BoldFolioWork = ({ content = {}, isEditing = false, onContentChange }) => 
                   onClick={() => {
                     if (isEditing) {
                       document.getElementById(`file-input-boldfolio-${imageKey}`).click();
+                    } else if (isPreview && onViewDetails && project.detailedDescription) {
+                      onViewDetails(project);
                     }
                   }}
                 >
+                  {/* Hover Overlay - Only in preview mode */}
+                  {isPreview && onViewDetails && project.detailedDescription && img.src && (
+                    <div
+                      className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center"
+                      style={{
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                    >
+                      <div style={{
+                        fontFamily: '"Inter", sans-serif',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#ffffff',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        transform: 'translateY(10px)',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(10px)'}
+                      >
+                        View Details →
+                      </div>
+                    </div>
+                  )}
+
                   {/* Hidden file input */}
                   {isEditing && (
                     <input

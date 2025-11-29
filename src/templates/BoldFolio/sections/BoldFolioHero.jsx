@@ -10,7 +10,7 @@ const BoldFolioHero = ({ content = {}, isEditing = false, onContentChange }) => 
 
   const handleFieldChange = (field, value) => {
     if (onContentChange) {
-      onContentChange('hero', field, value);
+      onContentChange(field, value);
     }
   };
 

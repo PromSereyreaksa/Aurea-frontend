@@ -17,6 +17,7 @@ const PortfoliosPage = () => {
   const [order] = useState('desc');
 
   const fetchPublishedSites = useCallback(async (page = 1, limit = 12) => {
+    console.log('🔄 fetchPublishedSites called');
     try {
       setLoading(true);
       const response = await sitesApi.getAllPublished({
@@ -26,7 +27,17 @@ const PortfoliosPage = () => {
         order
       });
 
+      console.log('📥 Raw API response:', response);
+
       if (response.success && response.data) {
+        // Debug: Log the sites data to see available fields
+        console.log('📋 PortfoliosPage - sites data:', response.data);
+        if (response.data.length > 0) {
+          console.log('📋 First site all keys:', Object.keys(response.data[0]));
+          console.log('📋 First site cover:', response.data[0].cover);
+          console.log('📋 First site coverImage:', response.data[0].coverImage);
+        }
+
         setSites(response.data);
         setPagination(response.pagination || {
           page: 1,
@@ -305,9 +316,9 @@ const PortfoliosPage = () => {
                       left: 0,
                       width: '100%',
                       height: '100%',
-                      backgroundImage: site.coverImage
-                        ? `url(${site.coverImage})`
-                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      backgroundImage: (site.coverImage || site.cover)
+                        ? `url(${site.coverImage || site.cover})`
+                        : `url(/placeholder-612.webp)`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       transition: 'transform 0.3s ease'

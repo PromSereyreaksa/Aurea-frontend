@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Plus, MoreVertical, Edit, Eye, Trash2, CheckCircle, XCircle, Grid as GridIcon, List } from 'lucide-react';
+import { Package, Plus, MoreVertical, Edit, Eye, Trash2, CheckCircle, XCircle, Grid as GridIcon, List, Camera } from 'lucide-react';
 import usePortfolioStore from '../../stores/portfolioStore';
+import { portfolioApi } from '../../lib/portfolioApi';
+import { useImageUpload } from '../../hooks/useImageUpload';
 import '../../styles/android-animations.css';
 
-const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
+const PortfoliosSectionNew = ({ portfolios: propPortfolios, isLoading }) => {
   const navigate = useNavigate();
-  const { deletePortfolio, publishPortfolio, unpublishPortfolio } = usePortfolioStore();
+  const { deletePortfolio, publishPortfolio, unpublishPortfolio, portfolios: storePortfolios } = usePortfolioStore();
+  const { uploadImage } = useImageUpload();
+
+  // Use store portfolios to get real-time updates after upload
+  const portfolios = storePortfolios.length > 0 ? storePortfolios : propPortfolios;
+
   const [openMenuId, setOpenMenuId] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'alphabetic'
@@ -17,6 +24,8 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [portfolioToDelete, setPortfolioToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [uploadingCoverId, setUploadingCoverId] = useState(null);
+  const { fetchUserPortfolios } = usePortfolioStore();
 
   // Close menu when clicking outside
   React.useEffect(() => {
@@ -110,6 +119,65 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
       setOpenMenuId(null);
     } catch (error) {
       console.error('Failed to toggle publish:', error);
+    }
+  };
+
+  const handleCoverUpload = async (e, portfolioId) => {
+    e.stopPropagation();
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image (JPG, PNG, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploadingCoverId(portfolioId);
+
+      console.log('📤 Starting cover upload for portfolio:', portfolioId);
+      console.log('📁 File:', file.name, file.type, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+      // Upload to Cloudinary with compression
+      const imageUrl = await uploadImage(file, {
+        compress: true,
+        direct: true,
+      });
+
+      console.log('✅ Image uploaded successfully!');
+      console.log('🔗 Cloudinary URL:', imageUrl);
+
+      // Update portfolio with new cover
+      const updateResult = await portfolioApi.update(portfolioId, { cover: imageUrl });
+
+      console.log('✅ Portfolio update response:', updateResult);
+
+      // Extract cover from response (handle nested structure)
+      const coverUrl = updateResult?.data?.portfolio?.cover || updateResult?.portfolio?.cover || updateResult?.cover || imageUrl;
+      console.log('🖼️ Cover URL extracted:', coverUrl);
+
+      // Update the local store immediately with the cover URL
+      // This ensures the cover shows up without waiting for backend list to return it
+      usePortfolioStore.getState().updatePortfolioOptimistic(portfolioId, { cover: coverUrl });
+      console.log('✅ Local store updated with cover');
+
+      // Clear API cache
+      portfolioApi.clearCache();
+
+    } catch (error) {
+      console.error('❌ Error uploading cover:', error);
+      console.error('❌ Error details:', error.message, error.stack);
+      alert('Failed to upload cover image. Please try again.');
+    } finally {
+      setUploadingCoverId(null);
     }
   };
 
@@ -645,13 +713,16 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
                     width: '40px',
                     height: '40px',
                     borderRadius: '8px',
-                    backgroundColor: color,
+                    backgroundImage: portfolio.cover
+                      ? `url(${portfolio.cover})`
+                      : `url(/placeholder-612.webp)`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}>
-                    <Package size={20} color="#fff" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
@@ -842,6 +913,16 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
           gap: '20px',
         }} className="fade-in portfolio-grid">
           {sortedPortfolios.map((portfolio, index) => {
+            // Debug: Log portfolio cover status
+            if (index === 0) {
+              console.log('🎨 Rendering portfolios, first portfolio:', {
+                id: portfolio._id,
+                title: portfolio.title,
+                cover: portfolio.cover,
+                hasCover: !!portfolio.cover
+              });
+            }
+
             const color = getColorForPortfolio(portfolio._id);
             const lastUpdated = new Date(portfolio.updatedAt || portfolio.createdAt);
             const timeDiff = Date.now() - lastUpdated.getTime();
@@ -883,16 +964,86 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
                 <div
                   style={{
                     aspectRatio: '16/10',
-                    background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
+                    backgroundImage: portfolio.cover
+                      ? `url(${portfolio.cover})`
+                      : `url(/placeholder-612.webp)`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
                     borderRadius: '8px 8px 0 0',
                     overflow: 'hidden',
+                    cursor: 'pointer',
                   }}
+                  className="group"
                 >
-                  <Package size={48} color="rgba(255,255,255,0.3)" />
+
+                  {/* Upload overlay on hover */}
+                  <label
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundColor: uploadingCoverId === portfolio._id ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      cursor: uploadingCoverId === portfolio._id ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      opacity: uploadingCoverId === portfolio._id ? 1 : 0,
+                      pointerEvents: 'auto',
+                    }}
+                    className="upload-overlay"
+                    onMouseEnter={(e) => {
+                      if (uploadingCoverId !== portfolio._id) {
+                        e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+                        e.currentTarget.style.opacity = 1;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (uploadingCoverId !== portfolio._id) {
+                        e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+                        e.currentTarget.style.opacity = 0;
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={(e) => handleCoverUpload(e, portfolio._id)}
+                      disabled={uploadingCoverId === portfolio._id}
+                      style={{ display: 'none' }}
+                    />
+                    {uploadingCoverId === portfolio._id ? (
+                      <>
+                        <div
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            border: '4px solid rgba(255,255,255,0.3)',
+                            borderTop: '4px solid #fff',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite',
+                          }}
+                        />
+                        <span style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                          Uploading...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera size={32} color="#fff" strokeWidth={1.5} />
+                        <span style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                          {portfolio.cover ? 'Change Cover' : 'Add Cover'}
+                        </span>
+                      </>
+                    )}
+                  </label>
+
                   {portfolio.published && (
                     <div style={{
                       position: 'absolute',
@@ -907,12 +1058,20 @@ const PortfoliosSectionNew = ({ portfolios, isLoading }) => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
+                      zIndex: 10,
                     }}>
                       <CheckCircle size={12} />
                       LIVE
                     </div>
                   )}
                 </div>
+
+                <style jsx>{`
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                `}</style>
 
                 {/* Portfolio Info */}
                 <div style={{ padding: '16px', position: 'relative', zIndex: openMenuId === portfolio._id ? 1100 : 1 }}>

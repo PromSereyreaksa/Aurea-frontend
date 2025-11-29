@@ -9,8 +9,9 @@ import { useBreakpoints } from '../../../hooks/useMediaQuery';
  * Desktop specs: 1024px content area, absolute positioning
  * Left column: 467px @ x:40px | Right column: 705px @ x:517px
  */
-const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChange }) => {
+const ChicWork = ({ content = {}, styling = {}, isEditing = false, isPreview = false, onContentChange, onViewDetails = null }) => {
   const fonts = styling.fonts || {};
+  const colors = styling.colors || {};
   const projects = content.projects || [];
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
   const { uploadImage } = useImageUpload();
@@ -204,19 +205,51 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
             onClick={() => {
               if (isEditing) {
                 document.getElementById(`file-input-chic-${index}`).click();
+              } else if (isPreview && onViewDetails && project.detailedDescription) {
+                onViewDetails(project);
               }
             }}
           >
             {project.image ? (
-              <img
-                src={project.image}
-                alt={project.title || 'Project'}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
+              <>
+                <img
+                  src={project.image}
+                  alt={project.title || 'Project'}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                {/* Hover Overlay - Only in preview mode */}
+                {isPreview && onViewDetails && project.detailedDescription && (
+                  <div
+                    className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center"
+                    style={{
+                      opacity: 0,
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                  >
+                    <div style={{
+                      fontFamily: fonts.body || '"Inter", sans-serif',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      transform: 'translateY(10px)',
+                      transition: 'transform 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(10px)'}
+                    >
+                      View Details →
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div
                 style={{
@@ -453,24 +486,55 @@ const ChicWork = ({ content = {}, styling = {}, isEditing = false, onContentChan
 
               {/* Image */}
               {project.image && (
-                <img
-                  src={project.image}
-                  alt={project.title || 'Project'}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    transition: 'transform 0.5s ease-in, opacity 0.3s ease',
-                    opacity: 1
-                  }}
+                <>
+                  <img
+                    src={project.image}
+                    alt={project.title || 'Project'}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      transition: 'transform 0.5s ease-in, opacity 0.3s ease',
+                      opacity: 1
+                    }}
                   onMouseEnter={(e) => {
                     if (!isEditing) e.target.style.transform = 'scale(1.01)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = 'scale(1)';
                   }}
-                />
+                  />
+                  {/* Hover Overlay - Only in preview mode */}
+                  {isPreview && onViewDetails && project.detailedDescription && (
+                    <div
+                      className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center"
+                      style={{
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => onViewDetails(project)}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                    >
+                      <div style={{
+                        fontFamily: fonts.body || '"Inter", sans-serif',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#ffffff',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        transform: 'translateY(10px)',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(10px)'}
+                      >
+                        View Details →
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Edit overlay when hovering over existing image */}

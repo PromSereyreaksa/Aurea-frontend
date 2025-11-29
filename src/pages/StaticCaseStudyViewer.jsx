@@ -44,8 +44,9 @@ const StaticCaseStudyViewer = () => {
           document.write(caseStudy.staticHtml);
           document.close();
         } else {
-          // Fallback to the portfolio page with case study
-          navigate(`/portfolio/${subdomain}/project/${projectId}`);
+          // If no static HTML, show error message
+          setError('Static HTML not available for this case study. Please generate static HTML first.');
+          setLoading(false);
         }
       } else {
         setError('Case study not found');

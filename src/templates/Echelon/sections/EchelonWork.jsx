@@ -13,14 +13,21 @@ const EchelonWork = ({
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
   const { uploadImage } = useImageUpload();
   
-  const { 
+  const {
     heading = 'SELECTED WORK',
-    projects = []
+    projects = [],
+    enabled = true
   } = content;
 
   const handleHeadingChange = (newHeading) => {
     if (onContentChange) {
       onContentChange('work', 'heading', newHeading);
+    }
+  };
+
+  const handleToggleSection = () => {
+    if (onContentChange) {
+      onContentChange('work', 'enabled', !enabled);
     }
   };
 
@@ -140,9 +147,54 @@ const EchelonWork = ({
         style={{
           backgroundColor: '#FFFFFF',
           position: 'relative',
-          overflow: 'clip'
+          overflow: 'clip',
+          opacity: enabled ? 1 : 0.5,
+          transition: 'opacity 0.3s ease'
         }}
       >
+      {/* Section Visibility Toggle - Only visible when editing */}
+      {isEditing && (
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          backgroundColor: enabled ? '#000000' : '#FF0000',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+        }}>
+          <label style={{
+            fontFamily: '"IBM Plex Mono", monospace',
+            fontSize: '12px',
+            color: '#FFFFFF',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={handleToggleSection}
+              style={{
+                width: '18px',
+                height: '18px',
+                cursor: 'pointer',
+                accentColor: '#FF0000'
+              }}
+            />
+            {enabled ? 'SECTION VISIBLE' : 'SECTION HIDDEN'}
+          </label>
+        </div>
+      )}
+
       {/* Aesthetic Spirals in Corners */}
       <SwissSpiral position="top-right" color="#000000" opacity={0.025} size={160} rotation={90} />
       <SwissSpiral position="bottom-left" color="#FF0000" opacity={0.035} size={180} rotation={270} />

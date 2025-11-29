@@ -8,6 +8,11 @@ const CaseStudyPage = () => {
   const { portfolios } = usePortfolioStore();
   const [caseStudy, setCaseStudy] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check if user is viewing from portfolio builder (owner) or public view
+  const isOwnerView = window.location.pathname.includes('/portfolio-builder/');
+
   // Load case study data if portfolioId and projectId are provided
   useEffect(() => {
     if (portfolioId && projectId) {
@@ -15,12 +20,67 @@ const CaseStudyPage = () => {
       if (portfolio?.caseStudies?.[projectId]) {
         setCaseStudy(portfolio.caseStudies[projectId]);
       }
+      setIsLoading(false);
+    } else {
+      // For static demo page (no portfolioId/projectId), show demo content
+      setIsLoading(false);
     }
   }, [portfolioId, projectId, portfolios]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // If we have portfolioId/projectId but no case study data
+  if (!isLoading && portfolioId && projectId && !caseStudy) {
+    return (
+      <div style={{
+        fontFamily: '"Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif',
+        backgroundColor: '#FFFFFF',
+        color: '#000000',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px'
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+          <h1 style={{
+            fontSize: '48px',
+            fontWeight: 900,
+            marginBottom: '24px',
+            textTransform: 'uppercase'
+          }}>
+            Case Study Not Available
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            marginBottom: '40px',
+            color: '#666666'
+          }}>
+            This case study hasn't been created yet.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              fontFamily: '"IBM Plex Mono", monospace',
+              fontSize: '14px',
+              color: '#000000',
+              backgroundColor: 'transparent',
+              border: '2px solid #000000',
+              padding: '16px 32px',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 700
+            }}
+          >
+            ← BACK
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -187,7 +247,7 @@ const CaseStudyPage = () => {
           VIEW CASE STUDY
         </div>
 
-        {portfolioId && projectId && (
+        {portfolioId && projectId && isOwnerView && (
           <button
             className="cs-header-edit"
             onClick={() => navigate(`/portfolio-builder/${portfolioId}/case-study/${projectId}`)}

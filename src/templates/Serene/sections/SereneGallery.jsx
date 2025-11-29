@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useImageUpload } from '../../../hooks/useImageUpload';
 
-const SereneGallery = ({ content, styling, isEditing, onChange }) => {
+const SereneGallery = ({ content, styling, isEditing, isPreview = false, onChange, onViewDetails = null }) => {
   const { colors, fonts } = styling;
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const { uploadImage } = useImageUpload();
@@ -144,14 +144,16 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
         style={{ gridRow: `span ${product.span || 2}` }}
       >
         <div
-          className="relative overflow-hidden w-full transition-all duration-200 rounded-sm h-full"
+          className="relative overflow-hidden w-full transition-all duration-200 rounded-sm h-full group"
           style={{
             backgroundColor: '#f3f4f6',
-            cursor: isEditing ? 'pointer' : 'default'
+            cursor: isEditing ? 'pointer' : (isPreview && product.detailedDescription ? 'pointer' : 'default')
           }}
           onClick={() => {
             if (isEditing) {
               document.getElementById(`file-input-${rowType}-${index}`).click();
+            } else if (isPreview && onViewDetails && product.detailedDescription) {
+              onViewDetails(product);
             }
           }}
         >
@@ -208,12 +210,41 @@ const SereneGallery = ({ content, styling, isEditing, onChange }) => {
 
           {/* Show image (either blob preview or final URL) */}
           {product.image && product.image.trim() !== '' ? (
-            <img
-              src={product.image}
-              alt={product.title}
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
+            <>
+              <img
+                src={product.image}
+                alt={product.title}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+              {/* Hover Overlay - Only in preview mode */}
+              {isPreview && onViewDetails && product.detailedDescription && (
+                <div
+                  className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center"
+                  style={{
+                    opacity: 0
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                >
+                  <div style={{
+                    fontFamily: fonts.bodyFont,
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    transform: 'translateY(10px)',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(10px)'}
+                  >
+                    View Details →
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">

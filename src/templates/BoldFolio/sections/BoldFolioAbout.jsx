@@ -1,7 +1,26 @@
+import { useState } from 'react';
+
 const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) => {
+  const [editingLink, setEditingLink] = useState(null);
+  const [linkValue, setLinkValue] = useState('');
+
   const handleFieldChange = (field, value) => {
     if (onContentChange) {
-      onContentChange('about', field, value);
+      onContentChange(field, value);
+    }
+  };
+
+  const openLinkModal = (field, currentValue) => {
+    if (!isEditing) return;
+    setEditingLink(field);
+    setLinkValue(currentValue || '');
+  };
+
+  const saveLinkValue = () => {
+    if (editingLink) {
+      handleFieldChange(editingLink, linkValue);
+      setEditingLink(null);
+      setLinkValue('');
     }
   };
 
@@ -88,17 +107,136 @@ const BoldFolioAbout = ({ content = {}, isEditing = false, onContentChange }) =>
         {content.email && (
           <p style={{...styles.subtext, fontSize: 'clamp(0.938rem, 2vw, 1.125rem)'}}>
             <a
-              href={`mailto:${content.email}`}
-              style={{ color: '#ff0080', textDecoration: 'underline' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => isEditing && handleFieldChange('email', e.target.textContent)}
+              href={!isEditing ? `mailto:${content.email}` : undefined}
+              onClick={(e) => {
+                if (isEditing) {
+                  e.preventDefault();
+                  openLinkModal('email', content.email);
+                }
+              }}
+              style={{
+                color: '#ff0080',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
             >
               {content.email}
+              {isEditing && (
+                <span style={{
+                  fontSize: '10px',
+                  marginLeft: '6px',
+                  color: '#999',
+                  fontStyle: 'italic'
+                }}>
+                  (click to edit)
+                </span>
+              )}
             </a>
           </p>
         )}
       </div>
+
+      {/* Link Edit Modal */}
+      {editingLink && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setEditingLink(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              padding: '30px',
+              borderRadius: '8px',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{
+              margin: '0 0 20px 0',
+              fontFamily: 'Graphik, sans-serif',
+              fontSize: '18px',
+              fontWeight: 600,
+              textTransform: 'uppercase'
+            }}>
+              Edit Email Address
+            </h3>
+            <input
+              type="text"
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+              placeholder="Enter email address"
+              autoFocus
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontFamily: 'Graphik, sans-serif',
+                fontSize: '14px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '4px',
+                marginBottom: '20px',
+                outline: 'none'
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  saveLinkValue();
+                } else if (e.key === 'Escape') {
+                  setEditingLink(null);
+                }
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setEditingLink(null)}
+                style={{
+                  padding: '10px 20px',
+                  fontFamily: 'Graphik, sans-serif',
+                  fontSize: '13px',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveLinkValue}
+                style={{
+                  padding: '10px 20px',
+                  fontFamily: 'Graphik, sans-serif',
+                  fontSize: '13px',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#ff0080',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
