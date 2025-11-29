@@ -4,6 +4,8 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate,
+  useParams,
 } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -87,6 +89,12 @@ function ScrollToTop() {
   }, [pathname]);
 
   return null;
+}
+
+// Redirect component for legacy /portfolio/:slug URLs
+function PortfolioRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/${slug}/html`} replace />;
 }
 
 function App() {
@@ -248,9 +256,10 @@ function App() {
             />
             <Route path="/templates" element={<TemplatesShowcasePage />} />
             <Route path="/portfolios" element={<PortfoliosPage />} />
+            {/* Redirect legacy /portfolio/:slug URLs to /:slug/html */}
             <Route
               path="/portfolio/:slug"
-              element={<PublishedPortfolioPage />}
+              element={<PortfolioRedirect />}
             />
             <Route
               path="/case-study/logo-design-process"

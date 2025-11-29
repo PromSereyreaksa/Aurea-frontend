@@ -1,7 +1,32 @@
+import { useState } from 'react';
+
 const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) => {
+  const [editingLink, setEditingLink] = useState(null);
+  const [linkValue, setLinkValue] = useState('');
+
   const handleFieldChange = (field, value) => {
     if (onContentChange) {
-      onContentChange('contact', field, value);
+      onContentChange(field, value);
+    }
+  };
+
+  const openLinkModal = (field, currentValue) => {
+    if (!isEditing) return;
+    setEditingLink(field);
+    setLinkValue(currentValue || '');
+  };
+
+  const saveLinkValue = () => {
+    if (editingLink) {
+      // Handle social links separately (they're nested in social object)
+      if (['twitter', 'linkedin', 'instagram', 'behance', 'dribbble'].includes(editingLink)) {
+        const updatedSocial = { ...(content.social || {}), [editingLink]: linkValue };
+        handleFieldChange('social', updatedSocial);
+      } else {
+        handleFieldChange(editingLink, linkValue);
+      }
+      setEditingLink(null);
+      setLinkValue('');
     }
   };
 
@@ -82,45 +107,283 @@ const BoldFolioContact = ({ content = {}, isEditing = false, onContentChange }) 
         </p>
         {content.email && (
           <a
-            href={`mailto:${content.email}`}
-            style={styles.email}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => isEditing && handleFieldChange('email', e.target.textContent)}
+            href={!isEditing ? `mailto:${content.email}` : undefined}
+            onClick={(e) => {
+              if (isEditing) {
+                e.preventDefault();
+                openLinkModal('email', content.email);
+              }
+            }}
+            style={{
+              ...styles.email,
+              cursor: 'pointer',
+              position: 'relative'
+            }}
           >
             {content.email}
+            {isEditing && (
+              <span style={{
+                fontSize: '10px',
+                marginLeft: '6px',
+                color: '#999',
+                fontStyle: 'italic'
+              }}>
+                (click to edit)
+              </span>
+            )}
           </a>
         )}
-        {(social.twitter || social.linkedin || social.instagram || social.behance || social.dribbble) && (
+        {(social.twitter || social.linkedin || social.instagram || social.behance || social.dribbble || isEditing) && (
           <div style={styles.social}>
-            {social.twitter && (
-              <a href={social.twitter} target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+            {(social.twitter || isEditing) && (
+              <a
+                href={!isEditing ? social.twitter : undefined}
+                target={!isEditing ? "_blank" : undefined}
+                rel={!isEditing ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (isEditing) {
+                    e.preventDefault();
+                    openLinkModal('twitter', social.twitter);
+                  }
+                }}
+                style={{
+                  ...styles.socialLink,
+                  cursor: 'pointer'
+                }}
+              >
                 Twitter
+                {isEditing && (
+                  <span style={{
+                    fontSize: '10px',
+                    marginLeft: '6px',
+                    color: '#999',
+                    fontStyle: 'italic'
+                  }}>
+                    (click to edit)
+                  </span>
+                )}
               </a>
             )}
-            {social.linkedin && (
-              <a href={social.linkedin} target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+            {(social.linkedin || isEditing) && (
+              <a
+                href={!isEditing ? social.linkedin : undefined}
+                target={!isEditing ? "_blank" : undefined}
+                rel={!isEditing ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (isEditing) {
+                    e.preventDefault();
+                    openLinkModal('linkedin', social.linkedin);
+                  }
+                }}
+                style={{
+                  ...styles.socialLink,
+                  cursor: 'pointer'
+                }}
+              >
                 LinkedIn
+                {isEditing && (
+                  <span style={{
+                    fontSize: '10px',
+                    marginLeft: '6px',
+                    color: '#999',
+                    fontStyle: 'italic'
+                  }}>
+                    (click to edit)
+                  </span>
+                )}
               </a>
             )}
-            {social.instagram && (
-              <a href={social.instagram} target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+            {(social.instagram || isEditing) && (
+              <a
+                href={!isEditing ? social.instagram : undefined}
+                target={!isEditing ? "_blank" : undefined}
+                rel={!isEditing ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (isEditing) {
+                    e.preventDefault();
+                    openLinkModal('instagram', social.instagram);
+                  }
+                }}
+                style={{
+                  ...styles.socialLink,
+                  cursor: 'pointer'
+                }}
+              >
                 Instagram
+                {isEditing && (
+                  <span style={{
+                    fontSize: '10px',
+                    marginLeft: '6px',
+                    color: '#999',
+                    fontStyle: 'italic'
+                  }}>
+                    (click to edit)
+                  </span>
+                )}
               </a>
             )}
-            {social.behance && (
-              <a href={social.behance} target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+            {(social.behance || isEditing) && (
+              <a
+                href={!isEditing ? social.behance : undefined}
+                target={!isEditing ? "_blank" : undefined}
+                rel={!isEditing ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (isEditing) {
+                    e.preventDefault();
+                    openLinkModal('behance', social.behance);
+                  }
+                }}
+                style={{
+                  ...styles.socialLink,
+                  cursor: 'pointer'
+                }}
+              >
                 Behance
+                {isEditing && (
+                  <span style={{
+                    fontSize: '10px',
+                    marginLeft: '6px',
+                    color: '#999',
+                    fontStyle: 'italic'
+                  }}>
+                    (click to edit)
+                  </span>
+                )}
               </a>
             )}
-            {social.dribbble && (
-              <a href={social.dribbble} target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+            {(social.dribbble || isEditing) && (
+              <a
+                href={!isEditing ? social.dribbble : undefined}
+                target={!isEditing ? "_blank" : undefined}
+                rel={!isEditing ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (isEditing) {
+                    e.preventDefault();
+                    openLinkModal('dribbble', social.dribbble);
+                  }
+                }}
+                style={{
+                  ...styles.socialLink,
+                  cursor: 'pointer'
+                }}
+              >
                 Dribbble
+                {isEditing && (
+                  <span style={{
+                    fontSize: '10px',
+                    marginLeft: '6px',
+                    color: '#999',
+                    fontStyle: 'italic'
+                  }}>
+                    (click to edit)
+                  </span>
+                )}
               </a>
             )}
           </div>
         )}
       </div>
+
+      {/* Link Edit Modal */}
+      {editingLink && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setEditingLink(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              padding: '30px',
+              borderRadius: '8px',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{
+              margin: '0 0 20px 0',
+              fontFamily: 'Graphik, sans-serif',
+              fontSize: '18px',
+              fontWeight: 600,
+              textTransform: 'uppercase'
+            }}>
+              Edit {editingLink} {editingLink === 'email' ? 'Address' : 'Link'}
+            </h3>
+            <input
+              type="text"
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+              placeholder={editingLink === 'email' ? 'Enter email address' : `Enter ${editingLink} URL`}
+              autoFocus
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontFamily: 'Graphik, sans-serif',
+                fontSize: '14px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '4px',
+                marginBottom: '20px',
+                outline: 'none'
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  saveLinkValue();
+                } else if (e.key === 'Escape') {
+                  setEditingLink(null);
+                }
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setEditingLink(null)}
+                style={{
+                  padding: '10px 20px',
+                  fontFamily: 'Graphik, sans-serif',
+                  fontSize: '13px',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveLinkValue}
+                style={{
+                  padding: '10px 20px',
+                  fontFamily: 'Graphik, sans-serif',
+                  fontSize: '13px',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#ff0080',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -156,11 +156,6 @@ const PublishModal = ({
     setSlug(`${adj}-${noun}-${randomNum}`);
   };
 
-  const getReactUrl = () => {
-    // React app view (uses your template with React)
-    return `${window.location.origin}/portfolio/${slug}`;
-  };
-
   const getStaticUrl = () => {
     // Static HTML file served through frontend domain
     // In production: https://aurea.tools/{subdomain}/html
@@ -241,7 +236,7 @@ const PublishModal = ({
                 Portfolio Slug
               </label>
               <p className="text-sm text-gray-600 mb-4">
-                Choose a unique slug for your portfolio. It will be accessible at aurea.tools/portfolio/your-slug
+                Choose a unique slug for your portfolio. It will be accessible at aurea.tools/your-slug/html
               </p>
 
               {/* Slug Input */}

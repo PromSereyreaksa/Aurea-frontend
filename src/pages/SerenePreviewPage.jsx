@@ -22,6 +22,20 @@ const SerenePreviewPage = () => {
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  // State for View Details modal
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleViewDetails = (project) => {
+    setSelectedProject(project);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setTimeout(() => setSelectedProject(null), 300);
+  };
+
   // Load portfolio data if portfolioId is provided OR if data was injected
   useEffect(() => {
     const loadPortfolioData = async () => {
@@ -376,9 +390,162 @@ const SerenePreviewPage = () => {
             }
           }}
           isEditing={false}
+          isPreview={true}
           onContentChange={() => {}}
+          onViewDetails={handleViewDetails}
         />
       </div>
+
+      {/* View Details Modal */}
+      {showModal && selectedProject && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            animation: 'fadeIn 0.3s ease'
+          }}
+          onClick={handleCloseModal}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              borderRadius: '4px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              animation: 'slideUp 0.3s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '30px 40px',
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start'
+              }}>
+                <div>
+                  <h2 style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '28px',
+                    fontWeight: 600,
+                    color: '#4a5568',
+                    margin: 0,
+                    marginBottom: '10px'
+                  }}>
+                    {selectedProject.title}
+                  </h2>
+                  <p style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '14px',
+                    color: '#9ca3af',
+                    margin: 0
+                  }}>
+                    {selectedProject.description}
+                  </p>
+                </div>
+                <button
+                  onClick={handleCloseModal}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '32px',
+                    color: '#9ca3af',
+                    cursor: 'pointer',
+                    padding: '0',
+                    lineHeight: '1'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{
+              padding: '40px'
+            }}>
+              {selectedProject.image && (
+                <img
+                  src={selectedProject.image}
+                  alt={selectedProject.title}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    borderRadius: '4px',
+                    marginBottom: '30px'
+                  }}
+                />
+              )}
+              <div style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '16px',
+                lineHeight: '1.8',
+                color: '#6b7280',
+                whiteSpace: 'pre-line'
+              }}>
+                {selectedProject.detailedDescription}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              padding: '20px 40px',
+              borderTop: '1px solid #e5e7eb',
+              textAlign: 'right'
+            }}>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '14px',
+                  padding: '12px 24px',
+                  backgroundColor: '#4a5568',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
 
       {/* Preview Footer - Hidden in PDF mode */}
       {!pdfMode && (

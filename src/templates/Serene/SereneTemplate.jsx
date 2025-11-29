@@ -17,8 +17,10 @@ const SereneTemplate = ({
   content = {},
   styling = {},
   isEditing = false,
+  isPreview = false,
   onContentChange = () => {},
   onSaveBeforeNavigate = null,
+  onViewDetails = null,
   className = '',
   portfolioId,
   baseUrl = '/template-preview/serene',
@@ -108,10 +110,12 @@ const SereneTemplate = ({
           content={content.gallery}
           styling={{ colors, fonts }}
           isEditing={isEditing}
+          isPreview={isPreview}
           onChange={(fieldId, value) => onContentChange('gallery', fieldId, value)}
           portfolioId={portfolioId}
           baseUrl={baseUrl}
           onSaveBeforeNavigate={onSaveBeforeNavigate}
+          onViewDetails={onViewDetails}
         />
       )}
 
