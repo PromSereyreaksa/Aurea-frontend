@@ -24,8 +24,11 @@ export const uploadSingleImage = async (file) => {
 
     const result = await response.json();
 
-    if (result.success && result.data?.url) {
-      return result.data.url;
+    // Handle both single and multiple upload response formats
+    const imageUrl = result.data?.url || result.data?.urls?.[0] || result.url || result.urls?.[0];
+
+    if (result.success && imageUrl) {
+      return imageUrl;
     } else {
       throw new Error(result.message || 'Upload failed');
     }

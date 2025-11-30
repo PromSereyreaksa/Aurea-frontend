@@ -215,7 +215,7 @@ const CaseStudyEditorPage = () => {
             };
           });
 
-          setCaseStudy({
+          const loadedCaseStudy = {
             title: existingCaseStudy.content?.hero?.title || 'LOGO DESIGN PROCESS',
             category: existingCaseStudy.content?.hero?.subtitle || 'BRANDING / IDENTITY',
             year: existingCaseStudy.content?.hero?.year || '2025',
@@ -224,8 +224,17 @@ const CaseStudyEditorPage = () => {
             heroImageCaption: 'Figure 01 — Design Process Framework',
             steps: caseStudy.steps, // Keep default steps for now
             sections: transformedSections.length > 0 ? transformedSections : caseStudy.sections
+          };
+
+          console.log('📥 Loading case study with:');
+          console.log('   Hero Image from API:', existingCaseStudy.content?.hero?.coverImage);
+          console.log('   Sections from API:', existingCaseStudy.content?.sections?.length || 0);
+          existingCaseStudy.content?.sections?.forEach((s, i) => {
+            console.log(`   Section ${i + 1}: image=${s.image || '(none)'}, images=[${s.images?.join(', ') || '(empty)'}]`);
           });
-          
+
+          setCaseStudy(loadedCaseStudy);
+
           console.log('✅ Case study loaded and transformed');
         }
       } catch (error) {
@@ -261,7 +270,7 @@ const CaseStudyEditorPage = () => {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      
+
       console.log('\n' + '='.repeat(80));
       console.log('💾 CASE STUDY SAVE - DIAGNOSTIC');
       console.log('='.repeat(80));
@@ -270,13 +279,43 @@ const CaseStudyEditorPage = () => {
       console.log('   Project ID:', projectId, `(type: ${typeof projectId})`);
       console.log('   Case Study ID:', caseStudyId || 'None (will create new)');
       console.log('   Operation:', caseStudyId ? 'UPDATE' : 'CREATE');
-      
+
+      // Check if any images are still uploading
+      console.log('🔍 Checking upload state:', { isUploadingImage });
+      if (isUploadingImage) {
+        toast.error('Please wait for image upload to complete before saving.');
+        setIsSaving(false);
+        return;
+      }
+
+      // Helper to check if URL is a blob URL (local preview)
+      const isBlobUrl = (url) => url && url.startsWith('blob:');
+
+      // Check for pending blob URLs that haven't been uploaded yet
+      const pendingHeroImage = isBlobUrl(caseStudy.heroImage);
+      const pendingSectionImages = caseStudy.sections.flatMap(section =>
+        section.subsections?.filter(sub => isBlobUrl(sub.image)).map(sub => sub.image) || []
+      );
+
+      console.log('🔍 Checking for blob URLs:', {
+        heroImage: caseStudy.heroImage,
+        heroIsBlobUrl: pendingHeroImage,
+        pendingSectionImages
+      });
+
+      if (pendingHeroImage || pendingSectionImages.length > 0) {
+        toast.error('Some images are still being uploaded. Please wait and try again.');
+        setIsSaving(false);
+        return;
+      }
+
       // ⚠️ VALIDATION: Title is required and cannot be empty!
       const title = caseStudy.title?.trim();
       console.log('\n✅ Validation:');
       console.log('   Title:', title || '(empty)');
       console.log('   Title valid:', !!title);
-      
+      console.log('   Hero Image:', caseStudy.heroImage || '(none)');
+
       if (!title || title === '') {
         console.error('❌ Validation failed: Title is required!');
         toast.error('Case study title is required!');
@@ -330,11 +369,17 @@ const CaseStudyEditorPage = () => {
       };
 
       // Log transformed data for debugging
-      console.log('\n� Request Payload:');
+      console.log('\n📦 Request Payload:');
       console.log('   Portfolio ID:', caseStudyData.portfolioId, `(type: ${typeof caseStudyData.portfolioId})`);
       console.log('   Project ID:', caseStudyData.projectId, `(type: ${typeof caseStudyData.projectId})`);
       console.log('   Title:', caseStudyData.content.hero.title);
+      console.log('   Cover Image:', caseStudyData.content.hero.coverImage || '(none)');
       console.log('   Sections count:', caseStudyData.content.sections.length);
+      caseStudyData.content.sections.forEach((section, i) => {
+        console.log(`   Section ${i + 1}: ${section.heading}`);
+        console.log(`     - Image: ${section.image || '(none)'}`);
+        console.log(`     - Images array: [${section.images.join(', ') || '(empty)'}]`);
+      });
       console.log('\n📋 Full payload structure:');
       console.log(JSON.stringify(caseStudyData, null, 2));
       
@@ -544,10 +589,12 @@ const CaseStudyEditorPage = () => {
       }
 
       const result = await response.json();
+      console.log('📥 Upload response:', result);
 
-      if (result.success && result.data?.url) {
-        const imageUrl = result.data.url;
+      // Handle multiple upload response formats - /api/upload/multiple returns { data: { urls: [...] } }
+      const imageUrl = result.data?.urls?.[0] || result.data?.url || result.urls?.[0] || result.url;
 
+      if (imageUrl) {
         // 3. Replace blob URL with Cloudinary URL
         if (type === 'hero') {
           setCaseStudy(prev => ({ ...prev, heroImage: imageUrl }));
@@ -559,8 +606,10 @@ const CaseStudyEditorPage = () => {
 
         // Clean up blob URL to free memory
         URL.revokeObjectURL(localPreview);
+        setHasUnsavedChanges(true);
       } else {
-        throw new Error(result.message || 'Upload failed - no URL returned');
+        console.error('❌ No URL in response:', result);
+        throw new Error('Upload failed - no URL returned');
       }
     } catch (error) {
       console.error('❌ Upload error:', error);
@@ -568,6 +617,7 @@ const CaseStudyEditorPage = () => {
       // Keep the preview so user can see what they tried to upload
     } finally {
       setIsUploadingImage(false);
+      console.log('📤 Upload state reset, isUploadingImage = false');
     }
   };
 
