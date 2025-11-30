@@ -11,7 +11,8 @@ const EchelonTemplate = ({
   onContentChange,
   className = '',
   portfolioId = null,
-  caseStudies = {}
+  caseStudies = {},
+  subdomain = null
 }) => {
   // Navigation scroll effect
   const [isScrolled, setIsScrolled] = useState(false);
@@ -158,6 +159,7 @@ const EchelonTemplate = ({
             onContentChange={handleSectionContentChange}
             portfolioId={portfolioId}
             caseStudies={caseStudies}
+            subdomain={subdomain}
           />
         )}
 

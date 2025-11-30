@@ -8,7 +8,8 @@ const EchelonWork = ({
   isEditing = false,
   onContentChange,
   portfolioId = null,
-  caseStudies = {}
+  caseStudies = {},
+  subdomain = null
 }) => {
   const [uploadingIndexes, setUploadingIndexes] = useState(new Map());
   const { uploadImage } = useImageUpload();
@@ -631,16 +632,28 @@ const EchelonWork = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        
+
                         // Get portfolio ID from URL as fallback
                         const pathParts = window.location.pathname.split('/');
-                        const portfolioIdFromUrl = pathParts.includes('portfolio-builder') 
+                        const portfolioIdFromUrl = pathParts.includes('portfolio-builder')
                           ? pathParts[pathParts.indexOf('portfolio-builder') + 1]
                           : portfolioId;
-                        
+
+                        // Check if we're viewing a published portfolio (subdomain is set)
+                        // or if the URL contains /{subdomain}/html pattern
+                        const isPublishedView = subdomain || pathParts.some((part, i) =>
+                          i < pathParts.length - 1 && pathParts[i + 1] === 'html'
+                        );
+                        const currentSubdomain = subdomain || (
+                          pathParts.find((part, i) => i < pathParts.length - 1 && pathParts[i + 1] === 'html')
+                        );
+
                         if (isEditing) {
                           // Edit mode: Navigate to case study editor
                           window.location.href = `/portfolio-builder/${portfolioIdFromUrl}/case-study/${project.id}`;
+                        } else if (isPublishedView && currentSubdomain) {
+                          // Published portfolio view: Use /{subdomain}/case-study/{projectId} format
+                          window.location.href = `/${currentSubdomain}/case-study/${project.id}`;
                         } else if (portfolioIdFromUrl) {
                           // Preview mode in builder: Navigate to case study view
                           window.location.href = `/portfolio/${portfolioIdFromUrl}/project/${project.id}`;
@@ -648,7 +661,7 @@ const EchelonWork = ({
                           // Public template preview: Use caseStudyUrl
                           window.location.href = project.caseStudyUrl;
                         } else {
-                          console.log('No navigation target found', { portfolioId, portfolioIdFromUrl, project });
+                          console.log('No navigation target found', { portfolioId, portfolioIdFromUrl, project, subdomain });
                         }
                       }}
                       style={{

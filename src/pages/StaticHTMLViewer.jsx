@@ -214,6 +214,7 @@ const StaticHTMLViewer = () => {
           isPreview={false}
           portfolioId={portfolio._id}
           caseStudies={portfolio.caseStudies || []}
+          subdomain={subdomain}
         />
 
         {/* Powered by Aurea Badge */}

@@ -148,6 +148,10 @@ export const uploadImage = async (file, onProgress, options = { compress: true }
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const result = JSON.parse(xhr.responseText);
+          // Normalize response format to always have data.url
+          if (result.success && result.data?.urls && !result.data.url) {
+            result.data.url = result.data.urls[0];
+          }
           resolve(result);
         } catch {
           reject(new Error('Invalid response from server'));
