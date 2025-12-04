@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import usePortfolioStore from '../../stores/portfolioStore';
 import caseStudyApi from '../../lib/caseStudyApi';
 import api from '../../lib/baseApi';
-import { uploadImage } from '../../lib/uploadApi';
+import { uploadDirectToCloudinary } from '../../lib/cloudinaryDirectUpload';
 import FloatingActionButtons from '../../components/PortfolioBuilder/FloatingActionButtons';
 
 const CaseStudyEditorPage = () => {
@@ -572,14 +572,14 @@ const CaseStudyEditorPage = () => {
     setIsUploadingImage(true);
 
     try {
-      console.log(`📤 Uploading ${type} image to Cloudinary in background...`);
+      console.log(`📤 Uploading ${type} image directly to Cloudinary...`);
 
-      // Use uploadImage from uploadApi.js (same as Echelon template) to avoid CORS issues
-      const result = await uploadImage(file);
+      // Use direct Cloudinary upload to bypass backend CORS issues
+      const result = await uploadDirectToCloudinary(file);
       console.log('📥 Upload response:', result);
 
-      // Handle response format from uploadApi
-      const imageUrl = result.data?.url || result.url;
+      // Handle response format from direct Cloudinary upload
+      const imageUrl = result.data?.url;
 
       if (imageUrl) {
         // 3. Replace blob URL with Cloudinary URL
