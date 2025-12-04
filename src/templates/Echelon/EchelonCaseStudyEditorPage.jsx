@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import usePortfolioStore from '../../stores/portfolioStore';
 import caseStudyApi from '../../lib/caseStudyApi';
 import api from '../../lib/baseApi';
+import { uploadImage } from '../../lib/uploadApi';
 import FloatingActionButtons from '../../components/PortfolioBuilder/FloatingActionButtons';
 
 const CaseStudyEditorPage = () => {
@@ -571,28 +572,14 @@ const CaseStudyEditorPage = () => {
     setIsUploadingImage(true);
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
       console.log(`📤 Uploading ${type} image to Cloudinary in background...`);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/single`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('aurea_token') || ''}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Use uploadImage from uploadApi.js (same as Echelon template) to avoid CORS issues
+      const result = await uploadImage(file);
       console.log('📥 Upload response:', result);
 
-      // Handle multiple upload response formats - /api/upload/multiple returns { data: { urls: [...] } }
-      const imageUrl = result.data?.urls?.[0] || result.data?.url || result.urls?.[0] || result.url;
+      // Handle response format from uploadApi
+      const imageUrl = result.data?.url || result.url;
 
       if (imageUrl) {
         // 3. Replace blob URL with Cloudinary URL
